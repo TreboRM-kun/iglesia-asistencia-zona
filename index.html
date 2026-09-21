@@ -1,0 +1,3093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asistencias - Iglesia Redención</title>
+  <link rel="icon" type="image/png" href="src/img/lg.png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      color: #171717;
+      background:
+        linear-gradient(#0001, #0001),
+        url("src/img/bg2.png") center center / cover no-repeat;
+      background-attachment: fixed;
+    }
+
+    .contenedor {
+      width: min(1600px, 100%);
+      max-width: 1600px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.93);
+      padding: 25px;
+      border: 1px solid #d6d0c6;
+      border-radius: 8px;
+      box-shadow: 0 4px 18px #0003;
+    }
+
+    .login {
+      max-width: 430px;
+      margin: 40px auto;
+      text-align: center;
+    }
+
+    .logo-login {
+      width: 300px;
+      max-width: 95%;
+      margin-bottom: 15px;
+    }
+
+    .logo-superior {
+      width: 210px;
+      max-height: 135px;
+      object-fit: contain;
+      vertical-align: middle;
+      margin-right: 20px;
+    }
+
+    h1 {
+      color: #171717;
+    }
+
+    h2 {
+      color: #6e1f2a;
+    }
+
+    h3 {
+      color: #9a7734;
+    }
+
+    input, select, textarea, button {
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #bdb8af;
+      border-radius: 4px;
+      font-size: 15px;
+    }
+
+    .login input {
+      width: 90%;
+    }
+
+    .cinta {
+      display: none;
+      width: 100%;
+      overflow: hidden;
+      margin-top: 18px;
+      border: 1px solid #9a7734;
+      background: #171717;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .cinta.visible {
+      display: block;
+    }
+
+    .cinta-contenido {
+      display: inline-block;
+      min-width: 100%;
+      padding: 9px 0;
+      animation: desplazamiento-cinta 24s linear infinite;
+    }
+
+    .cinta-contenido span {
+      margin-right: 70px;
+    }
+
+    @keyframes desplazamiento-cinta {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+
+    .lista-anuncios {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      max-height: 62vh;
+      overflow-y: auto;
+      margin-top: 14px;
+      text-align: left;
+    }
+
+    .anuncio-item {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 10px;
+      border-left: 4px solid #9a7734;
+      background: #f5f3ef;
+    }
+
+    .anuncio-item.prioridad {
+      border-left-color: #6e1f2a;
+    }
+
+    .anuncio-item strong,
+    .anuncio-item small {
+      display: block;
+    }
+
+    .anuncio-item small {
+      margin-top: 4px;
+      color: #6e1f2a;
+    }
+
+    .anuncio-multimedia {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 300px;
+      margin: 10px auto 0;
+      object-fit: contain;
+    }
+
+    .anuncio-item > span {
+      margin-top: 4px;
+    }
+
+    .boton-eliminar-anuncio {
+      width: auto !important;
+      padding: 6px 10px;
+      margin-top: 8px;
+      background: #171717;
+    }
+
+    button {
+      background: #171717;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #6e1f2a;
+    }
+
+    .boton-editar {
+      background: #171717;
+      color: white;
+    }
+
+    .boton-editar:hover {
+      background: #6e1f2a;
+    }
+
+    .boton-rojo {
+      background: #171717;
+    }
+
+    .boton-rojo:hover {
+      background: #6e1f2a;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    .barra {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .titulo-pagina {
+      display: flex;
+      align-items: center;
+    }
+
+    .formulario-nino {
+      background: #f5f3ef;
+      border-left: 6px solid #6e1f2a;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .controles-asistencia {
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 16px;
+    }
+
+    .control-asistencia {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .control-asistencia label {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .control-asistencia > select,
+    .control-asistencia > input {
+      width: auto;
+      min-width: 125px;
+      margin: 0;
+    }
+
+    #tipoReunion {
+      min-width: 205px;
+    }
+
+    #fecha {
+      min-width: 145px;
+    }
+
+    @media (max-width: 850px) {
+      .controles-asistencia {
+        align-items: stretch;
+      }
+
+      .control-asistencia,
+      .control-asistencia > select,
+      .control-asistencia > input,
+      #selectorFacilitadores {
+        width: 100%;
+      }
+    }
+
+    /* Barra horizontal para la tabla */
+    .tabla-scroll {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 15px;
+      border: 1px solid #171717;
+      border-radius: 4px;
+    }
+
+    .accion-lider {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      margin: 2px;
+      font-size: 19px;
+      line-height: 1;
+      border: 1px solid #171717;
+      background: white;
+      color: #171717;
+    }
+
+    .accion-lider:hover {
+      background: #171717;
+      color: white;
+    }
+
+    .accion-asistencia {
+      border-color: #6e1f2a;
+      color: #6e1f2a;
+    }
+
+    .accion-lider svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      margin: auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
+    .nombre-lider {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 190px;
+      text-align: left;
+    }
+
+    .acciones-lider {
+      display: flex;
+      flex-direction: row;
+      flex-shrink: 0;
+      gap: 2px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      background: white;
+      table-layout: auto;
+    }
+
+    table th:nth-child(2),
+    table td:nth-child(2) {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    table th:nth-child(3),
+    table td:nth-child(3),
+    table th:nth-child(4),
+    table td:nth-child(4) {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    th,
+    td {
+      border: 1px solid #d6d0c6;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #171717;
+      color: white;
+    }
+
+    th:nth-child(2) {
+      background: #6e1f2a;
+    }
+
+    th:nth-child(3) {
+      background: #9a7734;
+    }
+
+    th:nth-child(4) {
+      background: #f5f3ef;
+      color: #171717;
+    }
+
+    th:nth-child(5) {
+      background: #171717;
+    }
+
+    th:nth-child(6) {
+      background: #6e1f2a;
+    }
+
+    td:first-child {
+      text-align: left;
+    }
+
+    .nombre-nino {
+      width: 1%;
+      min-width: max-content;
+      white-space: nowrap;
+      color: #6e1f2a;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-width: 220px;
+      min-height: 75px;
+      resize: vertical;
+    }
+
+    .tabla-asistencia th:last-child,
+    .tabla-asistencia td:last-child {
+      width: 100%;
+    }
+
+    .acciones-barra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.modal.oculto {
+  display: none;
+}
+
+.ventana-usuarios {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  text-align: center;
+  background: white;
+  border: 1px solid #171717;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px #0008;
+}
+
+.ventana-usuarios h2 {
+  color: #171717;
+}
+
+.ventana-usuarios h3 {
+  color: #6e1f2a;
+}
+
+.ventana-resumen {
+  max-width: 850px;
+}
+
+.ventana-cumpleanos {
+  max-width: 1100px;
+}
+
+.ventana-anuncios {
+  max-width: 1100px;
+}
+
+.ventana-cumpleanos .cerrar-modal {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+.cabecera-cumpleanos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecera-cumpleanos h2 {
+  margin: 0;
+}
+
+#mesCumpleanos {
+  width: auto;
+  min-width: 145px;
+  margin: 0;
+}
+
+.calendario-cumpleanos {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 16px;
+}
+
+.dia-semana,
+.dia-cumpleanos {
+  min-height: 125px;
+  padding: 7px;
+  border: 1px solid #d6d0c6;
+}
+
+.dia-semana {
+  min-height: auto;
+  background: #171717;
+  color: white;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.dia-cumpleanos {
+  background: #f5f3ef;
+}
+
+.dia-cumpleanos.vacio {
+  background: white;
+}
+
+.numero-dia {
+  display: block;
+  margin-bottom: 5px;
+  color: #6e1f2a;
+  font-weight: bold;
+}
+
+.cumpleanero {
+  display: block;
+  margin-top: 4px;
+  padding: 4px;
+  background: white;
+  border-left: 3px solid #9a7734;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .dia-semana,
+  .dia-cumpleanos {
+    min-height: 95px;
+    padding: 4px;
+    font-size: 11px;
+  }
+
+  .cumpleanero {
+    font-size: 10px;
+  }
+
+  .cabecera-cumpleanos {
+    align-items: flex-start;
+  }
+
+  #mesCumpleanos {
+    min-width: 125px;
+  }
+}
+
+.filtros-resumen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  text-align: left;
+}
+
+.filtros-resumen label {
+  font-weight: bold;
+}
+
+.resumen-datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+    .resumen-encabezado {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.8fr);
+      gap: 10px;
+      align-items: stretch;
+      margin: 12px 0;
+    }
+
+    .resumen-identificacion,
+    .resumen-periodo {
+      padding: 12px;
+      border: 1px solid #d6d0c6;
+      background: #f5f3ef;
+    }
+
+    .resumen-identificacion {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+    }
+
+    .resumen-identificacion h3 {
+      width: 100%;
+      margin: 0 0 8px;
+      text-align: center;
+    }
+
+    .resumen-identificacion p,
+    .resumen-periodo p {
+      margin: 4px 0;
+    }
+
+    .resumen-etiqueta {
+      color: #6e1f2a;
+      font-weight: bold;
+    }
+
+.resumen-dato {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f5f3ef;
+}
+
+.resumen-dato strong {
+  display: block;
+  color: #6e1f2a;
+  font-size: 20px;
+}
+
+.tabla-resumen {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+.tabla-resumen th,
+.tabla-resumen td {
+  padding: 8px;
+}
+
+    .tabla-resumen th:first-child,
+    .tabla-resumen td:first-child {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+@media (max-width: 600px) {
+  .filtros-resumen,
+  .resumen-datos,
+  .resumen-encabezado {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ventana-usuarios input,
+.ventana-usuarios select {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.ventana-usuarios button:not(.cerrar-modal) {
+  width: 100%;
+}
+
+.cerrar-modal {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 2px 10px;
+  margin: 0;
+  background: #171717;
+  color: white;
+  font-size: 25px;
+}
+
+.cerrar-modal:hover {
+  background: #6e1f2a;
+}
+
+#mensajeUsuarios {
+  font-weight: bold;
+}
+
+#accionesUsuario {
+  margin-top: 10px;
+}
+
+#accionesUsuario.oculto {
+  display: none;
+}
+
+.texto-exito {
+  color: #6e1f2a !important;
+}
+
+#maestrosSalon {
+  min-width: 260px;
+  color: #6e1f2a;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+#maestrosSalon::placeholder {
+  color: #6e1f2a;
+  opacity: 0.7;
+}
+
+#selectorFacilitadores {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+      width: fit-content;
+}
+
+#selectorFacilitadores select {
+      width: auto;
+      min-width: 132px;
+      margin: 0;
+}
+
+@media (max-width: 600px) {
+  #selectorFacilitadores {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+      width: 100%;
+  }
+}
+
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+        background-position: center;
+      }
+
+      .contenedor {
+        padding: 15px;
+      }
+
+      .logo-superior {
+        width: 145px;
+        max-height: 100px;
+      }
+
+      .titulo-pagina h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <section id="pantallaLogin" class="contenedor login">
+    <img class="logo-login" src="src/img/lg1.png" alt="Logo Iglesia Redención">
+
+    <h2>Iniciar sesión</h2>
+
+    <input id="usuario" type="text" placeholder="Usuario">
+    <br>
+
+    <input id="contrasena" type="password" placeholder="Contraseña">
+    <br>
+
+    <button id="botonIngresar" onclick="iniciarSesion()">Ingresar</button>
+
+    <p id="mensajeLogin" class="mensaje"></p>
+    <div id="cintaAnunciosLogin" class="cinta" aria-live="polite"></div>
+  </section>
+
+  <section id="pantallaSistema" class="contenedor oculto">
+
+    <div class="barra">
+      <div class="titulo-pagina">
+        <img class="logo-superior" src="src/img/lg1.png" alt="Logo">
+        <div>
+          <h1>Asistencia de líderes</h1>
+          <p id="informacionUsuario"></p>
+        </div>
+      </div>
+
+      <div class="acciones-barra">
+        <button id="botonAdministrarUsuarios"
+          class="boton-editar oculto"
+          onclick="abrirAdministrarUsuarios()">
+          Administrar usuarios
+        </button>
+
+        <button id="botonResumenNino"
+          class="oculto"
+          onclick="abrirResumenNino()">
+          Resumen de líder
+        </button>
+
+        <button onclick="abrirCalendarioCumpleanos()">
+          Cumpleaños
+        </button>
+
+        <button onclick="abrirAnuncios()">
+          Anuncios
+        </button>
+
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="controles-asistencia">
+      <div class="control-asistencia">
+        <label for="salon">Zona:</label>
+        <select id="salon" onchange="mostrarAsistencia()">
+      <option value="Zona 1">Zona 1</option>
+      <option value="Zona 2">Zona 2</option>
+      <option value="Zona 3">Zona 3</option>
+      <option value="Zona 4">Zona 4</option>
+      <option value="Zona 5">Zona 5</option>
+      <option value="Zona 6">Zona 6</option>
+      <option value="Zona 7">Zona 7</option>
+        </select>
+      </div>
+
+      <div class="control-asistencia">
+        <label for="tipoReunion">Reunión:</label>
+        <select id="tipoReunion" onchange="actualizarFechaReunion(); actualizarFormularioLideres()">
+      <option value="ADN">Discipulado ADN (miércoles)</option>
+      <option value="Servicio dominical">Servicio dominical</option>
+          <option id="opcionReunionPastor" value="Reunión con el pastor">Reunión con el pastor (lunes)</option>
+        </select>
+      </div>
+
+      <div class="control-asistencia">
+        <label for="fecha">Fecha:</label>
+        <input id="fecha" type="date" min="1970-01-01" onchange="validarFechaReunion()">
+      </div>
+
+      <div class="control-asistencia">
+        <label id="etiquetaFacilitadores" for="facilitadorZona1">Facilitadores:</label>
+        <div id="selectorFacilitadores">
+      <select id="facilitadorZona1" onchange="guardarMaestrosSalon()">
+        <option value="">Facilitador 1</option>
+      </select>
+      <select id="facilitadorZona2" onchange="guardarMaestrosSalon()">
+        <option value="">Facilitador 2 (opcional)</option>
+      </select>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div id="formularioNino" class="formulario-nino oculto">
+      <h3>Agregar líder</h3>
+
+      <input id="nombreNino" type="text" placeholder="Nombre completo del líder">
+
+      <label for="cumpleanosNino">Cumpleaños:</label>
+      <input id="cumpleanosNino" type="text" inputmode="numeric"
+        placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
+        aria-label="Cumpleaños del líder, día y mes"
+        onblur="this.value = formatearCumpleanosEntrada(this.value)">
+
+      <input id="sectorNino" type="text" placeholder="Sector al que pertenece">
+
+      <input id="comiteRedNino" type="text" placeholder="Comité o red">
+
+      <label for="estadoNino">Estado:</label>
+      <select id="estadoNino">
+        <option value="Activo">Activo</option>
+        <option value="Protocolo del Servidor">Protocolo del Servidor</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+
+      <select id="salonNuevoNino">
+        <option value="Zona 1">Zona 1</option>
+        <option value="Zona 2">Zona 2</option>
+        <option value="Zona 3">Zona 3</option>
+        <option value="Zona 4">Zona 4</option>
+        <option value="Zona 5">Zona 5</option>
+        <option value="Zona 6">Zona 6</option>
+        <option value="Zona 7">Zona 7</option>
+      </select>
+
+      <button onclick="agregarNino()">Agregar líder</button>
+      <p id="mensajeNino"></p>
+    </div>
+
+    <div id="tablaAsistencia"></div>
+    <div id="cintaCumpleanosSistema" class="cinta" aria-live="polite"></div>
+
+
+      <div id="modalUsuarios" class="modal oculto">
+    <div class="ventana-usuarios">
+      <button class="cerrar-modal" onclick="cerrarAdministrarUsuarios()">
+        ×
+      </button>
+
+      <h2>Administrar usuarios</h2>
+
+      <h3>Modificar contraseña</h3>
+
+      <select id="usuarioSeleccionado">
+        <option value="">Seleccione un usuario</option>
+      </select>
+
+    <div id="accionesUsuario" class="oculto">
+      <button onclick="abrirCambioContrasena()">
+    Modificar contraseña
+      </button>
+
+      <button class="boton-rojo" onclick="confirmarEliminarUsuario()">
+    Eliminar usuario
+      </button>
+    </div>
+
+      <hr>
+
+      <h3>Crear nuevo usuario</h3>
+
+      <input id="nuevoUsuario" type="text"
+        placeholder="Nombre de usuario">
+
+      <input id="nuevaContrasena" type="password"
+        placeholder="Contraseña">
+
+      <select id="nuevoRol">
+        <option value="Facilitador">Facilitador</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Administrador">Administrador</option>
+      </select>
+
+      <select id="nuevoSalon">
+        <option value="Zona 1">Zona 1</option>
+        <option value="Zona 2">Zona 2</option>
+        <option value="Zona 3">Zona 3</option>
+        <option value="Zona 4">Zona 4</option>
+        <option value="Zona 5">Zona 5</option>
+        <option value="Zona 6">Zona 6</option>
+        <option value="Zona 7">Zona 7</option>
+        <option value="todos">Todas las zonas</option>
+      </select>
+
+      <button onclick="crearUsuario()">Crear usuario</button>
+
+      <p id="mensajeUsuarios"></p>
+    </div>
+  </div>
+
+  <div id="modalResumenNino" class="modal oculto">
+    <div class="ventana-usuarios ventana-resumen">
+      <button class="cerrar-modal" onclick="cerrarResumenNino()">×</button>
+
+      <h2>Resumen del líder</h2>
+
+      <div class="filtros-resumen">
+        <div>
+          <label for="resumenSalon">Zona:</label>
+          <select id="resumenSalon" onchange="cargarNinosResumen()">
+            <option value="Zona 1">Zona 1</option>
+            <option value="Zona 2">Zona 2</option>
+            <option value="Zona 3">Zona 3</option>
+            <option value="Zona 4">Zona 4</option>
+            <option value="Zona 5">Zona 5</option>
+            <option value="Zona 6">Zona 6</option>
+            <option value="Zona 7">Zona 7</option>
+            <option value="Pastor">Líderes</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="resumenNino">Líder:</label>
+          <select id="resumenNino"></select>
+        </div>
+
+        <div>
+          <label for="resumenTipoReunion">Reunión:</label>
+          <select id="resumenTipoReunion" onchange="actualizarTipoResumen()">
+            <option value="ADN">Discipulado ADN</option>
+            <option value="Servicio dominical">Servicio dominical</option>
+            <option value="Reunión con el pastor">Reunión con el pastor</option>
+            <option value="Todas">Todas las reuniones</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="resumenDesde">Desde:</label>
+          <input id="resumenDesde" type="date" min="1970-01-01" step="1" onchange="validarFechaResumenTodas(this)">
+        </div>
+
+        <div>
+          <label for="resumenHasta">Hasta:</label>
+          <input id="resumenHasta" type="date" min="1970-01-01" step="1" onchange="validarFechaResumenTodas(this)">
+        </div>
+      </div>
+
+      <button onclick="mostrarResumenNino()">Consultar resumen</button>
+      <div id="contenidoResumenNino"></div>
+    </div>
+  </div>
+
+  <div id="modalCumpleanos" class="modal oculto">
+    <div class="ventana-usuarios ventana-cumpleanos">
+      <button class="cerrar-modal" onclick="cerrarModal('modalCumpleanos')">×</button>
+
+      <div class="cabecera-cumpleanos">
+        <h2>Cumpleaños de los líderes</h2>
+        <select id="mesCumpleanos" aria-label="Seleccionar mes" onchange="mostrarCalendarioCumpleanos()">
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
+
+      <div id="calendarioCumpleanos"></div>
+    </div>
+  </div>
+
+  <div id="modalAnuncios" class="modal oculto">
+    <div class="ventana-usuarios ventana-anuncios">
+      <button class="cerrar-modal" onclick="cerrarModal('modalAnuncios')">×</button>
+
+      <h2>Anuncios</h2>
+      <input id="tituloAnuncio" type="text" placeholder="Título del anuncio">
+      <textarea id="textoAnuncio" placeholder="Escriba el anuncio"></textarea>
+      <label for="multimediaAnuncio">Imagen o video (opcional):</label>
+      <input id="multimediaAnuncio" type="file" accept="image/*,video/*">
+      <small>Imagen hasta 2 MB o video hasta 5 MB.</small>
+      <button onclick="guardarAnuncio()">Publicar anuncio</button>
+      <div id="listaAnuncios" class="lista-anuncios"></div>
+    </div>
+  </div>
+
+  <div id="modalConfirmacionAnuncio" class="modal oculto">
+    <div class="ventana-usuarios">
+      <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionAnuncio')">×</button>
+      <h2>Confirmar eliminación</h2>
+      <p id="textoConfirmacionAnuncio"></p>
+      <button class="boton-rojo" onclick="eliminarAnuncioConfirmado()">Sí, eliminar</button>
+      <button onclick="cerrarModal('modalConfirmacionAnuncio')">Cancelar</button>
+    </div>
+  </div>
+
+    <div id="modalNombreNino" class="modal oculto">
+  <div class="ventana-usuarios">
+    <button class="cerrar-modal" onclick="cerrarModal('modalNombreNino')">×</button>
+
+    <h2>Modificar datos del líder</h2>
+    <p id="nombreNinoCambioTexto"></p>
+
+    <input id="nombreNinoModal"
+      type="text"
+      placeholder="Nombre completo del líder">
+
+    <label for="cumpleanosNinoModal">Cumpleaños:</label>
+    <input id="cumpleanosNinoModal" type="text" inputmode="numeric"
+      placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
+      onblur="this.value = formatearCumpleanosEntrada(this.value)">
+
+    <input id="sectorNinoModal" type="text" placeholder="Sector al que pertenece">
+
+    <input id="comiteRedNinoModal" type="text" placeholder="Comité o red">
+
+    <label for="estadoNinoModal">Estado:</label>
+    <select id="estadoNinoModal">
+      <option value="Activo">Activo</option>
+      <option value="Protocolo del Servidor">Protocolo del Servidor</option>
+      <option value="Inactivo">Inactivo</option>
+    </select>
+
+    <button onclick="guardarNombreNino()">
+      Guardar cambios
+    </button>
+
+    <button onclick="cerrarModal('modalNombreNino')">
+      Cancelar
+    </button>
+  </div>
+</div>
+
+    <div id="modalContrasena" class="modal oculto">
+  <div class="ventana-usuarios">
+    <button class="cerrar-modal" onclick="cerrarModal('modalContrasena')">×</button>
+
+    <h2>Modificar contraseña</h2>
+    <p id="usuarioCambioTexto"></p>
+
+    <input id="nuevaContrasenaModal"
+      type="password"
+      placeholder="Nueva contraseña">
+
+    <button onclick="guardarNuevaContrasena()">
+      Guardar contraseña
+    </button>
+  </div>
+</div>
+
+<div id="modalConfirmacion" class="modal oculto">
+  <div class="ventana-usuarios">
+    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacion')">×</button>
+
+    <h2>Confirmar eliminación</h2>
+    <p id="textoConfirmacion"></p>
+
+    <button class="boton-rojo" onclick="eliminarUsuarioConfirmado()">
+      Sí, eliminar
+    </button>
+
+    <button onclick="cerrarModal('modalConfirmacion')">
+      Cancelar
+    </button>
+  </div>
+</div>
+
+<div id="modalConfirmacionNino" class="modal oculto">
+  <div class="ventana-usuarios">
+    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionNino')">×</button>
+
+    <h2>Confirmar eliminación</h2>
+    <p id="textoConfirmacionNino"></p>
+
+    <button class="boton-rojo" onclick="eliminarNinoConfirmado()">
+      Sí, eliminar
+    </button>
+
+    <button onclick="cerrarModal('modalConfirmacionNino')">
+      Cancelar
+    </button>
+  </div>
+</div>
+
+<div id="modalConfirmacionAsistencia" class="modal oculto">
+  <div class="ventana-usuarios">
+    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionAsistencia')">×</button>
+
+    <h2>Confirmar eliminación</h2>
+    <p id="textoConfirmacionAsistencia"></p>
+
+    <button class="boton-rojo" onclick="eliminarAsistenciaConfirmada()">
+      Sí, eliminar
+    </button>
+
+    <button onclick="cerrarModal('modalConfirmacionAsistencia')">
+      Cancelar
+    </button>
+  </div>
+</div>
+
+<div id="modalExito" class="modal oculto">
+  <div class="ventana-usuarios">
+    <h2 class="texto-exito">Operación realizada</h2>
+    <p id="textoExito"></p>
+
+    <button onclick="cerrarModal('modalExito')">
+      Aceptar
+    </button>
+  </div>
+</div>
+  </section>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      set
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDtPVsqzbr6BBRC6o5nQUhtnWsOhLP5rac",
+      authDomain: "asistencia-iglesia-zonas.firebaseapp.com",
+      databaseURL: "https://asistencia-iglesia-zonas-default-rtdb.firebaseio.com",
+      projectId: "asistencia-iglesia-zonas",
+      storageBucket: "asistencia-iglesia-zonas.firebasestorage.app",
+      messagingSenderId: "369962831363",
+      appId: "1:369962831363:web:c1f754e8186421e8310836",
+      measurementId: "G-97DY720EQY"
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const firebaseDatabase = getDatabase(firebaseApp);
+
+    window.firebaseReady = Promise.resolve({
+      database: firebaseDatabase,
+      ref,
+      get,
+      set
+    });
+  </script>
+
+  <script>
+const HOJAS = {
+  ninos: "Lideres",
+  lideresPastor: "LideresPastor",
+  usuarios: "Usuarios",
+  asistencias: "Asistencias",
+  maestros: "Facilitadores",
+  anuncios: "Anuncios"
+};
+
+const ZONAS = Array.from({ length: 7 }, (_, indice) => `Zona ${indice + 1}`);
+
+async function leerHoja(nombreHoja) {
+  const firebase = await window.firebaseReady;
+  const resultado = await firebase.get(
+    firebase.ref(firebase.database, nombreHoja)
+  );
+
+  return resultado.exists() ? Object.values(resultado.val()) : [];
+}
+
+async function reemplazarHoja(nombreHoja, filas) {
+  const firebase = await window.firebaseReady;
+  await firebase.set(
+    firebase.ref(firebase.database, nombreHoja),
+    filas
+  );
+}
+
+function sincronizarHoja(nombreHoja, filas) {
+  reemplazarHoja(nombreHoja, filas).catch(error => {
+    console.error(error);
+  });
+}
+
+let anuncios = JSON.parse(
+  localStorage.getItem("anunciosIglesiaRedencion")
+) || [];
+
+function filasDeNinos() {
+  return Object.entries(ninos).flatMap(([salon, nombres]) =>
+    nombres.map(nombre => ({
+      Nombre: nombre,
+      Salon: salon,
+      Cumpleanos: obtenerDatosLider(salon, nombre).cumpleanos,
+      Sector: obtenerDatosLider(salon, nombre).sector,
+      ComiteRed: obtenerDatosLider(salon, nombre).comiteRed,
+      Estado: obtenerDatosLider(salon, nombre).estado
+    }))
+  );
+}
+
+function filasDeLideresPastor() {
+  return lideresPastor.map(nombre => ({
+    Nombre: nombre,
+    ...obtenerDatosLider("Pastor", nombre)
+  }));
+}
+
+function normalizarCumpleanos(valor) {
+  const texto = String(valor || "").trim();
+  let partes;
+
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(texto)) {
+    partes = texto.split("-").slice(1);
+  } else if (/^\d{1,2}\/\d{1,2}$/.test(texto)) {
+    partes = texto.split("/").reverse();
+  } else if (/^\d{1,2}-\d{1,2}$/.test(texto)) {
+    partes = texto.split("-");
+    if (Number(partes[0]) > 12) {
+      partes.reverse();
+    }
+  } else {
+    return "";
+  }
+
+  const mes = Number(partes[0]);
+  const dia = Number(partes[1]);
+  const fechaValida = new Date(2024, mes - 1, dia);
+
+  if (
+    mes < 1 || mes > 12 || dia < 1 || dia > 31 ||
+    fechaValida.getMonth() !== mes - 1 || fechaValida.getDate() !== dia
+  ) {
+    return "";
+  }
+
+  return `${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+}
+
+function formatearCumpleanosEntrada(valor) {
+  const normalizado = normalizarCumpleanos(valor);
+  if (!normalizado) return "";
+  return normalizado.split("-").reverse().join("/");
+}
+
+function filasDeUsuarios() {
+  return Object.entries(usuarios).map(([usuario, datos]) => ({
+    Usuario: usuario,
+    Contrasena: datos.contrasena,
+    Rol: datos.rol,
+    Salon: datos.salon
+  }));
+}
+
+async function cargarDatosDesdeAPI() {
+  try {
+    const [filasNinos, filasLideresPastor, filasUsuarios, filasAsistencias, filasMaestros, filasAnuncios] =
+      await Promise.all([
+        leerHoja(HOJAS.ninos),
+        leerHoja(HOJAS.lideresPastor),
+        leerHoja(HOJAS.usuarios),
+        leerHoja(HOJAS.asistencias),
+        leerHoja(HOJAS.maestros),
+        leerHoja(HOJAS.anuncios)
+      ]);
+
+    if (filasAnuncios.length) {
+      anuncios = filasAnuncios;
+      localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
+    } else {
+      sincronizarHoja(HOJAS.anuncios, anuncios);
+    }
+    mostrarAnunciosLogin();
+
+    if (filasNinos.length) {
+      ninos = Object.fromEntries(ZONAS.map(zona => [zona, []]));
+      filasNinos.forEach(fila => {
+        if (ninos[fila.Salon]) {
+          ninos[fila.Salon].push(fila.Nombre);
+          lideresDatos[claveLider(fila.Salon, fila.Nombre)] = {
+            cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
+            sector: fila.Sector || fila.sector || "",
+            comiteRed: fila.ComiteRed || fila.comiteRed || "",
+            estado: fila.Estado || fila.estado || "Inactivo"
+          };
+        }
+      });
+      guardarDatosLideres();
+      localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
+    } else {
+      sincronizarHoja(HOJAS.ninos, filasDeNinos());
+    }
+
+    if (filasLideresPastor.length) {
+      lideresPastor = filasLideresPastor.map(fila => fila.Nombre);
+      filasLideresPastor.forEach(fila => {
+        lideresDatos[claveLider("Pastor", fila.Nombre)] = {
+          cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
+          sector: fila.Sector || fila.sector || "",
+          comiteRed: fila.ComiteRed || fila.comiteRed || "",
+          estado: fila.Estado || fila.estado || "Inactivo"
+        };
+      });
+      guardarDatosLideres();
+      localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
+    } else {
+      sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+    }
+
+    if (filasUsuarios.length) {
+      usuarios = {};
+      filasUsuarios.forEach(fila => {
+        usuarios[fila.Usuario] = {
+          contrasena: fila.Contrasena,
+          rol: fila.Rol,
+          salon: fila.Salon
+        };
+      });
+      localStorage.setItem("usuariosIglesiaRedencion", JSON.stringify(usuarios));
+    } else {
+      sincronizarHoja(HOJAS.usuarios, filasDeUsuarios());
+    }
+
+    if (filasAsistencias.length) {
+      asistencias = filasAsistencias;
+      localStorage.setItem(
+        "asistenciasIglesiaRedencion",
+        JSON.stringify(asistencias)
+      );
+    }
+
+    if (filasMaestros.length) {
+      maestrosSalon = Object.fromEntries(ZONAS.map(zona => [zona, ""]));
+      filasMaestros.forEach(fila => {
+        if (maestrosSalon[fila.Salon] !== undefined) {
+          maestrosSalon[fila.Salon] = fila.Maestros || "";
+        }
+      });
+      localStorage.setItem(
+        "facilitadoresIglesiaRedencion",
+        JSON.stringify(maestrosSalon)
+      );
+    } else {
+      sincronizarHoja(
+        HOJAS.maestros,
+        Object.entries(maestrosSalon).map(([salon, maestros]) => ({
+          Salon: salon,
+          Maestros: maestros
+        }))
+      );
+    }
+  } catch (error) {
+    console.error("Firebase no está disponible. Se usará la copia local.", error);
+  }
+
+  mostrarAnunciosLogin();
+  if (usuarioActual) {
+    mostrarCintaCumpleanos();
+  }
+
+  configurarUsuariosIglesia();
+}
+
+function configurarUsuariosIglesia() {
+  Object.keys(usuarios).forEach(usuario => {
+    if (usuarios[usuario].rol === "Facilitador") {
+      delete usuarios[usuario];
+    }
+  });
+
+  for (let numeroZona = 1; numeroZona <= 7; numeroZona++) {
+    usuarios[`Zona${numeroZona}`] = {
+      contrasena: `123z${numeroZona}`,
+      rol: "Facilitador",
+      salon: `Zona ${numeroZona}`
+    };
+  }
+
+  usuarios.Cuidador = {
+    contrasena: "admin123",
+    rol: "Administrador",
+    salon: "todos"
+  };
+
+  guardarUsuarios();
+}
+
+    const usuariosIniciales = {
+      Zona1: { contrasena: "123z1", rol: "Facilitador", salon: "Zona 1" },
+      Zona2: { contrasena: "123z2", rol: "Facilitador", salon: "Zona 2" },
+      Zona3: { contrasena: "123z3", rol: "Facilitador", salon: "Zona 3" },
+      Zona4: { contrasena: "123z4", rol: "Facilitador", salon: "Zona 4" },
+      Zona5: { contrasena: "123z5", rol: "Facilitador", salon: "Zona 5" },
+      Zona6: { contrasena: "123z6", rol: "Facilitador", salon: "Zona 6" },
+      Zona7: { contrasena: "123z7", rol: "Facilitador", salon: "Zona 7" },
+      Cuidador: {
+        contrasena: "admin123",
+        rol: "Administrador",
+        salon: "todos"
+      },
+      Pastor: {
+        contrasena: "admin123",
+        rol: "Administrador",
+        salon: "todos"
+      },
+      Supervisor: {
+        contrasena: "super123",
+        rol: "Supervisor",
+        salon: "todos"
+      }
+    };
+
+    let usuarios = JSON.parse(
+      localStorage.getItem("usuariosIglesiaRedencion")
+    );
+
+    if (!usuarios) {
+      usuarios = usuariosIniciales;
+      guardarUsuarios();
+    }
+
+    let ninosIniciales = {
+      "Zona 1": ["Ana López", "Carlos Pérez", "María Gómez"],
+      "Zona 2": ["David Torres", "Sofía Ramírez", "Juan Díaz"],
+      "Zona 3": ["Luis Martínez", "Elena Vargas", "Mateo Castillo"],
+      "Zona 4": [],
+      "Zona 5": [],
+      "Zona 6": [],
+      "Zona 7": []
+    };
+
+    let lideresDatos = JSON.parse(
+      localStorage.getItem("datosLideresIglesiaRedencion")
+    ) || {};
+
+    function claveLider(salon, nombre) {
+      return `${salon}::${nombre}`;
+    }
+
+    function obtenerCumpleanos(salon, nombre) {
+      return obtenerDatosLider(salon, nombre).cumpleanos;
+    }
+
+    function obtenerDatosLider(salon, nombre) {
+      return {
+        cumpleanos: normalizarCumpleanos(lideresDatos[claveLider(salon, nombre)]?.cumpleanos),
+        sector: lideresDatos[claveLider(salon, nombre)]?.sector || "",
+        comiteRed: lideresDatos[claveLider(salon, nombre)]?.comiteRed || "",
+        estado: lideresDatos[claveLider(salon, nombre)]?.estado || "Inactivo"
+      };
+    }
+
+    function guardarDatosLideres() {
+      localStorage.setItem(
+        "datosLideresIglesiaRedencion",
+        JSON.stringify(lideresDatos)
+      );
+    }
+
+    let ninos = JSON.parse(localStorage.getItem("lideresIglesiaRedencion"));
+
+    let lideresPastor = JSON.parse(
+      localStorage.getItem("lideresPastorIglesiaRedencion")
+    ) || [];
+
+    if (!ninos) {
+      ninos = ninosIniciales;
+      guardarNinos();
+    }
+
+    let asistencias = JSON.parse(
+      localStorage.getItem("asistenciasIglesiaRedencion")
+    ) || [];
+
+    let usuarioActual = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const fecha = document.getElementById("fecha");
+      const tipoReunion = document.getElementById("tipoReunion").value;
+      configurarRestriccionesFecha(tipoReunion);
+      fecha.value = obtenerFechaReunion(tipoReunion);
+
+      document.getElementById("usuario").addEventListener("keydown", evento => {
+        if (evento.key === "Enter") {
+          evento.preventDefault();
+          document.getElementById("contrasena").focus();
+        }
+      });
+
+      document.getElementById("contrasena").addEventListener("keydown", evento => {
+        if (evento.key === "Enter") {
+          evento.preventDefault();
+          iniciarSesion();
+        }
+      });
+
+      cargarDatosDesdeAPI();
+    });
+
+    function obtenerFechaReunion(tipo = document.getElementById("tipoReunion")?.value, fechaTexto) {
+      const fecha = fechaTexto
+        ? new Date(`${fechaTexto}T00:00:00`)
+        : new Date();
+
+      fecha.setHours(0, 0, 0, 0);
+      const diasPorTipo = {
+        "Reunión con el pastor": 1,
+        ADN: 3,
+        "Servicio dominical": 0
+      };
+      const diaObjetivo = diasPorTipo[tipo] ?? 0;
+      fecha.setDate(fecha.getDate() - ((fecha.getDay() - diaObjetivo + 7) % 7));
+
+      return [
+        fecha.getFullYear(),
+        String(fecha.getMonth() + 1).padStart(2, "0"),
+        String(fecha.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function esFechaDeReunion(fechaTexto, tipo) {
+      if (!fechaTexto) return false;
+      const diasPorTipo = {
+        "Reunión con el pastor": 1,
+        ADN: 3,
+        "Servicio dominical": 0
+      };
+      return new Date(`${fechaTexto}T00:00:00`).getDay() === diasPorTipo[tipo];
+    }
+
+    function formatearFechaISO(fecha) {
+      return [
+        fecha.getFullYear(),
+        String(fecha.getMonth() + 1).padStart(2, "0"),
+        String(fecha.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function obtenerPrimerDiaValido(tipo) {
+      const fecha = new Date("1970-01-01T00:00:00");
+      while (!esFechaDeReunion(formatearFechaISO(fecha), tipo)) {
+        fecha.setDate(fecha.getDate() + 1);
+      }
+      return formatearFechaISO(fecha);
+    }
+
+    function configurarRestriccionesFecha(tipo) {
+      const campoFecha = document.getElementById("fecha");
+      campoFecha.min = obtenerPrimerDiaValido(tipo);
+      campoFecha.step = "7";
+    }
+
+    function configurarRestriccionesResumen(tipo) {
+      const campoDesde = document.getElementById("resumenDesde");
+      const campoHasta = document.getElementById("resumenHasta");
+
+      if (tipo === "Todas") {
+        campoDesde.min = "1970-01-01";
+        campoHasta.min = "1970-01-01";
+        campoDesde.step = "1";
+        campoHasta.step = "1";
+        return;
+      }
+
+      const primerDia = obtenerPrimerDiaValido(tipo);
+      campoDesde.min = primerDia;
+      campoHasta.min = primerDia;
+      campoDesde.step = "7";
+      campoHasta.step = "7";
+    }
+
+    function validarFechaResumenTodas(campo) {
+      const tipoReunion = document.getElementById("resumenTipoReunion").value;
+
+      if (tipoReunion !== "Todas" || !campo.value) {
+        return;
+      }
+
+      const fecha = new Date(`${campo.value}T00:00:00`);
+      const diasValidos = [0, 1, 3];
+
+      while (!diasValidos.includes(fecha.getDay())) {
+        fecha.setDate(fecha.getDate() + 1);
+      }
+
+      campo.value = formatearFechaISO(fecha);
+    }
+
+    function actualizarFechaReunion() {
+      const tipo = document.getElementById("tipoReunion").value;
+      configurarRestriccionesFecha(tipo);
+      document.getElementById("fecha").value = obtenerFechaReunion(tipo);
+      mostrarAsistencia();
+    }
+
+    function esReunionPastor() {
+      return document.getElementById("tipoReunion").value === "Reunión con el pastor";
+    }
+
+    function actualizarOpcionesReunion() {
+      const opcionPastor = document.getElementById("opcionReunionPastor");
+      const selectorReunion = document.getElementById("tipoReunion");
+      const esFacilitador = usuarioActual?.rol === "Facilitador";
+
+      opcionPastor.classList.toggle("oculto", esFacilitador);
+
+      if (esFacilitador && selectorReunion.value === "Reunión con el pastor") {
+        selectorReunion.value = "ADN";
+        actualizarFechaReunion();
+      }
+    }
+
+    function obtenerLideresActuales(salon, tipoReunion) {
+      return tipoReunion === "Reunión con el pastor"
+        ? lideresPastor
+        : (ninos[salon] || []);
+    }
+
+    function actualizarFormularioLideres() {
+      const reunionPastor = esReunionPastor();
+      const puedeAgregar = usuarioActual && (
+        usuarioActual.rol === "Administrador" ||
+        (usuarioActual.rol === "Facilitador" && !reunionPastor)
+      );
+      const etiqueta = document.getElementById("etiquetaFacilitadores");
+      const selectorFacilitadores = document.getElementById("selectorFacilitadores");
+      const selectorZona = document.getElementById("salonNuevoNino");
+      const formulario = document.getElementById("formularioNino");
+
+      etiqueta.textContent = "Facilitadores:";
+      selectorFacilitadores.classList.toggle("oculto", reunionPastor);
+      selectorZona.classList.toggle("oculto", reunionPastor);
+      formulario.classList.toggle("oculto", !puedeAgregar);
+      mostrarMaestroSalon();
+      mostrarAsistencia();
+    }
+
+    function validarFechaReunion() {
+      const campoFecha = document.getElementById("fecha");
+      const tipo = document.getElementById("tipoReunion").value;
+
+      if (!esFechaDeReunion(campoFecha.value, tipo)) {
+        campoFecha.value = obtenerFechaReunion(tipo, campoFecha.value);
+      }
+
+      mostrarAsistencia();
+    }
+
+    function guardarNinos() {
+      localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
+      sincronizarHoja(HOJAS.ninos, filasDeNinos());
+    }
+
+    function ordenarNinos(salon) {
+      ninos[salon].sort((a, b) =>
+        a.localeCompare(b, "es", { sensitivity: "base" })
+      );
+    }
+
+        const maestrosIniciales = Object.fromEntries(ZONAS.map(zona => [zona, ""]));
+    
+    let maestrosSalon = JSON.parse(
+      localStorage.getItem("facilitadoresIglesiaRedencion")
+    ) || maestrosIniciales;
+    
+    function guardarMaestrosSalon() {
+      if (!usuarioActual || usuarioActual.rol !== "Administrador" || esReunionPastor()) {
+        return;
+      }
+    
+      const salon = document.getElementById("salon").value;
+      const facilitador1 = document.getElementById("facilitadorZona1").value;
+      const facilitador2 = document.getElementById("facilitadorZona2").value;
+
+      maestrosSalon[salon] = [facilitador1, facilitador2]
+        .filter(Boolean)
+        .join(", ");
+    
+      localStorage.setItem(
+        "facilitadoresIglesiaRedencion",
+        JSON.stringify(maestrosSalon)
+      );
+
+      sincronizarHoja(
+        HOJAS.maestros,
+        Object.entries(maestrosSalon).map(([nombreSalon, maestros]) => ({
+          Salon: nombreSalon,
+          Maestros: maestros
+        }))
+      );
+    }
+    
+    function mostrarMaestroSalon() {
+      const salon = document.getElementById("salon").value;
+      const selector1 = document.getElementById("facilitadorZona1");
+      const selector2 = document.getElementById("facilitadorZona2");
+
+      if (!selector1 || !selector2) {
+        return;
+      }
+
+      const asignados = String(maestrosSalon[salon] || "")
+        .split(",")
+        .map(nombre => nombre.trim())
+        .filter(Boolean);
+      const opciones = ["<option value=\"\">Sin asignar</option>"]
+        .concat(lideresPastor.map(nombre =>
+          `<option value="${escaparTexto(nombre)}">${escaparTexto(nombre)}</option>`
+        ))
+        .join("");
+
+      selector1.innerHTML = `<option value="">Facilitador 1</option>${opciones}`;
+      selector2.innerHTML = `<option value="">Facilitador 2 (opcional)</option>${opciones}`;
+      selector1.value = asignados[0] || "";
+      selector2.value = asignados[1] || "";
+
+      const puedeEditar = usuarioActual && usuarioActual.rol === "Administrador" && !esReunionPastor();
+      selector1.disabled = !puedeEditar;
+      selector2.disabled = !puedeEditar;
+    }
+
+    function guardarUsuarios() {
+      localStorage.setItem("usuariosIglesiaRedencion", JSON.stringify(usuarios));
+      sincronizarHoja(HOJAS.usuarios, filasDeUsuarios());
+    }
+
+    function escaparTexto(texto) {
+      return texto
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function obtenerAsistencia(salon, fecha, nombre, tipoReunion) {
+      return asistencias.find(fila =>
+        String(fila.Salon) === salon &&
+        String(fila.Fecha) === fecha &&
+        String(fila.Nombre) === nombre &&
+        String(fila.TipoReunion || "Servicio dominical") === tipoReunion
+      );
+    }
+
+    function iniciarSesion() {
+      const usuario = document.getElementById("usuario").value.trim();
+      const contrasena = document.getElementById("contrasena").value;
+      const datos = usuarios[usuario];
+
+      if (!datos || datos.contrasena !== contrasena) {
+        document.getElementById("mensajeLogin").textContent =
+          "Usuario o contraseña incorrectos.";
+        return;
+      }
+
+      usuarioActual = {
+        usuario,
+        ...datos
+      };
+
+      document.getElementById("pantallaLogin").classList.add("oculto");
+      document.getElementById("pantallaSistema").classList.remove("oculto");
+
+      document.getElementById("informacionUsuario").textContent =
+        `Usuario: ${usuarioActual.usuario} | Rol: ${usuarioActual.rol}`;
+
+      const selectorSalon = document.getElementById("salon");
+      const formulario = document.getElementById("formularioNino");
+
+      if (usuarioActual.salon !== "todos") {
+        selectorSalon.value = usuarioActual.salon;
+        selectorSalon.disabled = true;
+        document.getElementById("salonNuevoNino").value = usuarioActual.salon;
+        document.getElementById("salonNuevoNino").disabled = true;
+      } else {
+        selectorSalon.disabled = false;
+        document.getElementById("salonNuevoNino").disabled = false;
+      }
+
+      actualizarOpcionesReunion();
+      actualizarFormularioLideres();
+      mostrarAsistencia();
+      mostrarPanelUsuarios();
+      mostrarCintaCumpleanos();
+    }
+
+    function nombreMesCumpleanos(fechaTexto) {
+      if (!fechaTexto) return "";
+      const fecha = normalizarCumpleanos(fechaTexto).split("-");
+      return new Date(2024, Number(fecha[0]) - 1, Number(fecha[1])).toLocaleDateString("es-MX", {
+        day: "2-digit",
+        month: "long"
+      });
+    }
+
+    function cumpleanosEstaSemana(fechaTexto) {
+      if (!fechaTexto) return false;
+      const partes = normalizarCumpleanos(fechaTexto).split("-");
+      const fechaCumpleanos = new Date(
+        2024,
+        Number(partes[0]) - 1,
+        Number(partes[1])
+      );
+      const hoy = new Date();
+      const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      const fin = new Date(inicio);
+      fin.setDate(fin.getDate() + 7);
+      const fechaEsteAno = new Date(
+        hoy.getFullYear(),
+        fechaCumpleanos.getMonth(),
+        fechaCumpleanos.getDate()
+      );
+      if (fechaEsteAno < inicio) {
+        fechaEsteAno.setFullYear(hoy.getFullYear() + 1);
+      }
+      return fechaEsteAno >= inicio && fechaEsteAno <= fin;
+    }
+
+    function obtenerCumpleanosDeLaSemana() {
+      return Object.entries(ninos).flatMap(([salon, nombres]) =>
+        nombres
+          .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos(salon, nombre)))
+          .map(nombre => ({
+            nombre,
+            salon,
+            fecha: obtenerCumpleanos(salon, nombre)
+          }))
+      );
+    }
+
+    function mostrarCumpleanosDeLaSemana() {
+      const cumpleanos = obtenerCumpleanosDeLaSemana();
+      if (!cumpleanos.length) return;
+
+      const detalle = cumpleanos
+        .map(persona => `${persona.nombre} (${persona.salon}, ${nombreMesCumpleanos(persona.fecha)})`)
+        .join("\n");
+      alert(`Cumpleaños de esta semana:\n\n${detalle}`);
+    }
+
+    function ordenarAnuncios(lista) {
+      return [...lista].sort((a, b) => {
+        const prioridadA = a.Rol === "Administrador" ? 0 : 1;
+        const prioridadB = b.Rol === "Administrador" ? 0 : 1;
+        return prioridadA - prioridadB || Number(b.Fecha || 0) - Number(a.Fecha || 0);
+      });
+    }
+
+    function textoAnuncio(anuncio) {
+      return anuncio.Titulo
+        ? `${anuncio.Titulo}: ${anuncio.Texto}`
+        : anuncio.Texto;
+    }
+
+    function mostrarCinta(id, mensajes) {
+      const cinta = document.getElementById(id);
+      if (!cinta || !mensajes.length) {
+        if (cinta) {
+          cinta.classList.remove("visible");
+          cinta.innerHTML = "";
+        }
+        return;
+      }
+
+      cinta.innerHTML = `<div class="cinta-contenido">${mensajes
+        .map(mensaje => `<span>${escaparTexto(mensaje)}</span>`)
+        .join("")}</div>`;
+      cinta.classList.add("visible");
+    }
+
+    function mostrarAnunciosLogin() {
+      mostrarCinta(
+        "cintaAnunciosLogin",
+        ordenarAnuncios(anuncios).map(textoAnuncio)
+      );
+    }
+
+    function obtenerCumpleanosVisibles() {
+      const todasLasZonas = usuarioActual && (
+        usuarioActual.rol === "Administrador" || usuarioActual.rol === "Supervisor"
+      );
+      const zonas = todasLasZonas
+        ? Object.entries(ninos)
+        : Object.entries(ninos).filter(([zona]) => zona === usuarioActual?.salon);
+      const cumpleanos = zonas.flatMap(([salon, nombres]) =>
+        nombres
+          .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos(salon, nombre)))
+          .map(nombre => `${nombre} (${salon})`)
+      );
+      return [...new Set(cumpleanos)];
+    }
+
+    function mostrarCintaCumpleanos() {
+      const mensajes = obtenerCumpleanosVisibles();
+      mostrarCinta(
+        "cintaCumpleanosSistema",
+        mensajes.length ? [`Cumpleaños de la semana: ${mensajes.join("  ·  ")}`] : []
+      );
+    }
+
+    function mostrarListaAnuncios() {
+      const lista = document.getElementById("listaAnuncios");
+      lista.innerHTML = ordenarAnuncios(anuncios).map(anuncio => `
+        <div class="anuncio-item ${anuncio.Rol === "Administrador" ? "prioridad" : ""}">
+          <strong>${escaparTexto(anuncio.Titulo || "Anuncio")}</strong>
+          <span>${escaparTexto(anuncio.Texto)}</span>
+          ${anuncio.MediaTipo?.startsWith("image/") ? `<img class="anuncio-multimedia" src="${anuncio.MediaData}" alt="Imagen del anuncio">` : ""}
+          ${anuncio.MediaTipo?.startsWith("video/") ? `<video class="anuncio-multimedia" controls preload="metadata" src="${anuncio.MediaData}"></video>` : ""}
+          <small>${escaparTexto(anuncio.Autor || "Usuario")} ${anuncio.Rol === "Administrador" ? "· Prioridad administrativa" : ""}</small>
+          ${usuarioActual?.rol === "Administrador" ? `<button class="boton-eliminar-anuncio boton-rojo" onclick="confirmarEliminarAnuncio(${anuncios.indexOf(anuncio)})">Eliminar anuncio</button>` : ""}
+        </div>
+      `).join("") || "<p>No hay anuncios publicados.</p>";
+    }
+
+    function abrirAnuncios() {
+      mostrarListaAnuncios();
+      document.getElementById("modalAnuncios").classList.remove("oculto");
+    }
+
+    async function guardarAnuncio() {
+      if (!usuarioActual) return;
+
+      const titulo = document.getElementById("tituloAnuncio").value.trim();
+      const texto = document.getElementById("textoAnuncio").value.trim();
+      if (!texto) {
+        alert("Escriba el contenido del anuncio.");
+        return;
+      }
+
+      const archivo = document.getElementById("multimediaAnuncio").files[0];
+      const limite = archivo?.type.startsWith("video/") ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+
+      if (archivo && archivo.size > limite) {
+        alert(`El archivo supera el límite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
+        return;
+      }
+
+      const multimedia = archivo
+        ? await new Promise((resolver, rechazar) => {
+            const lector = new FileReader();
+            lector.onload = () => resolver({ tipo: archivo.type, datos: lector.result });
+            lector.onerror = rechazar;
+            lector.readAsDataURL(archivo);
+          })
+        : { tipo: "", datos: "" };
+
+      const anuncio = {
+        Titulo: titulo,
+        Texto: texto,
+        Autor: usuarioActual.usuario,
+        Rol: usuarioActual.rol,
+        Fecha: Date.now(),
+        MediaTipo: multimedia.tipo,
+        MediaData: multimedia.datos
+      };
+      anuncios.push(anuncio);
+      localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
+      await reemplazarHoja(HOJAS.anuncios, anuncios);
+
+      document.getElementById("tituloAnuncio").value = "";
+      document.getElementById("textoAnuncio").value = "";
+      document.getElementById("multimediaAnuncio").value = "";
+      mostrarListaAnuncios();
+      mostrarAnunciosLogin();
+      mostrarExito("El anuncio fue publicado correctamente.");
+    }
+
+    let anuncioPendiente = null;
+
+    function confirmarEliminarAnuncio(indice) {
+      if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
+      anuncioPendiente = indice;
+      document.getElementById("textoConfirmacionAnuncio").textContent =
+        `¿Está seguro de eliminar el anuncio "${anuncios[indice].Titulo || "Anuncio"}"?`;
+      document.getElementById("modalConfirmacionAnuncio").classList.remove("oculto");
+    }
+
+    async function eliminarAnuncioConfirmado() {
+      if (anuncioPendiente === null) return;
+      anuncios.splice(anuncioPendiente, 1);
+      anuncioPendiente = null;
+      localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
+      await reemplazarHoja(HOJAS.anuncios, anuncios);
+      cerrarModal("modalConfirmacionAnuncio");
+      mostrarListaAnuncios();
+      mostrarAnunciosLogin();
+      mostrarExito("El anuncio fue eliminado correctamente.");
+    }
+
+    function obtenerCumpleanosDelMes(mesTexto) {
+      const mes = Number(mesTexto) - 1;
+
+      return Object.entries(ninos).flatMap(([salon, nombres]) =>
+        nombres
+          .map(nombre => ({
+            nombre,
+            salon,
+            datos: obtenerDatosLider(salon, nombre)
+          }))
+          .filter(persona => {
+            if (!persona.datos.cumpleanos) return false;
+            return Number(persona.datos.cumpleanos.split("-")[0]) - 1 === mes;
+          })
+      );
+    }
+
+    function mostrarCalendarioCumpleanos() {
+      const mesTexto = document.getElementById("mesCumpleanos").value;
+      const calendario = document.getElementById("calendarioCumpleanos");
+
+      if (!mesTexto) {
+        calendario.innerHTML = "";
+        return;
+      }
+
+      const mes = Number(mesTexto);
+      const primerDia = new Date(2024, mes - 1, 1).getDay();
+      const diasDelMes = new Date(2024, mes, 0).getDate();
+      const cumpleanos = obtenerCumpleanosDelMes(mesTexto);
+      const porDia = {};
+
+      cumpleanos.forEach(persona => {
+        const dia = Number(persona.datos.cumpleanos.split("-")[1]);
+        if (!porDia[dia]) porDia[dia] = [];
+        porDia[dia].push(persona);
+      });
+
+      const nombresDias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+      let html = '<div class="calendario-cumpleanos">';
+
+      nombresDias.forEach(dia => {
+        html += `<div class="dia-semana">${dia}</div>`;
+      });
+
+      for (let indice = 0; indice < primerDia; indice++) {
+        html += '<div class="dia-cumpleanos vacio"></div>';
+      }
+
+      for (let dia = 1; dia <= diasDelMes; dia++) {
+        const personas = porDia[dia] || [];
+        html += `
+          <div class="dia-cumpleanos">
+            <span class="numero-dia">${dia}</span>
+            ${personas.map(persona => `
+              <span class="cumpleanero">
+                <strong>${escaparTexto(persona.nombre)}</strong><br>
+                ${escaparTexto(persona.salon)}${persona.datos.sector ? ` · ${escaparTexto(persona.datos.sector)}` : ""}
+              </span>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      html += "</div>";
+      calendario.innerHTML = html;
+    }
+
+    function abrirCalendarioCumpleanos() {
+      const campoMes = document.getElementById("mesCumpleanos");
+      const hoy = new Date();
+      campoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
+
+      mostrarCalendarioCumpleanos();
+      document.getElementById("modalCumpleanos").classList.remove("oculto");
+    }
+
+    function mostrarAsistencia() {
+      const salon = document.getElementById("salon").value;
+      const fecha = document.getElementById("fecha").value;
+      const tipoReunion = document.getElementById("tipoReunion").value;
+      const lideres = obtenerLideresActuales(salon, tipoReunion);
+      const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+
+      mostrarMaestroSalon();
+
+      if (!usuarioActual) return;
+
+      if (tipoReunion === "Reunión con el pastor") {
+        lideres.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+        localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
+      } else {
+        ordenarNinos(salon);
+        guardarNinos();
+      }
+
+      const puedeModificar =
+        usuarioActual.rol === "Administrador" ||
+        (usuarioActual.rol === "Facilitador" && tipoReunion !== "Reunión con el pastor");
+
+      const puedeEliminar = usuarioActual.rol === "Administrador";
+
+      let html = `
+        <h2>${tipoReunion === "Reunión con el pastor" ? "Líderes" : salon} | ${tipoReunion}</h2>
+        <div class="tabla-scroll">
+        <table class="tabla-asistencia">
+          <tr>
+            <th>Líder</th>
+            <th>Asistencia</th>
+            <th>Participación</th>
+            <th>Desarrollo de habilidades</th>
+            <th>Observaciones</th>
+          </tr>
+      `;
+
+      lideres.forEach((nino, indice) => {
+        const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
+        const asistenciaGuardada = obtenerAsistencia(salonDatos, fecha, nino, tipoReunion);
+        const tieneAsistencia = asistenciaGuardada?.Asistencia === "Sí";
+
+        html += `
+          <tr>
+            <td class="nombre-nino">
+              <div class="nombre-lider">
+                <span>${escaparTexto(nino)}</span>
+                <span class="acciones-lider">
+                  ${puedeEliminar ? `
+                    <button class="accion-lider"
+                      title="Eliminar líder"
+                      aria-label="Eliminar líder"
+                      onclick="eliminarLiderActual(${indice})">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                      </svg>
+                    </button>
+                  ` : ""}
+                  ${usuarioActual.rol === "Administrador" ? `
+                    <button class="accion-lider"
+                      title="Modificar líder"
+                      aria-label="Modificar líder"
+                      onclick="editarLiderActual(${indice})">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16v4Z" />
+                        <path d="m13.5 6.5 4 4" />
+                      </svg>
+                    </button>
+                  ` : ""}
+                  ${usuarioActual.rol === "Administrador" && asistenciaGuardada ? `
+                    <button class="accion-lider accion-asistencia"
+                      title="Eliminar asistencia de esta fecha"
+                      aria-label="Eliminar asistencia de esta fecha"
+                      onclick="eliminarAsistencia('${salon}', ${indice})">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M5 5l14 14M19 5L5 19" />
+                      </svg>
+                    </button>
+                  ` : ""}
+                </span>
+              </div>
+            </td>
+
+            <td>
+              <input id="asistencia-${id}" type="checkbox"
+                ${asistenciaGuardada?.Asistencia === "Sí" ? "checked" : ""}
+                ${puedeModificar ? "" : "disabled"}>
+            </td>
+
+            <td>
+              <select id="participacion-${id}"
+                ${puedeModificar ? "" : "disabled"}>
+                <option value="" ${!tieneAsistencia ? "selected" : ""}>-</option>
+                <option ${asistenciaGuardada?.Participacion === "Alta" ? "selected" : ""}>Alta</option>
+                <option ${asistenciaGuardada?.Participacion === "Media" ? "selected" : ""}>Media</option>
+                <option ${asistenciaGuardada?.Participacion === "Baja" ? "selected" : ""}>Baja</option>
+              </select>
+            </td>
+
+            <td>
+              <select id="desarrollo-${id}"
+                ${puedeModificar ? "" : "disabled"}>
+                <option value="" ${!tieneAsistencia ? "selected" : ""}>-</option>
+                <option ${asistenciaGuardada?.Desarrollo === "Excelente" ? "selected" : ""}>Excelente</option>
+                <option ${asistenciaGuardada?.Desarrollo === "Bueno" ? "selected" : ""}>Bueno</option>
+                <option ${asistenciaGuardada?.Desarrollo === "En proceso" ? "selected" : ""}>En proceso</option>
+              </select>
+            </td>
+
+            <td>
+              <textarea id="observaciones-${id}"
+                ${puedeModificar ? "" : "disabled"}
+                placeholder="Observaciones">${tieneAsistencia ? escaparTexto(asistenciaGuardada?.Observaciones || "") : "-"}</textarea>
+            </td>
+
+          </tr>
+        `;
+      });
+
+      html += "</table></div>";
+
+      if (puedeModificar) {
+        html += `
+          <br>
+          <button onclick="guardarAsistencia()">Guardar asistencia</button>
+        `;
+      } else {
+        html += `
+          <p><strong>Modo consulta:</strong> este usuario puede ver la información, pero no modificarla.</p>
+        `;
+      }
+
+      document.getElementById("tablaAsistencia").innerHTML = html;
+    }
+
+    function agregarNino() {
+      const nombre = document.getElementById("nombreNino").value.trim();
+      const cumpleanos = normalizarCumpleanos(
+        document.getElementById("cumpleanosNino").value
+      );
+      const sector = document.getElementById("sectorNino").value.trim();
+      const comiteRed = document.getElementById("comiteRedNino").value.trim();
+      const estado = document.getElementById("estadoNino").value;
+      const salonNuevo = document.getElementById("salonNuevoNino").value;
+      const reunionPastor = esReunionPastor();
+      const puedeAgregar = usuarioActual && (
+        usuarioActual.rol === "Administrador" ||
+        (usuarioActual.rol === "Facilitador" && !reunionPastor)
+      );
+      const grupoLideres = reunionPastor ? lideresPastor : ninos[salonNuevo];
+      const mensaje = document.getElementById("mensajeNino");
+
+      if (!puedeAgregar) {
+        mensaje.textContent = "No tiene permiso para agregar líderes en esta reunión.";
+        return;
+      }
+
+      if (
+        usuarioActual.rol === "Facilitador" &&
+        salonNuevo !== usuarioActual.salon
+      ) {
+        mensaje.textContent = "Solo puede agregar líderes en su zona asignada.";
+        return;
+      }
+
+      if (!nombre) {
+        mensaje.className = "mensaje";
+        mensaje.textContent = "Escriba el nombre del líder.";
+        return;
+      }
+
+      if (grupoLideres.includes(nombre)) {
+        mensaje.className = "mensaje";
+        mensaje.textContent = "Ese líder ya existe en esta zona.";
+        return;
+      }
+
+      grupoLideres.push(nombre);
+      const grupo = reunionPastor ? "Pastor" : salonNuevo;
+      lideresDatos[claveLider(grupo, nombre)] = {
+        cumpleanos,
+        sector,
+        comiteRed,
+        estado
+      };
+      guardarDatosLideres();
+      if (reunionPastor) {
+        lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+        localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
+        sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+      } else {
+        ordenarNinos(salonNuevo);
+        guardarNinos();
+      }
+
+      document.getElementById("nombreNino").value = "";
+      document.getElementById("cumpleanosNino").value = "";
+      document.getElementById("sectorNino").value = "";
+      document.getElementById("comiteRedNino").value = "";
+      document.getElementById("estadoNino").value = "Activo";
+      mensaje.className = "exito";
+      mensaje.textContent = "Líder agregado correctamente.";
+
+      if (reunionPastor || document.getElementById("salon").value === salonNuevo) {
+        mostrarAsistencia();
+      }
+    }
+
+    function eliminarLiderActual(indice) {
+      if (esReunionPastor()) {
+        eliminarNino("Pastor", indice);
+      } else {
+        eliminarNino(document.getElementById("salon").value, indice);
+      }
+    }
+
+    function editarLiderActual(indice) {
+      if (esReunionPastor()) {
+        editarNino("Pastor", indice);
+      } else {
+        editarNino(document.getElementById("salon").value, indice);
+      }
+    }
+
+    function eliminarNino(salon, indice) {
+      const lista = salon === "Pastor" ? lideresPastor : ninos[salon];
+      const nombre = lista[indice];
+
+      ninoEliminacionPendiente = { salon, indice };
+      document.getElementById("textoConfirmacionNino").textContent =
+        `¿Está seguro de eliminar a ${nombre}?`;
+      document.getElementById("modalConfirmacionNino")
+        .classList.remove("oculto");
+    }
+
+    function eliminarNinoConfirmado() {
+      if (!ninoEliminacionPendiente) {
+        return;
+      }
+
+      const { salon, indice } = ninoEliminacionPendiente;
+      const lista = salon === "Pastor" ? lideresPastor : ninos[salon];
+      const nombre = lista[indice];
+      lista.splice(indice, 1);
+      delete lideresDatos[claveLider(salon, nombre)];
+      guardarDatosLideres();
+      if (salon === "Pastor") {
+        localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
+        sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+      } else {
+        guardarNinos();
+      }
+      ninoEliminacionPendiente = null;
+      cerrarModal("modalConfirmacionNino");
+      mostrarAsistencia();
+    }
+
+    async function guardarAsistencia() {
+      const salon = document.getElementById("salon").value;
+      const fecha = document.getElementById("fecha").value;
+      const tipoReunion = document.getElementById("tipoReunion").value;
+      const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      const lideres = obtenerLideresActuales(salon, tipoReunion);
+
+      if (!esFechaDeReunion(fecha, tipoReunion)) {
+        alert("No se puede guardar la asistencia: seleccione el día correcto para la reunión.");
+        return;
+      }
+
+      const filasAsistencia = lideres.map((nombre, indice) => {
+        const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
+
+        return {
+          Fecha: fecha,
+          Salon: salonDatos,
+          Nombre: nombre,
+          TipoReunion: tipoReunion,
+          Asistencia: document.getElementById(`asistencia-${id}`).checked
+            ? "Sí"
+            : "No",
+          Participacion: document.getElementById(`asistencia-${id}`).checked
+            ? document.getElementById(`participacion-${id}`).value
+            : "",
+          Desarrollo: document.getElementById(`asistencia-${id}`).checked
+            ? document.getElementById(`desarrollo-${id}`).value
+            : "",
+          Observaciones: document.getElementById(`asistencia-${id}`).checked
+            ? document.getElementById(`observaciones-${id}`).value
+            : ""
+        };
+      });
+
+      asistencias = asistencias.filter(fila =>
+        String(fila.Fecha) !== fecha ||
+        String(fila.Salon) !== salonDatos ||
+        String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
+      );
+      asistencias.push(...filasAsistencia);
+      localStorage.setItem(
+        "asistenciasIglesiaRedencion",
+        JSON.stringify(asistencias)
+      );
+
+      const sincronizada = await sincronizarAsistencias(
+        fecha,
+        salonDatos,
+        tipoReunion,
+        filasAsistencia
+      );
+
+      mostrarExito(
+        sincronizada
+          ? "Asistencia guardada correctamente."
+          : "Asistencia guardada en este navegador, pero no se pudo sincronizar en línea."
+      );
+    }
+
+    let asistenciaPendiente = null;
+
+    function eliminarAsistencia(salon, indice) {
+      if (!usuarioActual || usuarioActual.rol !== "Administrador") {
+        return;
+      }
+
+      const fecha = document.getElementById("fecha").value;
+      const tipoReunion = document.getElementById("tipoReunion").value;
+      const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      const nombre = ninos[salon]?.[indice];
+
+      const nombreActual = tipoReunion === "Reunión con el pastor"
+        ? lideresPastor[indice]
+        : nombre;
+
+      if (!nombreActual || !obtenerAsistencia(salonDatos, fecha, nombreActual, tipoReunion)) {
+        return;
+      }
+
+      asistenciaPendiente = { salon: salonDatos, nombre: nombreActual, fecha, tipoReunion };
+      document.getElementById("textoConfirmacionAsistencia").textContent =
+        `¿Está seguro de eliminar la asistencia de ${nombre} del ${formatearFechaResumen(fecha)}?`;
+      document.getElementById("modalConfirmacionAsistencia")
+        .classList.remove("oculto");
+    }
+
+    async function eliminarAsistenciaConfirmada() {
+      if (!asistenciaPendiente) {
+        return;
+      }
+
+      const { salon, nombre, fecha, tipoReunion } = asistenciaPendiente;
+      asistenciaPendiente = null;
+      cerrarModal("modalConfirmacionAsistencia");
+
+      asistencias = asistencias.filter(fila =>
+        String(fila.Fecha) !== fecha ||
+        String(fila.Salon) !== salon ||
+        String(fila.Nombre) !== nombre ||
+        String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
+      );
+
+      localStorage.setItem(
+        "asistenciasIglesiaRedencion",
+        JSON.stringify(asistencias)
+      );
+
+      try {
+        const filasActuales = await leerHoja(HOJAS.asistencias);
+        const restantes = filasActuales.filter(fila =>
+          String(fila.Fecha) !== fecha ||
+          String(fila.Salon) !== salon ||
+          String(fila.Nombre) !== nombre ||
+          String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
+        );
+        await reemplazarHoja(HOJAS.asistencias, restantes);
+        mostrarExito("El registro de asistencia fue eliminado.");
+      } catch (error) {
+        console.error(error);
+        mostrarExito("El registro se eliminó en este navegador, pero no se pudo sincronizar en línea.");
+      }
+
+      mostrarAsistencia();
+    }
+
+    async function sincronizarAsistencias(fecha, salon, tipoReunion, filasNuevas) {
+      try {
+        const filasActuales = await leerHoja(HOJAS.asistencias);
+        const restantes = filasActuales.filter(fila =>
+          fila.Fecha !== fecha ||
+          fila.Salon !== salon ||
+          String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
+        );
+
+        await reemplazarHoja(
+          HOJAS.asistencias,
+          restantes.concat(filasNuevas)
+        );
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
+
+    function guardarUsuarios() {
+  localStorage.setItem(
+    "usuariosIglesiaRedencion",
+    JSON.stringify(usuarios)
+  );
+  sincronizarHoja(HOJAS.usuarios, filasDeUsuarios());
+}
+
+    function mostrarPanelUsuarios() {
+  const boton = document.getElementById("botonAdministrarUsuarios");
+  const botonResumen = document.getElementById("botonResumenNino");
+
+  if (usuarioActual && usuarioActual.rol === "Administrador") {
+    boton.classList.remove("oculto");
+  } else {
+    boton.classList.add("oculto");
+  }
+
+  if (usuarioActual &&
+      (usuarioActual.rol === "Supervisor" ||
+       usuarioActual.rol === "Administrador")) {
+    botonResumen.classList.remove("oculto");
+  } else {
+    botonResumen.classList.add("oculto");
+  }
+}
+
+    function cargarNinosResumen() {
+  const salonSeleccionado = document.getElementById("resumenSalon").value;
+  const tipoReunion = document.getElementById("resumenTipoReunion").value;
+  const salon = tipoReunion === "Reunión con el pastor"
+    ? "Pastor"
+    : salonSeleccionado;
+  const selectorNino = document.getElementById("resumenNino");
+  const lideres = tipoReunion === "Reunión con el pastor"
+    ? lideresPastor
+    : (ninos[salon] || []);
+
+  selectorNino.innerHTML = lideres
+    .map(nino => `
+      <option value="${escaparTexto(nino)}">${escaparTexto(nino)}</option>
+    `)
+    .join("");
+}
+
+    function abrirResumenNino() {
+  if (!usuarioActual ||
+      (usuarioActual.rol !== "Supervisor" &&
+       usuarioActual.rol !== "Administrador")) {
+    return;
+  }
+
+  const salon = usuarioActual.salon === "todos"
+    ? document.getElementById("salon").value
+    : usuarioActual.salon;
+  const tipoReunion = document.getElementById("resumenTipoReunion").value;
+  const domingoActual = obtenerFechaReunion(tipoReunion);
+  const fechaInicio = new Date(`${domingoActual}T00:00:00`);
+  fechaInicio.setDate(fechaInicio.getDate() - 12 * 7);
+
+  document.getElementById("resumenSalon").value = salon;
+  document.getElementById("resumenDesde").value = [
+    fechaInicio.getFullYear(),
+    String(fechaInicio.getMonth() + 1).padStart(2, "0"),
+    String(fechaInicio.getDate()).padStart(2, "0")
+  ].join("-");
+  document.getElementById("resumenHasta").value = domingoActual;
+  document.getElementById("resumenTipoReunion").value = tipoReunion;
+  configurarRestriccionesResumen(tipoReunion);
+  cargarNinosResumen();
+  document.getElementById("contenidoResumenNino").innerHTML = "";
+  document.getElementById("modalResumenNino").classList.remove("oculto");
+}
+
+    function cerrarResumenNino() {
+  document.getElementById("modalResumenNino").classList.add("oculto");
+}
+
+    function actualizarFechasResumen() {
+  const tipoReunion = document.getElementById("resumenTipoReunion").value;
+  configurarRestriccionesResumen(tipoReunion);
+
+  if (tipoReunion === "Todas") {
+    const fechaHasta = obtenerFechaReunion("Servicio dominical");
+    const fechaDesde = new Date(`${fechaHasta}T00:00:00`);
+    fechaDesde.setDate(fechaDesde.getDate() - 12 * 7);
+
+    document.getElementById("resumenDesde").value = [
+      fechaDesde.getFullYear(),
+      String(fechaDesde.getMonth() + 1).padStart(2, "0"),
+      String(fechaDesde.getDate()).padStart(2, "0")
+    ].join("-");
+    document.getElementById("resumenHasta").value = fechaHasta;
+    return;
+  }
+
+  const fechaHasta = obtenerFechaReunion(tipoReunion);
+  const fechaDesde = new Date(`${fechaHasta}T00:00:00`);
+  fechaDesde.setDate(fechaDesde.getDate() - 12 * 7);
+
+  document.getElementById("resumenDesde").value = [
+    fechaDesde.getFullYear(),
+    String(fechaDesde.getMonth() + 1).padStart(2, "0"),
+    String(fechaDesde.getDate()).padStart(2, "0")
+  ].join("-");
+  document.getElementById("resumenHasta").value = fechaHasta;
+}
+
+    function actualizarTipoResumen() {
+  const tipoReunion = document.getElementById("resumenTipoReunion").value;
+  const selectorSalon = document.getElementById("resumenSalon");
+
+  if (tipoReunion === "Reunión con el pastor") {
+    selectorSalon.value = "Pastor";
+  } else if (selectorSalon.value === "Pastor") {
+    selectorSalon.value = "Zona 1";
+  }
+
+  actualizarFechasResumen();
+  cargarNinosResumen();
+}
+
+    function obtenerDomingosEntre(desdeTexto, hastaTexto) {
+  const domingos = [];
+  const fecha = new Date(`${desdeTexto}T00:00:00`);
+  const hasta = new Date(`${hastaTexto}T00:00:00`);
+
+  while (fecha <= hasta) {
+    domingos.push([ 
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, "0"),
+      String(fecha.getDate()).padStart(2, "0")
+    ].join("-"));
+    fecha.setDate(fecha.getDate() + 7);
+  }
+
+  return domingos;
+}
+
+function obtenerFechasEntre(desdeTexto, hastaTexto) {
+  const fechas = [];
+  const fecha = new Date(`${desdeTexto}T00:00:00`);
+  const hasta = new Date(`${hastaTexto}T00:00:00`);
+
+  while (fecha <= hasta) {
+    fechas.push([
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, "0"),
+      String(fecha.getDate()).padStart(2, "0")
+    ].join("-"));
+    fecha.setDate(fecha.getDate() + 1);
+  }
+
+  return fechas;
+}
+
+function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
+  return obtenerFechasEntre(desdeTexto, hastaTexto).flatMap(fecha => {
+    const dia = new Date(`${fecha}T00:00:00`).getDay();
+    const tipos = {
+      0: "Servicio dominical",
+      1: "Reunión con el pastor",
+      3: "ADN"
+    };
+    return tipos[dia] ? [{ fecha, tipo: tipos[dia] }] : [];
+  });
+}
+
+    function valorMasFrecuente(filas, propiedad) {
+  const cantidades = {};
+
+  filas.forEach(fila => {
+    const valor = String(fila[propiedad] || "").trim();
+    if (valor) {
+      cantidades[valor] = (cantidades[valor] || 0) + 1;
+    }
+  });
+
+  const valores = Object.keys(cantidades);
+  if (!valores.length) {
+    return "Sin datos";
+  }
+
+  return valores.sort((a, b) => cantidades[b] - cantidades[a])[0];
+}
+
+    function formatearFechaResumen(fechaTexto) {
+  return new Date(`${fechaTexto}T00:00:00`).toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+
+    function mostrarResumenNino() {
+  if (!usuarioActual ||
+      (usuarioActual.rol !== "Supervisor" &&
+       usuarioActual.rol !== "Administrador")) {
+    return;
+  }
+
+  const salon = document.getElementById("resumenSalon").value;
+  const nino = document.getElementById("resumenNino").value;
+  const desde = document.getElementById("resumenDesde").value;
+  const hasta = document.getElementById("resumenHasta").value;
+
+  const tipoReunion = document.getElementById("resumenTipoReunion").value;
+
+  if (!nino || !desde || !hasta ||
+      (tipoReunion !== "Todas" &&
+       (!esFechaDeReunion(desde, tipoReunion) || !esFechaDeReunion(hasta, tipoReunion)))) {
+    alert("Seleccione fechas que correspondan al día de la reunión.");
+    return;
+  }
+
+  if (desde > hasta) {
+    alert("La fecha inicial no puede ser posterior a la fecha final.");
+    return;
+  }
+
+  const fechasPeriodo = tipoReunion === "Todas"
+    ? obtenerFechasEntre(desde, hasta)
+    : obtenerDomingosEntre(desde, hasta);
+  const reunionesPeriodo = tipoReunion === "Todas"
+    ? obtenerFechasDeTodasLasReuniones(desde, hasta)
+    : fechasPeriodo.map(fecha => ({ fecha, tipo: tipoReunion }));
+  const reunionesEsperadas = tipoReunion === "Todas"
+    ? reunionesPeriodo.length
+    : fechasPeriodo.length;
+  const registros = asistencias.filter(fila =>
+    String(fila.Salon) === salon &&
+    String(fila.Nombre) === nino &&
+    (tipoReunion === "Todas" ||
+      String(fila.TipoReunion || "Servicio dominical") === tipoReunion) &&
+    fechasPeriodo.includes(String(fila.Fecha))
+  );
+  const facilitador = maestrosSalon[salon] || "Sin asignar";
+  const cumpleanos = obtenerCumpleanos(salon, nino);
+  const datosLider = obtenerDatosLider(salon, nino);
+  const estadoLider = registros.length ? datosLider.estado : "Inactivo";
+  const registrosPorFecha = Object.fromEntries(
+    registros.map(fila => [String(fila.Fecha), fila])
+  );
+  const asistenciasContadas = registros.filter(fila => fila.Asistencia === "Sí").length;
+  const faltasContadas = registros.filter(fila => fila.Asistencia === "No").length;
+  const totalRegistradas = registros.length;
+  const sinRegistro = Math.max(reunionesEsperadas - totalRegistradas, 0);
+
+  const filasCalendario = tipoReunion === "Todas"
+    ? reunionesPeriodo.map(reunion => {
+        const registro = registros.find(fila =>
+          String(fila.Fecha) === reunion.fecha &&
+          String(fila.TipoReunion || "Servicio dominical") === reunion.tipo
+        );
+
+        return `
+        <tr>
+          <td>${formatearFechaResumen(reunion.fecha)}</td>
+          <td>${escaparTexto(reunion.tipo)}</td>
+          <td>${!registro ? "Sin registro" : registro.Asistencia === "Sí" ? "Asistió" : "Falta"}</td>
+          <td>${registro ? escaparTexto(registro.Participacion || "-") : "-"}</td>
+          <td>${registro ? escaparTexto(registro.Desarrollo || "-") : "-"}</td>
+          <td>${registro ? escaparTexto(registro.Observaciones || "-") : "-"}</td>
+        </tr>
+      `;
+      }).join("")
+    : fechasPeriodo.map(fecha => {
+    const registro = registrosPorFecha[fecha];
+    const estado = !registro
+      ? "Sin registro"
+      : registro.Asistencia === "Sí" ? "Asistió" : "Falta";
+
+    return `
+      <tr>
+        <td>${formatearFechaResumen(fecha)}</td>
+        <td>${estado}</td>
+        <td>${registro ? escaparTexto(registro.Participacion || "-") : "-"}</td>
+        <td>${registro ? escaparTexto(registro.Desarrollo || "-") : "-"}</td>
+        <td>${registro ? escaparTexto(registro.Observaciones || "-") : "-"}</td>
+      </tr>
+    `;
+  }).join("");
+
+  document.getElementById("contenidoResumenNino").innerHTML = `
+    <div class="resumen-encabezado">
+      <div class="resumen-identificacion">
+        <h3>${escaparTexto(nino)} | ${salon} | ${tipoReunion}</h3>
+      </div>
+      <div class="resumen-periodo">
+        <p class="resumen-etiqueta">Periodo</p>
+        <p>${formatearFechaResumen(desde)} al ${formatearFechaResumen(hasta)}</p>
+      </div>
+    </div>
+
+    <div class="resumen-datos">
+      <div class="resumen-dato">Facilitador<strong>${escaparTexto(facilitador)}</strong></div>
+      <div class="resumen-dato">Cumpleaños<strong>${cumpleanos ? nombreMesCumpleanos(cumpleanos) : "Sin registrar"}</strong></div>
+      <div class="resumen-dato">Sector<strong>${escaparTexto(datosLider.sector || "Sin registrar")}</strong></div>
+      <div class="resumen-dato">Comité o red<strong>${escaparTexto(datosLider.comiteRed || "Sin asignar")}</strong></div>
+      <div class="resumen-dato">Estado<strong>${escaparTexto(estadoLider)}</strong></div>
+      <div class="resumen-dato">Reuniones del periodo<strong>${reunionesEsperadas}</strong></div>
+      <div class="resumen-dato">Asistencias<strong>${asistenciasContadas}</strong></div>
+      <div class="resumen-dato">Faltas<strong>${faltasContadas}</strong></div>
+      <div class="resumen-dato">Registros guardados<strong>${totalRegistradas}</strong></div>
+      <div class="resumen-dato">Sin registro<strong>${sinRegistro}</strong></div>
+      <div class="resumen-dato">Participación predominante<strong>${escaparTexto(valorMasFrecuente(registros, "Participacion"))}</strong></div>
+      <div class="resumen-dato">Desarrollo predominante<strong>${escaparTexto(valorMasFrecuente(registros, "Desarrollo"))}</strong></div>
+    </div>
+
+    <div class="tabla-scroll">
+      <table class="tabla-resumen">
+        <tr>
+          <th>Fecha</th>
+          ${tipoReunion === "Todas" ? "<th>Reunión</th>" : ""}
+          <th>Estado</th>
+          <th>Participación</th>
+          <th>Desarrollo</th>
+          <th>Observaciones</th>
+        </tr>
+        ${filasCalendario}
+      </table>
+    </div>
+  `;
+}
+
+    function abrirAdministrarUsuarios() {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") {
+    return;
+  }
+
+  const selector = document.getElementById("usuarioSeleccionado");
+
+  selector.innerHTML =
+    '<option value="">Seleccione un usuario</option>';
+
+  Object.keys(usuarios).forEach(usuario => {
+    selector.innerHTML += `
+      <option value="${escaparTexto(usuario)}">
+        ${escaparTexto(usuario)} -
+        ${escaparTexto(usuarios[usuario].rol)}
+      </option>
+    `;
+  });
+
+  document.getElementById("accionesUsuario").classList.add("oculto");
+  document.getElementById("mensajeUsuarios").textContent = "";
+  document.getElementById("modalUsuarios").classList.remove("oculto");
+}
+
+document.addEventListener("change", evento => {
+  if (evento.target.id !== "usuarioSeleccionado") {
+    return;
+  }
+
+  const acciones = document.getElementById("accionesUsuario");
+
+  acciones.classList.toggle(
+    "oculto",
+    !evento.target.value
+  );
+});
+
+    function cerrarAdministrarUsuarios() {
+  document.getElementById("modalUsuarios").classList.add("oculto");
+}
+
+function crearUsuario() {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") {
+    return;
+  }
+
+  const nombre = document.getElementById("nuevoUsuario").value.trim();
+  const contrasena = document.getElementById("nuevaContrasena").value.trim();
+  const rol = document.getElementById("nuevoRol").value;
+  const salon = document.getElementById("nuevoSalon").value;
+  const mensaje = document.getElementById("mensajeUsuarios");
+
+  if (!nombre || !contrasena) {
+    mensaje.textContent = "Complete el usuario y la contraseña.";
+    mensaje.style.color = "#6e1f2a";
+    return;
+  }
+
+  if (usuarios[nombre]) {
+    mensaje.textContent = "Ese usuario ya existe.";
+    mensaje.style.color = "#6e1f2a";
+    return;
+  }
+
+  if (rol === "Facilitador" && salon === "todos") {
+    mensaje.textContent = "El facilitador debe tener una zona asignada.";
+    mensaje.style.color = "#6e1f2a";
+    return;
+  }
+
+  usuarios[nombre] = {
+    contrasena,
+    rol,
+    salon: rol === "Facilitador" ? salon : "todos"
+  };
+
+  guardarUsuarios();
+
+  document.getElementById("nuevoUsuario").value = "";
+  document.getElementById("nuevaContrasena").value = "";
+
+  mensaje.textContent = "Usuario creado correctamente.";
+  mensaje.style.color = "#6e1f2a";
+
+  // Actualiza la lista desplegable de usuarios
+  abrirAdministrarUsuarios();
+}
+
+let ninoPendiente = null;
+
+    function editarNino(salon, indice) {
+      if (usuarioActual.rol !== "Administrador") {
+        return;
+      }
+
+      const lista = salon === "Pastor" ? lideresPastor : ninos[salon];
+      const nombreAnterior = lista[indice];
+
+      ninoPendiente = { salon, indice };
+
+      document.getElementById("nombreNinoCambioTexto").textContent =
+        `Nombre actual: ${nombreAnterior}`;
+      document.getElementById("nombreNinoModal").value = nombreAnterior;
+      document.getElementById("cumpleanosNinoModal").value =
+        formatearCumpleanosEntrada(obtenerCumpleanos(salon, nombreAnterior));
+      const datosLider = obtenerDatosLider(salon, nombreAnterior);
+      document.getElementById("sectorNinoModal").value = datosLider.sector;
+      document.getElementById("comiteRedNinoModal").value = datosLider.comiteRed;
+      document.getElementById("estadoNinoModal").value = datosLider.estado;
+      document.getElementById("modalNombreNino").classList.remove("oculto");
+    }
+
+    function guardarNombreNino() {
+      if (!ninoPendiente) {
+        return;
+      }
+
+      const nuevoNombre = document.getElementById("nombreNinoModal")
+        .value.trim();
+      const nuevoCumpleanos = normalizarCumpleanos(
+        document.getElementById("cumpleanosNinoModal").value
+      );
+      const nuevoSector = document.getElementById("sectorNinoModal").value.trim();
+      const nuevoComiteRed = document.getElementById("comiteRedNinoModal").value.trim();
+      const nuevoEstado = document.getElementById("estadoNinoModal").value;
+
+      if (!nuevoNombre) {
+        alert("El nombre no puede estar vacío.");
+        return;
+      }
+
+      const lista = ninoPendiente.salon === "Pastor"
+        ? lideresPastor
+        : ninos[ninoPendiente.salon];
+      const nombreAnterior = lista[ninoPendiente.indice];
+      delete lideresDatos[claveLider(ninoPendiente.salon, nombreAnterior)];
+      lista[ninoPendiente.indice] = nuevoNombre;
+      lideresDatos[claveLider(ninoPendiente.salon, nuevoNombre)] = {
+        cumpleanos: nuevoCumpleanos,
+        sector: nuevoSector,
+        comiteRed: nuevoComiteRed,
+        estado: nuevoEstado
+      };
+      guardarDatosLideres();
+      if (ninoPendiente.salon === "Pastor") {
+        lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+        localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
+        sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+      } else {
+        ordenarNinos(ninoPendiente.salon);
+        guardarNinos();
+      }
+      cerrarModal("modalNombreNino");
+      ninoPendiente = null;
+      mostrarAsistencia();
+    }
+
+let usuarioPendiente = null;
+let ninoEliminacionPendiente = null;
+
+function abrirCambioContrasena() {
+  const usuario = document.getElementById("usuarioSeleccionado").value;
+
+  if (!usuario) {
+    return;
+  }
+
+  usuarioPendiente = usuario;
+
+  document.getElementById("usuarioCambioTexto").textContent =
+    `Usuario: ${usuario}`;
+
+  document.getElementById("nuevaContrasenaModal").value = "";
+  document.getElementById("modalContrasena").classList.remove("oculto");
+}
+
+function guardarNuevaContrasena() {
+  const nuevaContrasena =
+    document.getElementById("nuevaContrasenaModal").value.trim();
+
+  if (!nuevaContrasena) {
+    alert("Escriba una contraseña.");
+    return;
+  }
+
+  usuarios[usuarioPendiente].contrasena = nuevaContrasena;
+  guardarUsuarios();
+
+  cerrarModal("modalContrasena");
+  mostrarExito("La contraseña fue modificada correctamente.");
+}
+
+function confirmarEliminarUsuario() {
+  const usuario = document.getElementById("usuarioSeleccionado").value;
+
+  if (!usuario) {
+    return;
+  }
+
+  if (usuario === usuarioActual.usuario) {
+    alert("No puede eliminar el usuario con el que inició sesión.");
+    return;
+  }
+
+  usuarioPendiente = usuario;
+
+  document.getElementById("textoConfirmacion").textContent =
+    `¿Está seguro de eliminar al usuario "${usuario}"?`;
+
+  document.getElementById("modalConfirmacion")
+    .classList.remove("oculto");
+}
+
+function eliminarUsuarioConfirmado() {
+  delete usuarios[usuarioPendiente];
+  guardarUsuarios();
+
+  cerrarModal("modalConfirmacion");
+  abrirAdministrarUsuarios();
+
+  mostrarExito("El usuario fue eliminado correctamente.");
+}
+
+function mostrarExito(mensaje) {
+  document.getElementById("textoExito").textContent = mensaje;
+  document.getElementById("modalExito").classList.remove("oculto");
+}
+
+function cerrarModal(id) {
+  document.getElementById(id).classList.add("oculto");
+}
+
+    function cerrarSesion() {
+  usuarioActual = null;
+
+  document.getElementById("pantallaSistema").classList.add("oculto");
+  document.getElementById("pantallaLogin").classList.remove("oculto");
+
+  document.getElementById("usuario").value = "";
+  document.getElementById("contrasena").value = "";
+  document.getElementById("mensajeLogin").textContent = "";
+
+  document.getElementById("modalUsuarios").classList.add("oculto");
+  document.getElementById("modalResumenNino").classList.add("oculto");
+  document.getElementById("modalAnuncios").classList.add("oculto");
+  document.getElementById("modalConfirmacionAnuncio").classList.add("oculto");
+  document.getElementById("cintaCumpleanosSistema").classList.remove("visible");
+  document.getElementById("botonAdministrarUsuarios").classList.add("oculto");
+  document.getElementById("botonResumenNino").classList.add("oculto");
+
+  document.getElementById("salon").disabled = false;
+  document.getElementById("salonNuevoNino").disabled = false;
+}
+  </script>
+
+</body>
+</html>
