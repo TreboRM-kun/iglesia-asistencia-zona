@@ -402,6 +402,36 @@
       width: 100%;
     }
 
+    .datos-reunion {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+      padding: 14px;
+      border-left: 6px solid #9a7734;
+      background: #f5f3ef;
+      text-align: left;
+    }
+
+    .datos-reunion textarea,
+    .datos-reunion input {
+      width: 100%;
+      margin: 4px 0;
+    }
+
+    .multimedia-reunion {
+      display: block;
+      max-width: 100%;
+      max-height: 280px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .datos-reunion {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .acciones-barra {
   display: flex;
   align-items: center;
@@ -784,6 +814,12 @@
           Resumen de líder
         </button>
 
+        <button id="botonResumenReunion"
+          class="oculto"
+          onclick="abrirResumenReunion()">
+          Resumen de la reunión
+        </button>
+
         <button onclick="abrirCalendarioCumpleanos()">
           Cumpleaños
         </button>
@@ -809,6 +845,7 @@
       <option value="Zona 5">Zona 5</option>
       <option value="Zona 6">Zona 6</option>
       <option value="Zona 7">Zona 7</option>
+      <option value="Sabana de Parra">Sabana de Parra</option>
         </select>
       </div>
 
@@ -870,6 +907,7 @@
         <option value="Zona 5">Zona 5</option>
         <option value="Zona 6">Zona 6</option>
         <option value="Zona 7">Zona 7</option>
+        <option value="Sabana de Parra">Sabana de Parra</option>
       </select>
 
       <button onclick="agregarNino()">Agregar líder</button>
@@ -928,6 +966,7 @@
         <option value="Zona 5">Zona 5</option>
         <option value="Zona 6">Zona 6</option>
         <option value="Zona 7">Zona 7</option>
+        <option value="Sabana de Parra">Sabana de Parra</option>
         <option value="todos">Todas las zonas</option>
       </select>
 
@@ -954,6 +993,7 @@
             <option value="Zona 5">Zona 5</option>
             <option value="Zona 6">Zona 6</option>
             <option value="Zona 7">Zona 7</option>
+            <option value="Sabana de Parra">Sabana de Parra</option>
             <option value="Pastor">Líderes</option>
           </select>
         </div>
@@ -986,6 +1026,42 @@
 
       <button onclick="mostrarResumenNino()">Consultar resumen</button>
       <div id="contenidoResumenNino"></div>
+    </div>
+  </div>
+
+  <div id="modalResumenReunion" class="modal oculto">
+    <div class="ventana-usuarios ventana-resumen">
+      <button class="cerrar-modal" onclick="cerrarModal('modalResumenReunion')">×</button>
+      <h2>Resumen de la reunión</h2>
+      <div class="filtros-resumen">
+        <div>
+          <label for="resumenReunionSalon">Zona:</label>
+          <select id="resumenReunionSalon">
+            <option value="Zona 1">Zona 1</option>
+            <option value="Zona 2">Zona 2</option>
+            <option value="Zona 3">Zona 3</option>
+            <option value="Zona 4">Zona 4</option>
+            <option value="Zona 5">Zona 5</option>
+            <option value="Zona 6">Zona 6</option>
+            <option value="Zona 7">Zona 7</option>
+            <option value="Sabana de Parra">Sabana de Parra</option>
+          </select>
+        </div>
+        <div>
+          <label for="resumenReunionTipo">Reunión:</label>
+          <select id="resumenReunionTipo">
+            <option value="ADN">Discipulado ADN</option>
+            <option value="Servicio dominical">Servicio dominical</option>
+            <option value="Reunión con el pastor">Reunión con el pastor</option>
+          </select>
+        </div>
+        <div>
+          <label for="resumenReunionFecha">Fecha:</label>
+          <input id="resumenReunionFecha" type="date" min="1970-01-01">
+        </div>
+      </div>
+      <button onclick="mostrarResumenReunion()">Consultar resumen</button>
+      <div id="contenidoResumenReunion"></div>
     </div>
   </div>
 
@@ -1198,7 +1274,10 @@ const HOJAS = {
   anuncios: "Anuncios"
 };
 
-const ZONAS = Array.from({ length: 7 }, (_, indice) => `Zona ${indice + 1}`);
+const ZONAS = [
+  ...Array.from({ length: 7 }, (_, indice) => `Zona ${indice + 1}`),
+  "Sabana de Parra"
+];
 
 async function leerHoja(nombreHoja) {
   const firebase = await window.firebaseReady;
@@ -1417,6 +1496,12 @@ function configurarUsuariosIglesia() {
     };
   }
 
+  usuarios.Sabana = {
+    contrasena: "iglesiasdp",
+    rol: "Facilitador",
+    salon: "Sabana de Parra"
+  };
+
   usuarios.Cuidador = {
     contrasena: "admin123",
     rol: "Administrador",
@@ -1434,6 +1519,7 @@ function configurarUsuariosIglesia() {
       Zona5: { contrasena: "123z5", rol: "Facilitador", salon: "Zona 5" },
       Zona6: { contrasena: "123z6", rol: "Facilitador", salon: "Zona 6" },
       Zona7: { contrasena: "123z7", rol: "Facilitador", salon: "Zona 7" },
+      Sabana: { contrasena: "iglesiasdp", rol: "Facilitador", salon: "Sabana de Parra" },
       Cuidador: {
         contrasena: "admin123",
         rol: "Administrador",
@@ -1467,7 +1553,8 @@ function configurarUsuariosIglesia() {
       "Zona 4": [],
       "Zona 5": [],
       "Zona 6": [],
-      "Zona 7": []
+      "Zona 7": [],
+      "Sabana de Parra": []
     };
 
     let lideresDatos = JSON.parse(
@@ -1781,6 +1868,30 @@ function configurarUsuariosIglesia() {
         String(fila.Nombre) === nombre &&
         String(fila.TipoReunion || "Servicio dominical") === tipoReunion
       );
+    }
+
+    function obtenerDatosReunion(salon, fecha, tipoReunion) {
+      return asistencias.find(fila =>
+        String(fila.Salon) === salon &&
+        String(fila.Fecha) === fecha &&
+        String(fila.TipoReunion || "Servicio dominical") === tipoReunion &&
+        (fila.Comentario || fila.MediaData)
+      ) || null;
+    }
+
+    function mostrarMultimediaReunion(fila) {
+      if (!fila?.MediaData || !fila.MediaTipo) return "";
+      const datos = escaparTexto(fila.MediaData);
+      if (fila.MediaTipo.startsWith("image/")) {
+        return `<img class="multimedia-reunion" src="${datos}" alt="Archivo de la reunión">`;
+      }
+      if (fila.MediaTipo.startsWith("video/")) {
+        return `<video class="multimedia-reunion" controls preload="metadata" src="${datos}"></video>`;
+      }
+      if (fila.MediaTipo.startsWith("audio/")) {
+        return `<audio class="multimedia-reunion" controls src="${datos}"></audio>`;
+      }
+      return "";
     }
 
     function iniciarSesion() {
@@ -2228,7 +2339,20 @@ function configurarUsuariosIglesia() {
       html += "</table></div>";
 
       if (puedeModificar) {
+        const datosReunion = obtenerDatosReunion(salonDatos, fecha, tipoReunion);
         html += `
+          <div class="datos-reunion">
+            <div>
+              <label for="comentarioReunion">Comentario del facilitador:</label>
+              <textarea id="comentarioReunion" placeholder="Comentario de la reunión">${escaparTexto(datosReunion?.Comentario || "")}</textarea>
+            </div>
+            <div>
+              <label for="multimediaReunion">Archivo multimedia (imagen, video o audio):</label>
+              <input id="multimediaReunion" type="file" accept="image/*,video/*,audio/*">
+              <small>Imagen/audio hasta 2 MB o video hasta 5 MB.</small>
+              ${mostrarMultimediaReunion(datosReunion)}
+            </div>
+          </div>
           <br>
           <button onclick="guardarAsistencia()">Guardar asistencia</button>
         `;
@@ -2369,6 +2493,29 @@ function configurarUsuariosIglesia() {
       const tipoReunion = document.getElementById("tipoReunion").value;
       const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
       const lideres = obtenerLideresActuales(salon, tipoReunion);
+      const datosReunion = obtenerDatosReunion(salonDatos, fecha, tipoReunion);
+      const comentario = document.getElementById("comentarioReunion")?.value.trim() || "";
+      const archivo = document.getElementById("multimediaReunion")?.files[0];
+
+      if (archivo) {
+        const limite = archivo.type.startsWith("video/") ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+        if (archivo.size > limite) {
+          alert(`El archivo supera el límite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
+          return;
+        }
+      }
+
+      const multimedia = archivo
+        ? await new Promise((resolver, rechazar) => {
+            const lector = new FileReader();
+            lector.onload = () => resolver({ tipo: archivo.type, datos: lector.result });
+            lector.onerror = rechazar;
+            lector.readAsDataURL(archivo);
+          })
+        : {
+            tipo: datosReunion?.MediaTipo || "",
+            datos: datosReunion?.MediaData || ""
+          };
 
       if (!esFechaDeReunion(fecha, tipoReunion)) {
         alert("No se puede guardar la asistencia: seleccione el día correcto para la reunión.");
@@ -2394,7 +2541,10 @@ function configurarUsuariosIglesia() {
             : "",
           Observaciones: document.getElementById(`asistencia-${id}`).checked
             ? document.getElementById(`observaciones-${id}`).value
-            : ""
+            : "",
+          Comentario: comentario,
+          MediaTipo: multimedia.tipo,
+          MediaData: multimedia.datos
         };
       });
 
@@ -2520,6 +2670,7 @@ function configurarUsuariosIglesia() {
     function mostrarPanelUsuarios() {
   const boton = document.getElementById("botonAdministrarUsuarios");
   const botonResumen = document.getElementById("botonResumenNino");
+  const botonResumenReunion = document.getElementById("botonResumenReunion");
 
   if (usuarioActual && usuarioActual.rol === "Administrador") {
     boton.classList.remove("oculto");
@@ -2534,6 +2685,11 @@ function configurarUsuariosIglesia() {
   } else {
     botonResumen.classList.add("oculto");
   }
+
+  botonResumenReunion.classList.toggle(
+    "oculto",
+    !usuarioActual || usuarioActual.usuario !== "Pastor"
+  );
 }
 
     function cargarNinosResumen() {
@@ -2834,6 +2990,90 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   `;
 }
 
+    function abrirResumenReunion() {
+  if (!usuarioActual || usuarioActual.usuario !== "Pastor") {
+    return;
+  }
+
+  const salon = document.getElementById("salon").value;
+  const tipoReunion = document.getElementById("tipoReunion").value;
+  document.getElementById("resumenReunionSalon").value = salon;
+  document.getElementById("resumenReunionTipo").value = tipoReunion;
+  document.getElementById("resumenReunionFecha").value = obtenerFechaReunion(tipoReunion);
+  document.getElementById("contenidoResumenReunion").innerHTML = "";
+  document.getElementById("modalResumenReunion").classList.remove("oculto");
+}
+
+    function mostrarResumenReunion() {
+  if (!usuarioActual || usuarioActual.usuario !== "Pastor") {
+    return;
+  }
+
+  const salon = document.getElementById("resumenReunionSalon").value;
+  const tipoReunion = document.getElementById("resumenReunionTipo").value;
+  const fecha = document.getElementById("resumenReunionFecha").value;
+  const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+  const lideres = obtenerLideresActuales(salon, tipoReunion);
+
+  if (!fecha || !esFechaDeReunion(fecha, tipoReunion)) {
+    alert("Seleccione una fecha que corresponda al día de la reunión.");
+    return;
+  }
+
+  const registros = asistencias.filter(fila =>
+    String(fila.Salon) === salonDatos &&
+    String(fila.Fecha) === fecha &&
+    String(fila.TipoReunion || "Servicio dominical") === tipoReunion
+  );
+  const registrosPorNombre = Object.fromEntries(
+    registros.map(fila => [String(fila.Nombre), fila])
+  );
+  const datosReunion = registros.find(fila => fila.Comentario || fila.MediaData);
+  const asistentes = lideres.filter(nombre => registrosPorNombre[nombre]?.Asistencia === "Sí").length;
+  const faltantes = lideres.length - asistentes;
+  const filas = lideres.map(nombre => {
+    const registro = registrosPorNombre[nombre];
+    return `
+      <tr>
+        <td>${escaparTexto(nombre)}</td>
+        <td>${registro?.Asistencia === "Sí" ? "Asistió" : "Faltó"}</td>
+        <td>${escaparTexto(registro?.Participacion || "-")}</td>
+        <td>${escaparTexto(registro?.Desarrollo || "-")}</td>
+        <td>${escaparTexto(registro?.Observaciones || "-")}</td>
+      </tr>
+    `;
+  }).join("");
+
+  document.getElementById("contenidoResumenReunion").innerHTML = `
+    <div class="resumen-encabezado">
+      <div class="resumen-identificacion">
+        <h3>${escaparTexto(salon)} | ${escaparTexto(tipoReunion)}</h3>
+      </div>
+      <div class="resumen-periodo">
+        <p class="resumen-etiqueta">Fecha</p>
+        <p>${formatearFechaResumen(fecha)}</p>
+      </div>
+    </div>
+    <div class="resumen-datos">
+      <div class="resumen-dato">Líderes<strong>${lideres.length}</strong></div>
+      <div class="resumen-dato">Asistieron<strong>${asistentes}</strong></div>
+      <div class="resumen-dato">Faltaron<strong>${faltantes}</strong></div>
+      <div class="resumen-dato">Registros guardados<strong>${registros.length}</strong></div>
+    </div>
+    <h3>Desempeño</h3>
+    <div class="tabla-scroll">
+      <table class="tabla-resumen">
+        <tr><th>Líder</th><th>Estado</th><th>Participación</th><th>Desarrollo</th><th>Observaciones</th></tr>
+        ${filas || "<tr><td colspan=\"5\">No hay líderes registrados en esta zona.</td></tr>"}
+      </table>
+    </div>
+    <div class="resumen-datos">
+      <div class="resumen-dato">Comentario del facilitador<strong>${escaparTexto(datosReunion?.Comentario || "Sin comentario")}</strong></div>
+      <div class="resumen-dato">Archivo multimedia${mostrarMultimediaReunion(datosReunion) || "<strong>Sin archivo</strong>"}</div>
+    </div>
+  `;
+}
+
     function abrirAdministrarUsuarios() {
   if (!usuarioActual || usuarioActual.rol !== "Administrador") {
     return;
@@ -3078,6 +3318,7 @@ function cerrarModal(id) {
 
   document.getElementById("modalUsuarios").classList.add("oculto");
   document.getElementById("modalResumenNino").classList.add("oculto");
+  document.getElementById("modalResumenReunion").classList.add("oculto");
   document.getElementById("modalAnuncios").classList.add("oculto");
   document.getElementById("modalConfirmacionAnuncio").classList.add("oculto");
   document.getElementById("cintaCumpleanosSistema").classList.remove("visible");
