@@ -3,12 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171717">
   <title>Asistencias - Iglesia Redención</title>
   <link rel="icon" type="image/png" href="src/img/lg.png">
+  <link rel="manifest" href="manifest.webmanifest">
 
   <style>
     * {
       box-sizing: border-box;
+    }
+
+    .controles-cumpleanos {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-right: 40px;
     }
 
     body {
@@ -111,12 +120,32 @@
 
     .lista-anuncios {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      max-height: 62vh;
-      overflow-y: auto;
       margin-top: 14px;
       text-align: left;
+    }
+
+    .anuncios-inicio {
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+
+    .anuncios-inicio h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .lista-anuncios:empty {
+      display: none;
+    }
+
+    .lista-anuncios.anuncio-unico {
+      grid-template-columns: 1fr;
+    }
+
+    .anuncios-inicio:has(.lista-anuncios:empty) {
+      display: none;
     }
 
     .anuncio-item {
@@ -142,12 +171,18 @@
       color: #6e1f2a;
     }
 
+    .anuncio-fecha {
+      color: #6e1f2a;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
     .anuncio-multimedia {
       display: block;
-      width: auto;
+      width: 100%;
       max-width: 100%;
       height: auto;
-      max-height: 300px;
+      max-height: 70vh;
       margin: 10px auto 0;
       object-fit: contain;
     }
@@ -161,6 +196,25 @@
       padding: 6px 10px;
       margin-top: 8px;
       background: #171717;
+    }
+
+    .asistencia-falta {
+      color: #b00020;
+      font-weight: bold;
+    }
+
+    .casilla-sin-asistencia {
+      background: #f5f3ef;
+    }
+
+    .multimedia-reunion {
+      max-height: 70vh;
+    }
+
+    @media (max-width: 700px) {
+      .lista-anuncios {
+        grid-template-columns: 1fr;
+      }
     }
 
     button {
@@ -216,6 +270,30 @@
       margin: 20px 0;
     }
 
+    .seguimiento-lider {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-top: 10px;
+    }
+
+    .seguimiento-lider .campo-verificacion {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .seguimiento-lider select {
+      width: auto;
+      min-width: 150px;
+      margin: 0;
+    }
+
+    .seguimiento-lider button {
+      width: auto;
+      margin: 0;
+    }
+
     .controles-asistencia {
       display: flex;
       align-items: flex-end;
@@ -240,6 +318,18 @@
       width: auto;
       min-width: 125px;
       margin: 0;
+    }
+
+    .instalar-aplicacion {
+      display: block;
+      width: fit-content;
+      padding: 9px 16px;
+      margin: 8px auto;
+      background: #9a7734;
+    }
+
+    .instalar-aplicacion:hover {
+      background: #6e1f2a;
     }
 
     #tipoReunion {
@@ -313,6 +403,21 @@
       gap: 8px;
       min-width: 190px;
       text-align: left;
+    }
+
+    .origen-lider {
+      display: block;
+      margin-top: 3px;
+      color: #6e1f2a;
+      font-size: 12px;
+      font-weight: normal;
+      white-space: normal;
+    }
+
+    .seguimiento-lider .campo-verificacion {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .acciones-lider {
@@ -421,9 +526,81 @@
 
     .multimedia-reunion {
       display: block;
+      width: 100%;
       max-width: 100%;
-      max-height: 280px;
+      max-height: 70vh;
       margin-top: 8px;
+      object-fit: contain;
+    }
+
+    .multimedia-ampliable {
+      cursor: zoom-in;
+    }
+
+    .boton-ampliar-multimedia {
+      width: auto !important;
+      margin-top: 6px;
+      background: #9a7734;
+    }
+
+    .visor-multimedia {
+      width: min(96vw, 1240px);
+      max-width: min(96vw, 1240px);
+      max-height: 96vh;
+      padding: 48px 12px 12px;
+    }
+
+    #modalVisorMultimedia {
+      inset: 0 auto auto 0;
+      width: 100vw;
+      max-width: none;
+      height: 100vh;
+      height: 100dvh;
+      padding: 0;
+      background: #000;
+    }
+
+    #modalVisorMultimedia .visor-multimedia {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      max-width: none;
+      height: 100vh;
+      height: 100dvh;
+      max-height: none;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: #000;
+      box-shadow: none;
+    }
+
+    .visor-multimedia img,
+    .visor-multimedia video {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 100vw;
+      max-height: 100vh;
+      max-height: 100dvh;
+      margin: auto;
+      object-fit: contain;
+    }
+
+    .visor-multimedia audio {
+      display: block;
+      width: min(700px, 85vw);
+      max-width: 100%;
+      margin: auto;
+    }
+
+    .visor-multimedia .cerrar-modal {
+      z-index: 1;
+      top: max(8px, env(safe-area-inset-top));
+      right: max(8px, env(safe-area-inset-right));
     }
 
     @media (max-width: 600px) {
@@ -487,10 +664,10 @@
   max-width: 1100px;
 }
 
-.ventana-cumpleanos .cerrar-modal {
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
+.ventana-anuncios #seccionAnunciosPasados {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #d6d0c6;
 }
 
 .cabecera-cumpleanos {
@@ -541,6 +718,19 @@
   background: white;
 }
 
+.dia-cumpleanos.fuera-mes {
+  background: #e4e1dc;
+  color: #8b8780;
+}
+
+.dia-cumpleanos.fuera-mes .numero-dia {
+  color: #8b8780;
+}
+
+.dia-cumpleanos.fuera-mes .cumpleanero {
+  opacity: 0.7;
+}
+
 .numero-dia {
   display: block;
   margin-bottom: 5px;
@@ -570,11 +760,23 @@
   }
 
   .cabecera-cumpleanos {
-    align-items: flex-start;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   #mesCumpleanos {
     min-width: 125px;
+  }
+
+  .controles-cumpleanos {
+    align-self: flex-end;
+    gap: 10px;
+    margin-right: 0;
+  }
+
+  .seguimiento-lider {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
@@ -680,6 +882,33 @@
   margin: 8px 0;
 }
 
+.campo-verificacion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.campo-verificacion input,
+.ventana-usuarios .campo-verificacion input {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+}
+
+.perfil-casillas {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 12px 0;
+}
+
+.perfil-casillas .campo-verificacion {
+  margin: 0;
+  white-space: nowrap;
+}
+
 .ventana-usuarios button:not(.cerrar-modal) {
   width: 100%;
 }
@@ -697,6 +926,12 @@
 
 .cerrar-modal:hover {
   background: #6e1f2a;
+}
+
+.cerrar-cumpleanos {
+  position: static;
+  inset: auto;
+  flex: 0 0 auto;
 }
 
 #mensajeUsuarios {
@@ -785,12 +1020,22 @@
     <br>
 
     <button id="botonIngresar" onclick="iniciarSesion()">Ingresar</button>
+    <button id="botonInstalarAplicacion" class="instalar-aplicacion"
+      type="button" onclick="instalarAplicacion()">
+      Instalar aplicación
+    </button>
 
     <p id="mensajeLogin" class="mensaje"></p>
-    <div id="cintaAnunciosLogin" class="cinta" aria-live="polite"></div>
+  </section>
+
+  <section id="seccionAnunciosInicio" class="contenedor anuncios-inicio">
+    <h2>Anuncios</h2>
+    <div id="anunciosInicio" class="lista-anuncios" aria-live="polite"></div>
   </section>
 
   <section id="pantallaSistema" class="contenedor oculto">
+
+    <div id="cintaCumpleanosSistema" class="cinta" aria-live="polite"></div>
 
     <div class="barra">
       <div class="titulo-pagina">
@@ -835,16 +1080,16 @@
     <hr>
 
     <div class="controles-asistencia">
-      <div class="control-asistencia">
+      <div id="controlSalon" class="control-asistencia">
         <label for="salon">Zona:</label>
-        <select id="salon" onchange="mostrarAsistencia()">
+        <select id="salon" onchange="actualizarReunionPorSalon()">
       <option value="Zona 1">Zona 1</option>
       <option value="Zona 2">Zona 2</option>
       <option value="Zona 3">Zona 3</option>
       <option value="Zona 4">Zona 4</option>
       <option value="Zona 5">Zona 5</option>
       <option value="Zona 6">Zona 6</option>
-      <option value="Zona 7">Zona 7</option>
+      <option value="Virtual">Virtual</option>
       <option value="Sabana de Parra">Sabana de Parra</option>
         </select>
       </div>
@@ -855,6 +1100,7 @@
       <option value="ADN">Discipulado ADN (miércoles)</option>
       <option value="Servicio dominical">Servicio dominical</option>
           <option id="opcionReunionPastor" value="Reunión con el pastor">Reunión con el pastor (lunes)</option>
+            <option id="opcionReunionVirtual" value="Discipulado Virtual">Discipulado Virtual (jueves)</option>
         </select>
       </div>
 
@@ -863,7 +1109,7 @@
         <input id="fecha" type="date" min="1970-01-01" onchange="validarFechaReunion()">
       </div>
 
-      <div class="control-asistencia">
+      <div id="controlFacilitadores" class="control-asistencia">
         <label id="etiquetaFacilitadores" for="facilitadorZona1">Facilitadores:</label>
         <div id="selectorFacilitadores">
       <select id="facilitadorZona1" onchange="guardarMaestrosSalon()">
@@ -880,7 +1126,9 @@
     <div id="formularioNino" class="formulario-nino oculto">
       <h3>Agregar líder</h3>
 
-      <input id="nombreNino" type="text" placeholder="Nombre completo del líder">
+      <input id="nombreNino" type="text" list="sugerenciasLideresVirtuales" placeholder="Nombre completo del líder"
+        oninput="mostrarCoincidenciaLiderVirtual()">
+      <datalist id="sugerenciasLideresVirtuales"></datalist>
 
       <label for="cumpleanosNino">Cumpleaños:</label>
       <input id="cumpleanosNino" type="text" inputmode="numeric"
@@ -906,16 +1154,27 @@
         <option value="Zona 4">Zona 4</option>
         <option value="Zona 5">Zona 5</option>
         <option value="Zona 6">Zona 6</option>
-        <option value="Zona 7">Zona 7</option>
+        <option value="Virtual">Virtual</option>
         <option value="Sabana de Parra">Sabana de Parra</option>
       </select>
 
-      <button onclick="agregarNino()">Agregar líder</button>
+      <div class="seguimiento-lider">
+        <label class="campo-verificacion"><input id="bautizadoNino" type="checkbox"> Bautizado</label>
+        <label class="campo-verificacion"><input id="encuentroNino" type="checkbox"> Encuentro cara a cara con Dios</label>
+        <label for="doctrinaNino">Clase de Doctrina:</label>
+        <select id="doctrinaNino">
+          <option value="">Sin comenzar</option>
+          <option value="Nivel 1">Nivel 1</option>
+          <option value="Nivel 2">Nivel 2</option>
+          <option value="Nivel 3">Nivel 3</option>
+          <option value="Completado">Completado</option>
+        </select>
+        <button onclick="agregarNino()">Agregar líder</button>
+      </div>
       <p id="mensajeNino"></p>
     </div>
 
     <div id="tablaAsistencia"></div>
-    <div id="cintaCumpleanosSistema" class="cinta" aria-live="polite"></div>
 
 
       <div id="modalUsuarios" class="modal oculto">
@@ -924,7 +1183,7 @@
         ×
       </button>
 
-      <h2>Administrar usuarios</h2>
+      <h2 id="tituloAdministrarUsuarios">Administrar usuarios</h2>
 
       <h3>Modificar contraseña</h3>
 
@@ -944,6 +1203,7 @@
 
       <hr>
 
+      <section id="formularioNuevoUsuario">
       <h3>Crear nuevo usuario</h3>
 
       <input id="nuevoUsuario" type="text"
@@ -965,7 +1225,7 @@
         <option value="Zona 4">Zona 4</option>
         <option value="Zona 5">Zona 5</option>
         <option value="Zona 6">Zona 6</option>
-        <option value="Zona 7">Zona 7</option>
+        <option value="Virtual">Virtual</option>
         <option value="Sabana de Parra">Sabana de Parra</option>
         <option value="todos">Todas las zonas</option>
       </select>
@@ -973,6 +1233,7 @@
       <button onclick="crearUsuario()">Crear usuario</button>
 
       <p id="mensajeUsuarios"></p>
+      </section>
     </div>
   </div>
 
@@ -985,14 +1246,14 @@
       <div class="filtros-resumen">
         <div>
           <label for="resumenSalon">Zona:</label>
-          <select id="resumenSalon" onchange="cargarNinosResumen()">
+          <select id="resumenSalon" onchange="actualizarResumenPorSalon()">
             <option value="Zona 1">Zona 1</option>
             <option value="Zona 2">Zona 2</option>
             <option value="Zona 3">Zona 3</option>
             <option value="Zona 4">Zona 4</option>
             <option value="Zona 5">Zona 5</option>
             <option value="Zona 6">Zona 6</option>
-            <option value="Zona 7">Zona 7</option>
+            <option value="Virtual">Virtual</option>
             <option value="Sabana de Parra">Sabana de Parra</option>
             <option value="Pastor">Líderes</option>
           </select>
@@ -1009,6 +1270,7 @@
             <option value="ADN">Discipulado ADN</option>
             <option value="Servicio dominical">Servicio dominical</option>
             <option value="Reunión con el pastor">Reunión con el pastor</option>
+            <option value="Discipulado Virtual">Discipulado Virtual</option>
             <option value="Todas">Todas las reuniones</option>
           </select>
         </div>
@@ -1036,23 +1298,25 @@
       <div class="filtros-resumen">
         <div>
           <label for="resumenReunionSalon">Zona:</label>
-          <select id="resumenReunionSalon">
+          <select id="resumenReunionSalon" onchange="actualizarResumenReunionPorSalon()">
             <option value="Zona 1">Zona 1</option>
             <option value="Zona 2">Zona 2</option>
             <option value="Zona 3">Zona 3</option>
             <option value="Zona 4">Zona 4</option>
             <option value="Zona 5">Zona 5</option>
             <option value="Zona 6">Zona 6</option>
-            <option value="Zona 7">Zona 7</option>
+            <option value="Virtual">Virtual</option>
             <option value="Sabana de Parra">Sabana de Parra</option>
+            <option value="Pastor">Líderes</option>
           </select>
         </div>
         <div>
           <label for="resumenReunionTipo">Reunión:</label>
-          <select id="resumenReunionTipo">
+          <select id="resumenReunionTipo" onchange="actualizarFechaResumenReunion()">
             <option value="ADN">Discipulado ADN</option>
             <option value="Servicio dominical">Servicio dominical</option>
             <option value="Reunión con el pastor">Reunión con el pastor</option>
+            <option value="Discipulado Virtual">Discipulado Virtual</option>
           </select>
         </div>
         <div>
@@ -1067,24 +1331,25 @@
 
   <div id="modalCumpleanos" class="modal oculto">
     <div class="ventana-usuarios ventana-cumpleanos">
-      <button class="cerrar-modal" onclick="cerrarModal('modalCumpleanos')">×</button>
-
       <div class="cabecera-cumpleanos">
         <h2>Cumpleaños de los líderes</h2>
-        <select id="mesCumpleanos" aria-label="Seleccionar mes" onchange="mostrarCalendarioCumpleanos()">
-          <option value="01">Enero</option>
-          <option value="02">Febrero</option>
-          <option value="03">Marzo</option>
-          <option value="04">Abril</option>
-          <option value="05">Mayo</option>
-          <option value="06">Junio</option>
-          <option value="07">Julio</option>
-          <option value="08">Agosto</option>
-          <option value="09">Septiembre</option>
-          <option value="10">Octubre</option>
-          <option value="11">Noviembre</option>
-          <option value="12">Diciembre</option>
-        </select>
+        <div class="controles-cumpleanos">
+          <select id="mesCumpleanos" aria-label="Seleccionar mes" onchange="mostrarCalendarioCumpleanos()">
+            <option value="01">Enero</option>
+            <option value="02">Febrero</option>
+            <option value="03">Marzo</option>
+            <option value="04">Abril</option>
+            <option value="05">Mayo</option>
+            <option value="06">Junio</option>
+            <option value="07">Julio</option>
+            <option value="08">Agosto</option>
+            <option value="09">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+          <button class="cerrar-modal cerrar-cumpleanos" onclick="cerrarModal('modalCumpleanos')" aria-label="Cerrar ventana">×</button>
+        </div>
       </div>
 
       <div id="calendarioCumpleanos"></div>
@@ -1096,13 +1361,22 @@
       <button class="cerrar-modal" onclick="cerrarModal('modalAnuncios')">×</button>
 
       <h2>Anuncios</h2>
+      <section id="formularioEdicionAnuncio">
       <input id="tituloAnuncio" type="text" placeholder="Título del anuncio">
       <textarea id="textoAnuncio" placeholder="Escriba el anuncio"></textarea>
+      <label for="fechaAnuncio">Fecha del anuncio:</label>
+      <input id="fechaAnuncio" type="date">
       <label for="multimediaAnuncio">Imagen o video (opcional):</label>
       <input id="multimediaAnuncio" type="file" accept="image/*,video/*">
       <small>Imagen hasta 2 MB o video hasta 5 MB.</small>
-      <button onclick="guardarAnuncio()">Publicar anuncio</button>
+      <button id="botonGuardarAnuncio" onclick="guardarAnuncio()">Publicar anuncio</button>
+      <button id="botonCancelarEdicionAnuncio" class="oculto" onclick="cancelarEdicionAnuncio()">Cancelar edición</button>
+      </section>
       <div id="listaAnuncios" class="lista-anuncios"></div>
+      <details id="seccionAnunciosPasados" class="oculto">
+        <summary>Anuncios pasados</summary>
+        <div id="listaAnunciosPasados" class="lista-anuncios"></div>
+      </details>
     </div>
   </div>
 
@@ -1113,6 +1387,14 @@
       <p id="textoConfirmacionAnuncio"></p>
       <button class="boton-rojo" onclick="eliminarAnuncioConfirmado()">Sí, eliminar</button>
       <button onclick="cerrarModal('modalConfirmacionAnuncio')">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="modalVisorMultimedia" class="modal oculto"
+    onclick="if (event.target === this) cerrarVisorMultimedia()">
+    <div class="ventana-usuarios visor-multimedia">
+      <button class="cerrar-modal" onclick="cerrarVisorMultimedia()" aria-label="Cerrar archivo multimedia">×</button>
+      <div id="contenidoVisorMultimedia"></div>
     </div>
   </div>
 
@@ -1141,6 +1423,20 @@
       <option value="Activo">Activo</option>
       <option value="Protocolo del Servidor">Protocolo del Servidor</option>
       <option value="Inactivo">Inactivo</option>
+    </select>
+
+    <div class="perfil-casillas">
+      <label class="campo-verificacion"><input id="bautizadoNinoModal" type="checkbox"> Bautizado</label>
+      <label class="campo-verificacion"><input id="encuentroNinoModal" type="checkbox"> Encuentro cara a cara con Dios</label>
+    </div>
+
+    <label for="doctrinaNinoModal">Clase de Doctrina:</label>
+    <select id="doctrinaNinoModal">
+      <option value="">Sin comenzar</option>
+      <option value="Nivel 1">Nivel 1</option>
+      <option value="Nivel 2">Nivel 2</option>
+      <option value="Nivel 3">Nivel 3</option>
+      <option value="Completado">Completado</option>
     </select>
 
     <button onclick="guardarNombreNino()">
@@ -1271,13 +1567,94 @@ const HOJAS = {
   usuarios: "Usuarios",
   asistencias: "Asistencias",
   maestros: "Facilitadores",
-  anuncios: "Anuncios"
+  anuncios: "Anuncios",
+  lideresVirtuales: "DiscipuladoVirtual"
 };
 
 const ZONAS = [
-  ...Array.from({ length: 7 }, (_, indice) => `Zona ${indice + 1}`),
+  ...Array.from({ length: 6 }, (_, indice) => `Zona ${indice + 1}`),
+  "Virtual",
   "Sabana de Parra"
 ];
+
+function normalizarNombreLider(nombre) {
+  return String(nombre || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("es");
+}
+
+function leerBooleanoLider(valor) {
+  return valor === true || valor === 1 ||
+    String(valor || "").toLocaleLowerCase("es") === "sí" ||
+    String(valor || "").toLocaleLowerCase("es") === "true";
+}
+
+function guardarVirtuales() {
+  localStorage.setItem("lideresVirtualesIglesiaRedencion", JSON.stringify(lideresVirtuales));
+  sincronizarHoja(HOJAS.lideresVirtuales, filasDeLideresVirtuales());
+}
+
+function buscarLideresPorNombre(nombre, incluirVirtual = false) {
+  const clave = normalizarNombreLider(nombre);
+  return Object.entries(ninos)
+    .filter(([salon]) => incluirVirtual || salon !== "Virtual")
+    .flatMap(([salon, nombres]) => nombres.map(nombreLider => ({
+      salon,
+      nombre: nombreLider
+    })))
+    .filter(lider => normalizarNombreLider(lider.nombre) === clave);
+}
+
+function buscarLiderPorNombre(nombre, incluirVirtual = false) {
+  return buscarLideresPorNombre(nombre, incluirVirtual)[0];
+}
+
+function migrarZonaSieteLocal() {
+  if (!Array.isArray(ninos["Zona 7"])) return;
+  ninos.Virtual = ninos.Virtual || [];
+  ninos["Zona 7"].forEach(nombre => {
+    const existente = buscarLiderPorNombre(nombre);
+    const origen = existente?.salon || "Virtual";
+    if (!lideresVirtuales.some(lider =>
+      normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombre)
+    )) {
+      lideresVirtuales.push({
+        Nombre: existente?.nombre || nombre,
+        SalonOrigen: origen
+      });
+    }
+    if (existente) {
+      ninos.Virtual = ninos.Virtual.filter(nombreVirtual =>
+        normalizarNombreLider(nombreVirtual) !== normalizarNombreLider(nombre)
+      );
+      delete lideresDatos[claveLider("Virtual", nombre)];
+    } else if (!ninos.Virtual.some(nombreVirtual =>
+      normalizarNombreLider(nombreVirtual) === normalizarNombreLider(nombre)
+    )) {
+      ninos.Virtual.push(nombre);
+      lideresDatos[claveLider("Virtual", nombre)] =
+        lideresDatos[claveLider("Zona 7", nombre)] || {};
+    }
+    if (existente) {
+      const datosOrigen = lideresDatos[claveLider(origen, existente.nombre)] || {};
+      const datosZonaSiete = lideresDatos[claveLider("Zona 7", nombre)] || {};
+      lideresDatos[claveLider(origen, existente.nombre)] = {
+        ...datosZonaSiete,
+        ...datosOrigen,
+        cumpleanos: datosOrigen.cumpleanos || datosZonaSiete.cumpleanos || "",
+        sector: datosOrigen.sector || datosZonaSiete.sector || "",
+        comiteRed: datosOrigen.comiteRed || datosZonaSiete.comiteRed || ""
+      };
+    }
+    delete lideresDatos[claveLider("Zona 7", nombre)];
+  });
+  delete ninos["Zona 7"];
+  localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
+  localStorage.setItem("lideresVirtualesIglesiaRedencion", JSON.stringify(lideresVirtuales));
+}
 
 async function leerHoja(nombreHoja) {
   const firebase = await window.firebaseReady;
@@ -1297,9 +1674,16 @@ async function reemplazarHoja(nombreHoja, filas) {
 }
 
 function sincronizarHoja(nombreHoja, filas) {
-  reemplazarHoja(nombreHoja, filas).catch(error => {
-    console.error(error);
+  const sincronizar = () => reemplazarHoja(nombreHoja, filas).catch(error => {
+    console.error(`No se pudo sincronizar la hoja ${nombreHoja}.`, error);
   });
+  if (window.firebaseReady) {
+    sincronizar();
+  } else if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", sincronizar, { once: true });
+  } else {
+    sincronizar();
+  }
 }
 
 let anuncios = JSON.parse(
@@ -1308,22 +1692,52 @@ let anuncios = JSON.parse(
 
 function filasDeNinos() {
   return Object.entries(ninos).flatMap(([salon, nombres]) =>
-    nombres.map(nombre => ({
-      Nombre: nombre,
-      Salon: salon,
-      Cumpleanos: obtenerDatosLider(salon, nombre).cumpleanos,
-      Sector: obtenerDatosLider(salon, nombre).sector,
-      ComiteRed: obtenerDatosLider(salon, nombre).comiteRed,
-      Estado: obtenerDatosLider(salon, nombre).estado
-    }))
+    nombres.map(nombre => {
+      const datos = obtenerDatosLider(salon, nombre);
+      return {
+        Nombre: nombre,
+        Salon: salon,
+        Cumpleanos: datos.cumpleanos,
+        Sector: datos.sector,
+        ComiteRed: datos.comiteRed,
+        Estado: datos.estado,
+        Bautizado: datos.bautizado,
+        EncuentroCaraACara: datos.encuentro,
+        Doctrina: datos.doctrina
+      };
+    })
   );
 }
 
 function filasDeLideresPastor() {
-  return lideresPastor.map(nombre => ({
-    Nombre: nombre,
-    ...obtenerDatosLider("Pastor", nombre)
+  return lideresPastor.map(nombre => {
+    const datos = obtenerDatosLider("Pastor", nombre);
+    return {
+      Nombre: nombre,
+      Cumpleanos: datos.cumpleanos,
+      Sector: datos.sector,
+      ComiteRed: datos.comiteRed,
+      Estado: datos.estado,
+      Bautizado: datos.bautizado,
+      EncuentroCaraACara: datos.encuentro,
+      Doctrina: datos.doctrina
+    };
+  });
+}
+
+function filasDeLideresVirtuales() {
+  return lideresVirtuales.map(({ Nombre, SalonOrigen }) => ({
+    Nombre,
+    Salon: "Virtual",
+    SalonOrigen: SalonOrigen || "Virtual"
   }));
+}
+
+function obtenerLiderVirtual(nombre) {
+  const clave = normalizarNombreLider(nombre);
+  return lideresVirtuales.find(lider =>
+    normalizarNombreLider(lider.Nombre) === clave
+  );
 }
 
 function normalizarCumpleanos(valor) {
@@ -1374,14 +1788,15 @@ function filasDeUsuarios() {
 
 async function cargarDatosDesdeAPI() {
   try {
-    const [filasNinos, filasLideresPastor, filasUsuarios, filasAsistencias, filasMaestros, filasAnuncios] =
+    const [filasNinos, filasLideresPastor, filasUsuarios, filasAsistencias, filasMaestros, filasAnuncios, filasVirtuales] =
       await Promise.all([
         leerHoja(HOJAS.ninos),
         leerHoja(HOJAS.lideresPastor),
         leerHoja(HOJAS.usuarios),
         leerHoja(HOJAS.asistencias),
         leerHoja(HOJAS.maestros),
-        leerHoja(HOJAS.anuncios)
+        leerHoja(HOJAS.anuncios),
+        leerHoja(HOJAS.lideresVirtuales)
       ]);
 
     if (filasAnuncios.length) {
@@ -1394,19 +1809,108 @@ async function cargarDatosDesdeAPI() {
 
     if (filasNinos.length) {
       ninos = Object.fromEntries(ZONAS.map(zona => [zona, []]));
+      const filasZonaSiete = [];
       filasNinos.forEach(fila => {
-        if (ninos[fila.Salon]) {
-          ninos[fila.Salon].push(fila.Nombre);
-          lideresDatos[claveLider(fila.Salon, fila.Nombre)] = {
+        const salon = fila.Salon === "Zona 7" ? "Virtual" : fila.Salon;
+        if (fila.Salon === "Zona 7") {
+          filasZonaSiete.push(fila);
+        } else if (ninos[salon]) {
+          ninos[salon].push(fila.Nombre);
+          lideresDatos[claveLider(salon, fila.Nombre)] = {
             cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
             sector: fila.Sector || fila.sector || "",
             comiteRed: fila.ComiteRed || fila.comiteRed || "",
-            estado: fila.Estado || fila.estado || "Inactivo"
+            estado: fila.Estado || fila.estado || "Inactivo",
+            bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
+            encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
+            doctrina: fila.Doctrina || ""
           };
         }
       });
+
+      const origenesVirtuales = new Map();
+      filasVirtuales.forEach(fila => {
+        const existente = Object.entries(ninos)
+          .filter(([salon]) => salon !== "Virtual")
+          .find(([, nombres]) => nombres.some(nombre =>
+            normalizarNombreLider(nombre) === normalizarNombreLider(fila.Nombre)
+          ));
+        origenesVirtuales.set(
+          normalizarNombreLider(fila.Nombre),
+          existente?.[0] || fila.SalonOrigen || "Virtual"
+        );
+      });
+
+      filasZonaSiete.forEach(fila => {
+        const nombreNormalizado = normalizarNombreLider(fila.Nombre);
+        const existente = Object.entries(ninos)
+          .filter(([salon]) => salon !== "Virtual")
+          .find(([, nombres]) => nombres.some(nombre =>
+            normalizarNombreLider(nombre) === nombreNormalizado
+          ));
+        const salonOrigen = existente?.[0] || "Virtual";
+        origenesVirtuales.set(nombreNormalizado, salonOrigen);
+
+        if (existente) {
+          const datosExistentes = lideresDatos[claveLider(salonOrigen, existente[1].find(nombre =>
+            normalizarNombreLider(nombre) === nombreNormalizado
+          ))] || {};
+          const datosAnteriores = {
+            cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
+            sector: fila.Sector || fila.sector || "",
+            comiteRed: fila.ComiteRed || fila.comiteRed || "",
+            estado: fila.Estado || fila.estado || "Inactivo",
+            bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
+            encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
+            doctrina: fila.Doctrina || ""
+          };
+          const nombreExistente = existente[1].find(nombre =>
+            normalizarNombreLider(nombre) === nombreNormalizado
+          );
+          const claveExistente = claveLider(salonOrigen, nombreExistente);
+          lideresDatos[claveExistente] = { ...datosAnteriores, ...datosExistentes };
+        } else {
+          if (!ninos.Virtual.some(nombre =>
+            normalizarNombreLider(nombre) === nombreNormalizado
+          )) ninos.Virtual.push(fila.Nombre);
+          lideresDatos[claveLider("Virtual", fila.Nombre)] = {
+            cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
+            sector: fila.Sector || fila.sector || "",
+            comiteRed: fila.ComiteRed || fila.comiteRed || "",
+            estado: fila.Estado || fila.estado || "Inactivo",
+            bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
+            encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
+            doctrina: fila.Doctrina || ""
+          };
+        }
+      });
+
+      const lideresVirtualesUnicos = new Map();
+      filasVirtuales.concat(filasZonaSiete.map(fila => ({
+        Nombre: fila.Nombre,
+        SalonOrigen: origenesVirtuales.get(normalizarNombreLider(fila.Nombre))
+      }))).forEach(fila => {
+        const clave = normalizarNombreLider(fila.Nombre);
+        const liderEncontrado = Object.entries(ninos)
+          .filter(([salon]) => salon !== "Virtual")
+          .flatMap(([salon, nombres]) => nombres.map(nombre => ({ salon, nombre })))
+          .find(lider => normalizarNombreLider(lider.nombre) === clave);
+        lideresVirtualesUnicos.set(clave, {
+          Nombre: liderEncontrado?.nombre || fila.Nombre,
+          SalonOrigen: liderEncontrado?.salon || "Virtual"
+        });
+      });
+      lideresVirtuales = [...lideresVirtualesUnicos.values()];
+      localStorage.setItem(
+        "lideresVirtualesIglesiaRedencion",
+        JSON.stringify(lideresVirtuales)
+      );
       guardarDatosLideres();
       localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
+      if (filasZonaSiete.length) {
+        sincronizarHoja(HOJAS.ninos, filasDeNinos());
+        guardarVirtuales();
+      }
     } else {
       sincronizarHoja(HOJAS.ninos, filasDeNinos());
     }
@@ -1418,7 +1922,10 @@ async function cargarDatosDesdeAPI() {
           cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
           sector: fila.Sector || fila.sector || "",
           comiteRed: fila.ComiteRed || fila.comiteRed || "",
-          estado: fila.Estado || fila.estado || "Inactivo"
+          estado: fila.Estado || fila.estado || "Inactivo",
+          bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
+          encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
+          doctrina: fila.Doctrina || ""
         };
       });
       guardarDatosLideres();
@@ -1447,6 +1954,24 @@ async function cargarDatosDesdeAPI() {
         "asistenciasIglesiaRedencion",
         JSON.stringify(asistencias)
       );
+      asistencias = asistencias.map(fila => ({
+        ...fila,
+        Salon: fila.Salon === "Zona 7" ? "Virtual" : fila.Salon
+      }));
+      localStorage.setItem("asistenciasIglesiaRedencion", JSON.stringify(asistencias));
+    }
+
+    if (!filasNinos.length && filasVirtuales.length) {
+      lideresVirtuales = filasVirtuales.map(fila => ({
+        Nombre: fila.Nombre,
+        SalonOrigen: fila.SalonOrigen || "Virtual"
+      }));
+      localStorage.setItem(
+        "lideresVirtualesIglesiaRedencion",
+        JSON.stringify(lideresVirtuales)
+      );
+    } else if (!filasVirtuales.length) {
+      guardarVirtuales();
     }
 
     if (filasMaestros.length) {
@@ -1488,7 +2013,7 @@ function configurarUsuariosIglesia() {
     }
   });
 
-  for (let numeroZona = 1; numeroZona <= 7; numeroZona++) {
+  for (let numeroZona = 1; numeroZona <= 6; numeroZona++) {
     usuarios[`Zona${numeroZona}`] = {
       contrasena: `123z${numeroZona}`,
       rol: "Facilitador",
@@ -1518,7 +2043,6 @@ function configurarUsuariosIglesia() {
       Zona4: { contrasena: "123z4", rol: "Facilitador", salon: "Zona 4" },
       Zona5: { contrasena: "123z5", rol: "Facilitador", salon: "Zona 5" },
       Zona6: { contrasena: "123z6", rol: "Facilitador", salon: "Zona 6" },
-      Zona7: { contrasena: "123z7", rol: "Facilitador", salon: "Zona 7" },
       Sabana: { contrasena: "iglesiasdp", rol: "Facilitador", salon: "Sabana de Parra" },
       Cuidador: {
         contrasena: "admin123",
@@ -1553,7 +2077,7 @@ function configurarUsuariosIglesia() {
       "Zona 4": [],
       "Zona 5": [],
       "Zona 6": [],
-      "Zona 7": [],
+      "Virtual": [],
       "Sabana de Parra": []
     };
 
@@ -1574,7 +2098,10 @@ function configurarUsuariosIglesia() {
         cumpleanos: normalizarCumpleanos(lideresDatos[claveLider(salon, nombre)]?.cumpleanos),
         sector: lideresDatos[claveLider(salon, nombre)]?.sector || "",
         comiteRed: lideresDatos[claveLider(salon, nombre)]?.comiteRed || "",
-        estado: lideresDatos[claveLider(salon, nombre)]?.estado || "Inactivo"
+        estado: lideresDatos[claveLider(salon, nombre)]?.estado || "Inactivo",
+        bautizado: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.bautizado),
+        encuentro: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.encuentro),
+        doctrina: lideresDatos[claveLider(salon, nombre)]?.doctrina || ""
       };
     }
 
@@ -1591,18 +2118,60 @@ function configurarUsuariosIglesia() {
       localStorage.getItem("lideresPastorIglesiaRedencion")
     ) || [];
 
+    let lideresVirtuales = JSON.parse(
+      localStorage.getItem("lideresVirtualesIglesiaRedencion")
+    ) || [];
+
     if (!ninos) {
       ninos = ninosIniciales;
       guardarNinos();
     }
+    migrarZonaSieteLocal();
 
     let asistencias = JSON.parse(
       localStorage.getItem("asistenciasIglesiaRedencion")
     ) || [];
+    asistencias = asistencias.map(fila => ({
+      ...fila,
+      Salon: fila.Salon === "Zona 7" ? "Virtual" : fila.Salon
+    }));
 
     let usuarioActual = null;
+    let eventoInstalacionPendiente = null;
+
+    window.addEventListener("beforeinstallprompt", evento => {
+      evento.preventDefault();
+      eventoInstalacionPendiente = evento;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      eventoInstalacionPendiente = null;
+      document.getElementById("botonInstalarAplicacion").classList.add("oculto");
+    });
+
+    async function instalarAplicacion() {
+      if (eventoInstalacionPendiente) {
+        eventoInstalacionPendiente.prompt();
+        await eventoInstalacionPendiente.userChoice;
+        eventoInstalacionPendiente = null;
+        return;
+      }
+
+      const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      alert(esIOS
+        ? "En Safari, toca Compartir y selecciona «Agregar a pantalla de inicio»."
+        : "Para instalar la aplicación, abre esta página desde su dirección HTTPS en un navegador compatible y usa la opción «Instalar aplicación» del navegador.");
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
+      mostrarAnunciosLogin();
+      if ("serviceWorker" in navigator &&
+          (location.protocol === "https:" || location.hostname === "localhost")) {
+        navigator.serviceWorker.register("./sw.js").catch(error => {
+          console.error("No se pudo registrar el service worker.", error);
+        });
+      }
+
         const fecha = document.getElementById("fecha");
       const tipoReunion = document.getElementById("tipoReunion").value;
       configurarRestriccionesFecha(tipoReunion);
@@ -1622,6 +2191,7 @@ function configurarUsuariosIglesia() {
         }
       });
 
+      document.getElementById("fechaAnuncio").value = formatearFechaISO(new Date());
       cargarDatosDesdeAPI();
     });
 
@@ -1634,7 +2204,8 @@ function configurarUsuariosIglesia() {
       const diasPorTipo = {
         "Reunión con el pastor": 1,
         ADN: 3,
-        "Servicio dominical": 0
+        "Servicio dominical": 0,
+        "Discipulado Virtual": 4
       };
       const diaObjetivo = diasPorTipo[tipo] ?? 0;
       fecha.setDate(fecha.getDate() - ((fecha.getDay() - diaObjetivo + 7) % 7));
@@ -1651,7 +2222,8 @@ function configurarUsuariosIglesia() {
       const diasPorTipo = {
         "Reunión con el pastor": 1,
         ADN: 3,
-        "Servicio dominical": 0
+        "Servicio dominical": 0,
+        "Discipulado Virtual": 4
       };
       return new Date(`${fechaTexto}T00:00:00`).getDay() === diasPorTipo[tipo];
     }
@@ -1662,6 +2234,57 @@ function configurarUsuariosIglesia() {
         String(fecha.getMonth() + 1).padStart(2, "0"),
         String(fecha.getDate()).padStart(2, "0")
       ].join("-");
+    }
+
+    function obtenerFechaADNDeVirtual(fechaJueves) {
+      const fecha = new Date(`${fechaJueves}T00:00:00`);
+      fecha.setDate(fecha.getDate() - 1);
+      return formatearFechaISO(fecha);
+    }
+
+    function aplicarAsistenciasVirtualesADN(registros, filasVirtuales) {
+      const resultado = [...registros];
+      filasVirtuales.forEach(filaVirtual => {
+        const coincide = fila =>
+          String(fila.Fecha) === filaVirtual.Fecha &&
+          String(fila.Salon) === filaVirtual.Salon &&
+          normalizarNombreLider(fila.Nombre) === normalizarNombreLider(filaVirtual.Nombre) &&
+          String(fila.TipoReunion || "Servicio dominical") === "ADN";
+        const coincidentes = resultado.filter(coincide);
+        const automatico = coincidentes.find(fila => fila.OrigenVirtual === true);
+        const manual = coincidentes.find(fila => fila.OrigenVirtual !== true);
+
+        if (filaVirtual.Asistencia === "Sí") {
+          const anterior = automatico?.RegistroADNAnterior || manual || null;
+          for (let indice = resultado.length - 1; indice >= 0; indice--) {
+            if (coincide(resultado[indice])) resultado.splice(indice, 1);
+          }
+          resultado.push({
+            ...(manual || automatico || {}),
+            ...filaVirtual,
+            Observaciones: "*Discipulado virtual con el Pastor*",
+            OrigenVirtual: true,
+            RegistroADNAnterior: anterior
+          });
+        } else if (automatico) {
+          for (let indice = resultado.length - 1; indice >= 0; indice--) {
+            if (coincide(resultado[indice]) && resultado[indice].OrigenVirtual === true) {
+              resultado.splice(indice, 1);
+            }
+          }
+          const anterior = automatico.RegistroADNAnterior;
+          if (anterior && !resultado.some(coincide)) resultado.push(anterior);
+        }
+      });
+      return resultado;
+    }
+
+    function obtenerPrimerDiaDelMes(tipo, fechaBase = new Date()) {
+      const fecha = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 1);
+      while (!esFechaDeReunion(formatearFechaISO(fecha), tipo)) {
+        fecha.setDate(fecha.getDate() + 1);
+      }
+      return formatearFechaISO(fecha);
     }
 
     function obtenerPrimerDiaValido(tipo) {
@@ -1705,7 +2328,7 @@ function configurarUsuariosIglesia() {
       }
 
       const fecha = new Date(`${campo.value}T00:00:00`);
-      const diasValidos = [0, 1, 3];
+      const diasValidos = [0, 1, 3, 4];
 
       while (!diasValidos.includes(fecha.getDay())) {
         fecha.setDate(fecha.getDate() + 1);
@@ -1716,48 +2339,103 @@ function configurarUsuariosIglesia() {
 
     function actualizarFechaReunion() {
       const tipo = document.getElementById("tipoReunion").value;
-      configurarRestriccionesFecha(tipo);
-      document.getElementById("fecha").value = obtenerFechaReunion(tipo);
+      const salon = document.getElementById("salon");
+      if (tipo === "Discipulado Virtual") {
+        if (!["Administrador", "Supervisor"].includes(usuarioActual?.rol)) {
+          document.getElementById("tipoReunion").value = "ADN";
+        } else {
+          salon.value = "Virtual";
+        }
+      }
+      const tipoActualizado = document.getElementById("tipoReunion").value;
+      configurarRestriccionesFecha(tipoActualizado);
+      document.getElementById("fecha").value = obtenerFechaReunion(tipoActualizado);
       mostrarAsistencia();
+    }
+
+    function actualizarReunionPorSalon() {
+      const salon = document.getElementById("salon").value;
+      const selectorReunion = document.getElementById("tipoReunion");
+      if (salon === "Virtual") {
+        selectorReunion.value = "Discipulado Virtual";
+      } else if (selectorReunion.value === "Discipulado Virtual") {
+        selectorReunion.value = "ADN";
+      }
+      actualizarFechaReunion();
+      actualizarFormularioLideres();
     }
 
     function esReunionPastor() {
       return document.getElementById("tipoReunion").value === "Reunión con el pastor";
     }
 
+    function esReunionVirtual() {
+      return document.getElementById("tipoReunion").value === "Discipulado Virtual";
+    }
+
     function actualizarOpcionesReunion() {
       const opcionPastor = document.getElementById("opcionReunionPastor");
+      const opcionVirtual = document.getElementById("opcionReunionVirtual");
       const selectorReunion = document.getElementById("tipoReunion");
+      const opcionSalonVirtual = [...document.getElementById("salon").options]
+        .find(opcion => opcion.value === "Virtual");
+      const opcionesVirtuales = ["resumenSalon", "resumenReunionSalon"]
+        .map(id => [...document.getElementById(id).options]
+          .find(opcion => opcion.value === "Virtual"))
+        .filter(Boolean);
       const esFacilitador = usuarioActual?.rol === "Facilitador";
+      const puedeVerVirtual = ["Administrador", "Supervisor"].includes(usuarioActual?.rol);
 
       opcionPastor.classList.toggle("oculto", esFacilitador);
+      opcionVirtual.classList.toggle("oculto", !puedeVerVirtual);
+      if (opcionSalonVirtual) {
+        opcionSalonVirtual.hidden = !puedeVerVirtual;
+      }
+      opcionesVirtuales.forEach(opcion => {
+        opcion.hidden = !puedeVerVirtual;
+      });
 
       if (esFacilitador && selectorReunion.value === "Reunión con el pastor") {
+        selectorReunion.value = "ADN";
+        actualizarFechaReunion();
+      }
+      if (!puedeVerVirtual && selectorReunion.value === "Discipulado Virtual") {
         selectorReunion.value = "ADN";
         actualizarFechaReunion();
       }
     }
 
     function obtenerLideresActuales(salon, tipoReunion) {
-      return tipoReunion === "Reunión con el pastor"
-        ? lideresPastor
-        : (ninos[salon] || []);
+      if (tipoReunion === "Reunión con el pastor") return lideresPastor;
+      if (tipoReunion === "Discipulado Virtual") {
+        return lideresVirtuales.map(lider => lider.Nombre);
+      }
+      return ninos[salon] || [];
     }
 
     function actualizarFormularioLideres() {
       const reunionPastor = esReunionPastor();
+      const reunionVirtual = esReunionVirtual();
       const puedeAgregar = usuarioActual && (
         usuarioActual.rol === "Administrador" ||
-        (usuarioActual.rol === "Facilitador" && !reunionPastor)
+        (usuarioActual.rol === "Facilitador" && !reunionPastor && !reunionVirtual)
       );
       const etiqueta = document.getElementById("etiquetaFacilitadores");
       const selectorFacilitadores = document.getElementById("selectorFacilitadores");
       const selectorZona = document.getElementById("salonNuevoNino");
       const formulario = document.getElementById("formularioNino");
 
-      etiqueta.textContent = "Facilitadores:";
-      selectorFacilitadores.classList.toggle("oculto", reunionPastor);
-      selectorZona.classList.toggle("oculto", reunionPastor);
+      document.getElementById("controlSalon").classList.toggle(
+        "oculto",
+        reunionPastor || reunionVirtual
+      );
+      document.getElementById("controlFacilitadores").classList.toggle(
+        "oculto",
+        reunionPastor || reunionVirtual
+      );
+      etiqueta.textContent = reunionVirtual ? "Agregar o enlazar líderes:" : "Facilitadores:";
+      selectorFacilitadores.classList.toggle("oculto", reunionPastor || reunionVirtual);
+      selectorZona.classList.toggle("oculto", reunionPastor || reunionVirtual);
       formulario.classList.toggle("oculto", !puedeAgregar);
       mostrarMaestroSalon();
       mostrarAsistencia();
@@ -1881,17 +2559,65 @@ function configurarUsuariosIglesia() {
 
     function mostrarMultimediaReunion(fila) {
       if (!fila?.MediaData || !fila.MediaTipo) return "";
-      const datos = escaparTexto(fila.MediaData);
-      if (fila.MediaTipo.startsWith("image/")) {
-        return `<img class="multimedia-reunion" src="${datos}" alt="Archivo de la reunión">`;
+      return crearVistaPreviaMultimedia(
+        fila.MediaTipo,
+        fila.MediaData,
+        "multimedia-reunion",
+        "Archivo de la reunión"
+      );
+    }
+
+    function crearVistaPreviaMultimedia(tipo, datos, clase, alt) {
+      const tipoSeguro = escaparTexto(tipo);
+      const datosSeguros = escaparTexto(datos);
+      const atributoMultimedia = `data-media-tipo="${tipoSeguro}" data-media-datos="${datosSeguros}"`;
+      if (tipo.startsWith("image/")) {
+        return `<img class="${clase} multimedia-ampliable" src="${datosSeguros}" alt="${escaparTexto(alt)}" ${atributoMultimedia} onclick="abrirVisorMultimedia(this)">`;
       }
-      if (fila.MediaTipo.startsWith("video/")) {
-        return `<video class="multimedia-reunion" controls preload="metadata" src="${datos}"></video>`;
+      if (tipo.startsWith("video/")) {
+        return `<video class="${clase}" controls preload="metadata" src="${datosSeguros}" ${atributoMultimedia} ondblclick="abrirVisorMultimedia(this)"></video>
+          <button class="boton-ampliar-multimedia" type="button" ${atributoMultimedia} onclick="abrirVisorMultimedia(this)">Ampliar video</button>`;
       }
-      if (fila.MediaTipo.startsWith("audio/")) {
-        return `<audio class="multimedia-reunion" controls src="${datos}"></audio>`;
+      if (tipo.startsWith("audio/")) {
+        return `<audio class="${clase}" controls preload="metadata" src="${datosSeguros}" ${atributoMultimedia} ondblclick="abrirVisorMultimedia(this)"></audio>
+          <button class="boton-ampliar-multimedia" type="button" ${atributoMultimedia} onclick="abrirVisorMultimedia(this)">Ampliar reproductor</button>`;
       }
       return "";
+    }
+
+    function abrirVisorMultimedia(control) {
+      const tipo = control.dataset.mediaTipo || "";
+      const datos = control.dataset.mediaDatos || "";
+      const elemento = tipo.startsWith("image/")
+        ? document.createElement("img")
+        : tipo.startsWith("video/")
+          ? document.createElement("video")
+          : tipo.startsWith("audio/")
+            ? document.createElement("audio")
+            : null;
+      if (!elemento || !datos) return;
+
+      elemento.src = datos;
+      if (elemento instanceof HTMLImageElement) {
+        elemento.alt = "Archivo multimedia ampliado";
+      } else {
+        elemento.controls = true;
+        elemento.autoplay = tipo.startsWith("video/");
+        elemento.preload = "metadata";
+      }
+      const contenido = document.getElementById("contenidoVisorMultimedia");
+      contenido.replaceChildren(elemento);
+      const visor = document.getElementById("modalVisorMultimedia");
+      document.body.append(visor);
+      visor.classList.remove("oculto");
+    }
+
+    function cerrarVisorMultimedia() {
+      const contenido = document.getElementById("contenidoVisorMultimedia");
+      const elemento = contenido.querySelector("video, audio");
+      if (elemento) elemento.pause();
+      contenido.replaceChildren();
+      document.getElementById("modalVisorMultimedia").classList.add("oculto");
     }
 
     function iniciarSesion() {
@@ -1912,6 +2638,7 @@ function configurarUsuariosIglesia() {
 
       document.getElementById("pantallaLogin").classList.add("oculto");
       document.getElementById("pantallaSistema").classList.remove("oculto");
+      mostrarAnunciosLogin();
 
       document.getElementById("informacionUsuario").textContent =
         `Usuario: ${usuarioActual.usuario} | Rol: ${usuarioActual.rol}`;
@@ -1948,28 +2675,30 @@ function configurarUsuariosIglesia() {
     function cumpleanosEstaSemana(fechaTexto) {
       if (!fechaTexto) return false;
       const partes = normalizarCumpleanos(fechaTexto).split("-");
-      const fechaCumpleanos = new Date(
-        2024,
-        Number(partes[0]) - 1,
-        Number(partes[1])
-      );
       const hoy = new Date();
       const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
       const fin = new Date(inicio);
-      fin.setDate(fin.getDate() + 7);
-      const fechaEsteAno = new Date(
-        hoy.getFullYear(),
-        fechaCumpleanos.getMonth(),
-        fechaCumpleanos.getDate()
-      );
-      if (fechaEsteAno < inicio) {
-        fechaEsteAno.setFullYear(hoy.getFullYear() + 1);
+      fin.setDate(fin.getDate() + 6);
+      for (let ano = inicio.getFullYear(); ano <= fin.getFullYear(); ano++) {
+        const fechaCumpleanos = new Date(
+          ano,
+          Number(partes[0]) - 1,
+          Number(partes[1])
+        );
+        if (fechaCumpleanos >= inicio && fechaCumpleanos <= fin) return true;
       }
-      return fechaEsteAno >= inicio && fechaEsteAno <= fin;
+      return false;
     }
 
     function obtenerCumpleanosDeLaSemana() {
-      return Object.entries(ninos).flatMap(([salon, nombres]) =>
+      const todasLasZonas = usuarioActual && (
+        usuarioActual.rol === "Administrador" || usuarioActual.rol === "Supervisor"
+      );
+      const zonas = todasLasZonas
+        ? Object.entries(ninos)
+        : Object.entries(ninos).filter(([salon]) => salon === usuarioActual?.salon);
+      const cumpleanosZonas = zonas.flatMap(([salon, nombres]) =>
         nombres
           .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos(salon, nombre)))
           .map(nombre => ({
@@ -1977,6 +2706,18 @@ function configurarUsuariosIglesia() {
             salon,
             fecha: obtenerCumpleanos(salon, nombre)
           }))
+      );
+      const cumpleanosPastor = todasLasZonas
+        ? lideresPastor
+            .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos("Pastor", nombre)))
+            .map(nombre => ({
+              nombre,
+              salon: "Líderes",
+              fecha: obtenerCumpleanos("Pastor", nombre)
+            }))
+        : [];
+      return cumpleanosZonas.concat(cumpleanosPastor).sort((a, b) =>
+        a.fecha.localeCompare(b.fecha) || a.nombre.localeCompare(b.nombre, "es")
       );
     }
 
@@ -1991,11 +2732,45 @@ function configurarUsuariosIglesia() {
     }
 
     function ordenarAnuncios(lista) {
-      return [...lista].sort((a, b) => {
-        const prioridadA = a.Rol === "Administrador" ? 0 : 1;
-        const prioridadB = b.Rol === "Administrador" ? 0 : 1;
-        return prioridadA - prioridadB || Number(b.Fecha || 0) - Number(a.Fecha || 0);
-      });
+      return [...lista].sort((a, b) =>
+        obtenerFechaAnuncio(a).getTime() - obtenerFechaAnuncio(b).getTime()
+      );
+    }
+
+    function obtenerFechaAnuncio(anuncio) {
+      const valor = anuncio.FechaAnuncio || anuncio.Fecha || 0;
+      const fecha = /^\d{4}-\d{2}-\d{2}$/.test(String(valor))
+        ? new Date(`${valor}T00:00:00`)
+        : typeof valor === "number" || /^\d+$/.test(String(valor))
+          ? new Date(Number(valor))
+          : new Date(valor);
+      return Number.isNaN(fecha.getTime()) ? new Date(0) : fecha;
+    }
+
+    function obtenerFechaAnuncioISO(anuncio) {
+      const fecha = obtenerFechaAnuncio(anuncio);
+      return [
+        fecha.getFullYear(),
+        String(fecha.getMonth() + 1).padStart(2, "0"),
+        String(fecha.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function esAnuncioPasado(anuncio) {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      return obtenerFechaAnuncio(anuncio) < hoy;
+    }
+
+    function textoFechaAnuncio(anuncio) {
+      const fecha = obtenerFechaAnuncio(anuncio);
+      return fecha.getTime()
+        ? fecha.toLocaleDateString("es-MX", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+          })
+        : "Fecha no disponible";
     }
 
     function textoAnuncio(anuncio) {
@@ -2015,15 +2790,30 @@ function configurarUsuariosIglesia() {
       }
 
       cinta.innerHTML = `<div class="cinta-contenido">${mensajes
-        .map(mensaje => `<span>${escaparTexto(mensaje)}</span>`)
+        .map((mensaje, indice) => `
+          ${indice ? '<span class="separador-cumpleanos" aria-hidden="true"> ✦ </span>' : ""}
+          <span>${escaparTexto(mensaje)}</span>
+        `)
         .join("")}</div>`;
       cinta.classList.add("visible");
     }
 
     function mostrarAnunciosLogin() {
-      mostrarCinta(
-        "cintaAnunciosLogin",
-        ordenarAnuncios(anuncios).map(textoAnuncio)
+      const lista = document.getElementById("anunciosInicio");
+      if (!lista) return;
+      const anunciosVigentes = ordenarAnuncios(anuncios.filter(anuncio => !esAnuncioPasado(anuncio)));
+      lista.classList.toggle("anuncio-unico", anunciosVigentes.length === 1);
+      lista.innerHTML = anunciosVigentes.map(anuncio => `
+        <article class="anuncio-item">
+          <strong>${escaparTexto(anuncio.Titulo || "Anuncio")}</strong>
+          <small class="anuncio-fecha">${escaparTexto(textoFechaAnuncio(anuncio))}</small>
+          <span>${escaparTexto(anuncio.Texto)}</span>
+          ${anuncio.MediaTipo && anuncio.MediaData ? crearVistaPreviaMultimedia(anuncio.MediaTipo, anuncio.MediaData, "anuncio-multimedia", "Imagen del anuncio") : ""}
+        </article>
+      `).join("");
+      document.getElementById("seccionAnunciosInicio").classList.toggle(
+        "oculto",
+        anunciosVigentes.length === 0 || Boolean(usuarioActual)
       );
     }
 
@@ -2043,7 +2833,9 @@ function configurarUsuariosIglesia() {
     }
 
     function mostrarCintaCumpleanos() {
-      const mensajes = obtenerCumpleanosVisibles();
+      const mensajes = obtenerCumpleanosDeLaSemana().map(persona =>
+        `🎂 ${persona.nombre} (${persona.salon}) · ${nombreMesCumpleanos(persona.fecha)}`
+      );
       mostrarCinta(
         "cintaCumpleanosSistema",
         mensajes.length ? [`Cumpleaños de la semana: ${mensajes.join("  ·  ")}`] : []
@@ -2052,30 +2844,65 @@ function configurarUsuariosIglesia() {
 
     function mostrarListaAnuncios() {
       const lista = document.getElementById("listaAnuncios");
-      lista.innerHTML = ordenarAnuncios(anuncios).map(anuncio => `
-        <div class="anuncio-item ${anuncio.Rol === "Administrador" ? "prioridad" : ""}">
+      const pasados = document.getElementById("listaAnunciosPasados");
+      const vigentes = ordenarAnuncios(anuncios.filter(anuncio => !esAnuncioPasado(anuncio)));
+      const anunciosPasados = anuncios
+        .filter(esAnuncioPasado)
+        .sort((a, b) => obtenerFechaAnuncio(b).getTime() - obtenerFechaAnuncio(a).getTime());
+      lista.classList.toggle("anuncio-unico", vigentes.length === 1);
+      pasados.classList.toggle("anuncio-unico", anunciosPasados.length === 1);
+      lista.innerHTML = vigentes.map(anuncio => crearTarjetaAnuncio(anuncio, false)).join("")
+        || "<p>No hay anuncios vigentes.</p>";
+      pasados.innerHTML = anunciosPasados.map(anuncio => crearTarjetaAnuncio(anuncio, true)).join("")
+        || "<p>No hay anuncios pasados.</p>";
+      document.getElementById("seccionAnunciosPasados").classList.toggle(
+        "oculto",
+        anunciosPasados.length === 0
+      );
+    }
+
+    function crearTarjetaAnuncio(anuncio, pasado) {
+      const indice = anuncios.indexOf(anuncio);
+      return `
+        <article class="anuncio-item">
           <strong>${escaparTexto(anuncio.Titulo || "Anuncio")}</strong>
+          <small class="anuncio-fecha">${escaparTexto(textoFechaAnuncio(anuncio))}</small>
           <span>${escaparTexto(anuncio.Texto)}</span>
-          ${anuncio.MediaTipo?.startsWith("image/") ? `<img class="anuncio-multimedia" src="${anuncio.MediaData}" alt="Imagen del anuncio">` : ""}
-          ${anuncio.MediaTipo?.startsWith("video/") ? `<video class="anuncio-multimedia" controls preload="metadata" src="${anuncio.MediaData}"></video>` : ""}
-          <small>${escaparTexto(anuncio.Autor || "Usuario")} ${anuncio.Rol === "Administrador" ? "· Prioridad administrativa" : ""}</small>
-          ${usuarioActual?.rol === "Administrador" ? `<button class="boton-eliminar-anuncio boton-rojo" onclick="confirmarEliminarAnuncio(${anuncios.indexOf(anuncio)})">Eliminar anuncio</button>` : ""}
-        </div>
-      `).join("") || "<p>No hay anuncios publicados.</p>";
+          ${anuncio.MediaTipo && anuncio.MediaData ? crearVistaPreviaMultimedia(anuncio.MediaTipo, anuncio.MediaData, "anuncio-multimedia", "Imagen del anuncio") : ""}
+          ${(pasado || !anuncio.FechaAnuncio) && usuarioActual?.rol === "Administrador" ? `<button onclick="editarAnuncio(${indice})">${anuncio.FechaAnuncio ? "Modificar anuncio" : "Asignar fecha"}</button>` : ""}
+          ${usuarioActual?.rol === "Administrador" ? `<button class="boton-eliminar-anuncio boton-rojo" onclick="confirmarEliminarAnuncio(${indice})">Eliminar anuncio</button>` : ""}
+        </article>
+      `;
     }
 
     function abrirAnuncios() {
+      if (!usuarioActual) return;
       mostrarListaAnuncios();
+      mostrarAnunciosLogin();
+      document.getElementById("formularioEdicionAnuncio").classList.toggle(
+        "oculto",
+        usuarioActual.rol !== "Administrador"
+      );
+      document.getElementById("seccionAnunciosPasados").open = false;
+      if (anuncioEnEdicion === null) {
+        document.getElementById("fechaAnuncio").value = formatearFechaISO(new Date());
+      }
+      actualizarFormularioAnuncio();
       document.getElementById("modalAnuncios").classList.remove("oculto");
     }
 
     async function guardarAnuncio() {
-      if (!usuarioActual) return;
+      if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
 
       const titulo = document.getElementById("tituloAnuncio").value.trim();
       const texto = document.getElementById("textoAnuncio").value.trim();
+      const fechaAnuncio = document.getElementById("fechaAnuncio").value;
       if (!texto) {
         alert("Escriba el contenido del anuncio.");
+        return;
+      }
+      if (!fechaAnuncio) {
+        alert("Seleccione la fecha en que se publicará el anuncio.");
         return;
       }
 
@@ -2096,28 +2923,69 @@ function configurarUsuariosIglesia() {
           })
         : { tipo: "", datos: "" };
 
+      const anterior = anuncioEnEdicion === null ? null : anuncios[anuncioEnEdicion];
       const anuncio = {
+        ...(anterior || {}),
         Titulo: titulo,
         Texto: texto,
-        Autor: usuarioActual.usuario,
-        Rol: usuarioActual.rol,
-        Fecha: Date.now(),
-        MediaTipo: multimedia.tipo,
-        MediaData: multimedia.datos
+        Autor: anterior?.Autor || usuarioActual.usuario,
+        Rol: anterior?.Rol || usuarioActual.rol,
+        Fecha: anterior?.Fecha || Date.now(),
+        FechaAnuncio: fechaAnuncio,
+        MediaTipo: archivo ? multimedia.tipo : anterior?.MediaTipo || "",
+        MediaData: archivo ? multimedia.datos : anterior?.MediaData || ""
       };
-      anuncios.push(anuncio);
+      if (anuncioEnEdicion === null) anuncios.push(anuncio);
+      else anuncios[anuncioEnEdicion] = anuncio;
       localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
       await reemplazarHoja(HOJAS.anuncios, anuncios);
 
       document.getElementById("tituloAnuncio").value = "";
       document.getElementById("textoAnuncio").value = "";
+      document.getElementById("fechaAnuncio").value = formatearFechaISO(new Date());
       document.getElementById("multimediaAnuncio").value = "";
+      anuncioEnEdicion = null;
+      actualizarFormularioAnuncio();
       mostrarListaAnuncios();
       mostrarAnunciosLogin();
-      mostrarExito("El anuncio fue publicado correctamente.");
+      mostrarExito(anterior ? "El anuncio fue actualizado correctamente." : "El anuncio fue publicado correctamente.");
     }
 
     let anuncioPendiente = null;
+    let anuncioEnEdicion = null;
+
+    function actualizarFormularioAnuncio() {
+      const editando = anuncioEnEdicion !== null;
+      document.getElementById("botonGuardarAnuncio").textContent =
+        editando ? "Guardar cambios del anuncio" : "Publicar anuncio";
+      document.getElementById("botonCancelarEdicionAnuncio").classList.toggle(
+        "oculto",
+        !editando
+      );
+    }
+
+    function editarAnuncio(indice) {
+      if (!usuarioActual || usuarioActual.rol !== "Administrador" ||
+          !anuncios[indice] || !esAnuncioPasado(anuncios[indice])) return;
+
+      const anuncio = anuncios[indice];
+      anuncioEnEdicion = indice;
+      document.getElementById("tituloAnuncio").value = anuncio.Titulo || "";
+      document.getElementById("textoAnuncio").value = anuncio.Texto || "";
+      document.getElementById("fechaAnuncio").value = obtenerFechaAnuncioISO(anuncio);
+      document.getElementById("multimediaAnuncio").value = "";
+      actualizarFormularioAnuncio();
+      document.getElementById("tituloAnuncio").focus();
+    }
+
+    function cancelarEdicionAnuncio() {
+      anuncioEnEdicion = null;
+      document.getElementById("tituloAnuncio").value = "";
+      document.getElementById("textoAnuncio").value = "";
+      document.getElementById("fechaAnuncio").value = formatearFechaISO(new Date());
+      document.getElementById("multimediaAnuncio").value = "";
+      actualizarFormularioAnuncio();
+    }
 
     function confirmarEliminarAnuncio(indice) {
       if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
@@ -2128,6 +2996,7 @@ function configurarUsuariosIglesia() {
     }
 
     async function eliminarAnuncioConfirmado() {
+      if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
       if (anuncioPendiente === null) return;
       anuncios.splice(anuncioPendiente, 1);
       anuncioPendiente = null;
@@ -2139,21 +3008,22 @@ function configurarUsuariosIglesia() {
       mostrarExito("El anuncio fue eliminado correctamente.");
     }
 
-    function obtenerCumpleanosDelMes(mesTexto) {
-      const mes = Number(mesTexto) - 1;
-
-      return Object.entries(ninos).flatMap(([salon, nombres]) =>
+    function obtenerTodosLosCumpleanos() {
+      const porZonas = Object.entries(ninos).flatMap(([salon, nombres]) =>
         nombres
           .map(nombre => ({
             nombre,
             salon,
             datos: obtenerDatosLider(salon, nombre)
           }))
-          .filter(persona => {
-            if (!persona.datos.cumpleanos) return false;
-            return Number(persona.datos.cumpleanos.split("-")[0]) - 1 === mes;
-          })
+          .filter(persona => persona.datos.cumpleanos)
       );
+      const delPastor = lideresPastor.map(nombre => ({
+        nombre,
+        salon: "Líderes",
+        datos: obtenerDatosLider("Pastor", nombre)
+      })).filter(persona => persona.datos.cumpleanos);
+      return porZonas.concat(delPastor);
     }
 
     function mostrarCalendarioCumpleanos() {
@@ -2166,15 +3036,17 @@ function configurarUsuariosIglesia() {
       }
 
       const mes = Number(mesTexto);
-      const primerDia = new Date(2024, mes - 1, 1).getDay();
-      const diasDelMes = new Date(2024, mes, 0).getDate();
-      const cumpleanos = obtenerCumpleanosDelMes(mesTexto);
+      const ano = new Date().getFullYear();
+      const fechaInicioMes = new Date(ano, mes - 1, 1);
+      const primerDia = fechaInicioMes.getDay();
+      const diasDelMes = new Date(ano, mes, 0).getDate();
+      const cumpleanos = obtenerTodosLosCumpleanos();
       const porDia = {};
 
       cumpleanos.forEach(persona => {
-        const dia = Number(persona.datos.cumpleanos.split("-")[1]);
-        if (!porDia[dia]) porDia[dia] = [];
-        porDia[dia].push(persona);
+        const clave = persona.datos.cumpleanos;
+        if (!porDia[clave]) porDia[clave] = [];
+        porDia[clave].push(persona);
       });
 
       const nombresDias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -2184,15 +3056,19 @@ function configurarUsuariosIglesia() {
         html += `<div class="dia-semana">${dia}</div>`;
       });
 
-      for (let indice = 0; indice < primerDia; indice++) {
-        html += '<div class="dia-cumpleanos vacio"></div>';
-      }
+      const fechaInicioCalendario = new Date(fechaInicioMes);
+      fechaInicioCalendario.setDate(fechaInicioCalendario.getDate() - primerDia);
+      const totalDias = Math.ceil((primerDia + diasDelMes) / 7) * 7;
 
-      for (let dia = 1; dia <= diasDelMes; dia++) {
-        const personas = porDia[dia] || [];
+      for (let indice = 0; indice < totalDias; indice++) {
+        const fechaCelda = new Date(fechaInicioCalendario);
+        fechaCelda.setDate(fechaCelda.getDate() + indice);
+        const esMesActual = fechaCelda.getMonth() === mes - 1;
+        const fechaCumpleanos = `${String(fechaCelda.getMonth() + 1).padStart(2, "0")}-${String(fechaCelda.getDate()).padStart(2, "0")}`;
+        const personas = porDia[fechaCumpleanos] || [];
         html += `
-          <div class="dia-cumpleanos">
-            <span class="numero-dia">${dia}</span>
+          <div class="dia-cumpleanos${esMesActual ? "" : " fuera-mes"}">
+            <span class="numero-dia">${fechaCelda.getDate()}</span>
             ${personas.map(persona => `
               <span class="cumpleanero">
                 <strong>${escaparTexto(persona.nombre)}</strong><br>
@@ -2229,15 +3105,20 @@ function configurarUsuariosIglesia() {
 
       if (tipoReunion === "Reunión con el pastor") {
         lideres.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
-        localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
-      } else {
+        if (usuarioActual.rol !== "Supervisor") {
+          localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
+        }
+      } else if (tipoReunion !== "Discipulado Virtual" &&
+          usuarioActual.rol !== "Supervisor") {
         ordenarNinos(salon);
         guardarNinos();
       }
 
       const puedeModificar =
         usuarioActual.rol === "Administrador" ||
-        (usuarioActual.rol === "Facilitador" && tipoReunion !== "Reunión con el pastor");
+        (usuarioActual.rol === "Facilitador" &&
+          tipoReunion !== "Reunión con el pastor" &&
+          tipoReunion !== "Discipulado Virtual");
 
       const puedeEliminar = usuarioActual.rol === "Administrador";
 
@@ -2258,12 +3139,18 @@ function configurarUsuariosIglesia() {
         const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
         const asistenciaGuardada = obtenerAsistencia(salonDatos, fecha, nino, tipoReunion);
         const tieneAsistencia = asistenciaGuardada?.Asistencia === "Sí";
+        const origenVirtual = tipoReunion === "Discipulado Virtual"
+          ? obtenerLiderVirtual(nino)?.SalonOrigen
+          : "";
+        const detalleOrigen = origenVirtual && origenVirtual !== "Virtual"
+          ? `<small class="origen-lider">Líder de ${escaparTexto(origenVirtual)}; la asistencia se refleja en su ADN.</small>`
+          : "";
 
         html += `
           <tr>
             <td class="nombre-nino">
               <div class="nombre-lider">
-                <span>${escaparTexto(nino)}</span>
+                <span>${escaparTexto(nino)}${detalleOrigen}</span>
                 <span class="acciones-lider">
                   ${puedeEliminar ? `
                     <button class="accion-lider"
@@ -2275,7 +3162,11 @@ function configurarUsuariosIglesia() {
                       </svg>
                     </button>
                   ` : ""}
-                  ${usuarioActual.rol === "Administrador" ? `
+                  ${(usuarioActual.rol === "Administrador" ||
+                    (usuarioActual.rol === "Facilitador" &&
+                     usuarioActual.salon === salon &&
+                     tipoReunion !== "Reunión con el pastor" &&
+                     tipoReunion !== "Discipulado Virtual")) ? `
                     <button class="accion-lider"
                       title="Modificar líder"
                       aria-label="Modificar líder"
@@ -2329,7 +3220,7 @@ function configurarUsuariosIglesia() {
             <td>
               <textarea id="observaciones-${id}"
                 ${puedeModificar ? "" : "disabled"}
-                placeholder="Observaciones">${tieneAsistencia ? escaparTexto(asistenciaGuardada?.Observaciones || "") : "-"}</textarea>
+                placeholder="Observaciones">${tieneAsistencia ? escaparTexto(asistenciaGuardada?.Observaciones || "") : ""}</textarea>
             </td>
 
           </tr>
@@ -2365,6 +3256,61 @@ function configurarUsuariosIglesia() {
       document.getElementById("tablaAsistencia").innerHTML = html;
     }
 
+    function mostrarCoincidenciaLiderVirtual() {
+      const mensaje = document.getElementById("mensajeNino");
+      const nombre = document.getElementById("nombreNino").value.trim();
+      const sugerencias = document.getElementById("sugerenciasLideresVirtuales");
+      if (!esReunionVirtual()) {
+        mensaje.textContent = "";
+        sugerencias.replaceChildren();
+        return;
+      }
+      const todosLosLideresDeZona = Object.entries(ninos)
+        .filter(([salon]) => salon !== "Virtual")
+        .flatMap(([salon, nombres]) =>
+          nombres.map(nombreLider => ({ salon, nombre: nombreLider }))
+        );
+      const busqueda = normalizarNombreLider(nombre);
+      sugerencias.innerHTML = todosLosLideresDeZona
+        .filter(lider => !busqueda ||
+          normalizarNombreLider(lider.nombre).includes(busqueda))
+        .map(lider => `<option value="${escaparTexto(lider.nombre)}" label="${escaparTexto(lider.salon)}"></option>`)
+        .join("");
+      if (!nombre) {
+        mensaje.textContent = "";
+        return;
+      }
+
+      const coincidencias = buscarLideresPorNombre(nombre);
+      if (coincidencias.length === 1) {
+        const { salon, nombre: nombreOrigen } = coincidencias[0];
+        const datos = obtenerDatosLider(salon, nombreOrigen);
+        document.getElementById("cumpleanosNino").value =
+          formatearCumpleanosEntrada(datos.cumpleanos);
+        document.getElementById("sectorNino").value = datos.sector;
+        document.getElementById("comiteRedNino").value = datos.comiteRed;
+        document.getElementById("estadoNino").value = datos.estado;
+        document.getElementById("bautizadoNino").checked = datos.bautizado;
+        document.getElementById("encuentroNino").checked = datos.encuentro;
+        document.getElementById("doctrinaNino").value = datos.doctrina;
+        mensaje.className = "mensaje";
+        mensaje.textContent =
+          `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazará sin duplicar su ficha.`;
+      } else if (coincidencias.length > 1) {
+        mensaje.className = "mensaje";
+        mensaje.textContent =
+          `Ese nombre está duplicado en ${[...new Set(coincidencias.map(lider => lider.salon))].join(", ")}.`;
+      } else {
+        mensaje.className = "mensaje";
+        const coincidenciasParciales = todosLosLideresDeZona.filter(lider =>
+          normalizarNombreLider(lider.nombre).includes(busqueda)
+        );
+        mensaje.textContent = coincidenciasParciales.length
+          ? "Hay nombres parecidos; seleccione el líder correcto de la lista para cargar sus datos."
+          : "No encontramos ese nombre en otra zona. Al agregarlo, se registrará como líder de Virtual.";
+      }
+    }
+
     function agregarNino() {
       const nombre = document.getElementById("nombreNino").value.trim();
       const cumpleanos = normalizarCumpleanos(
@@ -2375,11 +3321,14 @@ function configurarUsuariosIglesia() {
       const estado = document.getElementById("estadoNino").value;
       const salonNuevo = document.getElementById("salonNuevoNino").value;
       const reunionPastor = esReunionPastor();
+      const reunionVirtual = esReunionVirtual();
+      const bautizado = document.getElementById("bautizadoNino").checked;
+      const encuentro = document.getElementById("encuentroNino").checked;
+      const doctrina = document.getElementById("doctrinaNino").value;
       const puedeAgregar = usuarioActual && (
         usuarioActual.rol === "Administrador" ||
-        (usuarioActual.rol === "Facilitador" && !reunionPastor)
+        (usuarioActual.rol === "Facilitador" && !reunionPastor && !reunionVirtual)
       );
-      const grupoLideres = reunionPastor ? lideresPastor : ninos[salonNuevo];
       const mensaje = document.getElementById("mensajeNino");
 
       if (!puedeAgregar) {
@@ -2401,7 +3350,76 @@ function configurarUsuariosIglesia() {
         return;
       }
 
-      if (grupoLideres.includes(nombre)) {
+      if (reunionVirtual) {
+        if (nombre.trim().split(/\s+/).length < 2) {
+          mensaje.className = "mensaje";
+          mensaje.textContent = "Escriba el nombre y apellido del líder.";
+          return;
+        }
+
+        if (lideresVirtuales.some(lider =>
+          normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombre)
+        )) {
+          mensaje.className = "mensaje";
+          mensaje.textContent = "Ese líder ya está registrado en Discipulado Virtual.";
+          return;
+        }
+
+        const lideresExistentes = buscarLideresPorNombre(nombre, true);
+        const zonasCoincidentes = [...new Set(lideresExistentes.map(lider => lider.salon))];
+        if (lideresExistentes.length > 1) {
+          mensaje.className = "mensaje";
+          mensaje.textContent = `Ese nombre aparece en varias zonas (${zonasCoincidentes.join(", ")}). Corrija primero el registro duplicado.`;
+          return;
+        }
+        const liderExistente = lideresExistentes[0];
+        const nombreVirtual = liderExistente?.nombre || nombre.trim().replace(/\s+/g, " ");
+        const salonOrigen = liderExistente?.salon || "Virtual";
+
+        lideresVirtuales.push({
+          Nombre: nombreVirtual,
+          Salon: "Virtual",
+          SalonOrigen: salonOrigen
+        });
+        if (salonOrigen === "Virtual" &&
+            !ninos.Virtual.some(nombre =>
+              normalizarNombreLider(nombre) === normalizarNombreLider(nombreVirtual)
+            )) {
+          ninos.Virtual.push(nombreVirtual);
+          lideresDatos[claveLider("Virtual", nombreVirtual)] = {
+            cumpleanos,
+            sector,
+            comiteRed,
+            estado,
+            bautizado,
+            encuentro,
+            doctrina
+          };
+          guardarDatosLideres();
+          guardarNinos();
+        }
+        guardarVirtuales();
+        document.getElementById("nombreNino").value = "";
+        document.getElementById("sugerenciasLideresVirtuales").replaceChildren();
+        document.getElementById("cumpleanosNino").value = "";
+        document.getElementById("sectorNino").value = "";
+        document.getElementById("comiteRedNino").value = "";
+        document.getElementById("estadoNino").value = "Activo";
+        document.getElementById("bautizadoNino").checked = false;
+        document.getElementById("encuentroNino").checked = false;
+        document.getElementById("doctrinaNino").value = "";
+        mensaje.className = "exito";
+        mensaje.textContent = salonOrigen === "Virtual"
+          ? `${nombreVirtual} fue agregado a Discipulado Virtual.`
+          : `${nombreVirtual} ya pertenece a ${salonOrigen} y fue enlazado a Virtual.`;
+        mostrarAsistencia();
+        return;
+      }
+
+      const grupoLideres = reunionPastor ? lideresPastor : ninos[salonNuevo];
+      if (grupoLideres.some(lider =>
+        normalizarNombreLider(lider) === normalizarNombreLider(nombre)
+      )) {
         mensaje.className = "mensaje";
         mensaje.textContent = "Ese líder ya existe en esta zona.";
         return;
@@ -2413,7 +3431,10 @@ function configurarUsuariosIglesia() {
         cumpleanos,
         sector,
         comiteRed,
-        estado
+        estado,
+        bautizado,
+        encuentro,
+        doctrina
       };
       guardarDatosLideres();
       if (reunionPastor) {
@@ -2430,6 +3451,9 @@ function configurarUsuariosIglesia() {
       document.getElementById("sectorNino").value = "";
       document.getElementById("comiteRedNino").value = "";
       document.getElementById("estadoNino").value = "Activo";
+      document.getElementById("bautizadoNino").checked = false;
+      document.getElementById("encuentroNino").checked = false;
+      document.getElementById("doctrinaNino").value = "";
       mensaje.className = "exito";
       mensaje.textContent = "Líder agregado correctamente.";
 
@@ -2441,6 +3465,11 @@ function configurarUsuariosIglesia() {
     function eliminarLiderActual(indice) {
       if (esReunionPastor()) {
         eliminarNino("Pastor", indice);
+      } else if (esReunionVirtual()) {
+        ninoEliminacionPendiente = { salon: "Virtual", indice, referenciaVirtual: true };
+        document.getElementById("textoConfirmacionNino").textContent =
+          `¿Está seguro de quitar a ${lideresVirtuales[indice]?.Nombre} del listado Virtual?`;
+        document.getElementById("modalConfirmacionNino").classList.remove("oculto");
       } else {
         eliminarNino(document.getElementById("salon").value, indice);
       }
@@ -2449,6 +3478,12 @@ function configurarUsuariosIglesia() {
     function editarLiderActual(indice) {
       if (esReunionPastor()) {
         editarNino("Pastor", indice);
+      } else if (esReunionVirtual()) {
+        const liderVirtual = lideresVirtuales[indice];
+        const indiceOrigen = (ninos[liderVirtual?.SalonOrigen] || []).findIndex(nombre =>
+          normalizarNombreLider(nombre) === normalizarNombreLider(liderVirtual?.Nombre)
+        );
+        if (indiceOrigen >= 0) editarNino(liderVirtual.SalonOrigen, indiceOrigen);
       } else {
         editarNino(document.getElementById("salon").value, indice);
       }
@@ -2470,11 +3505,26 @@ function configurarUsuariosIglesia() {
         return;
       }
 
+      if (ninoEliminacionPendiente.referenciaVirtual) {
+        lideresVirtuales.splice(ninoEliminacionPendiente.indice, 1);
+        guardarVirtuales();
+        ninoEliminacionPendiente = null;
+        cerrarModal("modalConfirmacionNino");
+        mostrarAsistencia();
+        return;
+      }
+
       const { salon, indice } = ninoEliminacionPendiente;
       const lista = salon === "Pastor" ? lideresPastor : ninos[salon];
       const nombre = lista[indice];
       lista.splice(indice, 1);
       delete lideresDatos[claveLider(salon, nombre)];
+      const cantidadVirtualAnterior = lideresVirtuales.length;
+      lideresVirtuales = lideresVirtuales.filter(lider =>
+        lider.SalonOrigen !== salon ||
+        normalizarNombreLider(lider.Nombre) !== normalizarNombreLider(nombre)
+      );
+      if (lideresVirtuales.length !== cantidadVirtualAnterior) guardarVirtuales();
       guardarDatosLideres();
       if (salon === "Pastor") {
         localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
@@ -2492,6 +3542,11 @@ function configurarUsuariosIglesia() {
       const fecha = document.getElementById("fecha").value;
       const tipoReunion = document.getElementById("tipoReunion").value;
       const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      if (tipoReunion === "Discipulado Virtual" &&
+          usuarioActual?.rol !== "Administrador") {
+        alert("Discipulado Virtual está disponible solo para el administrador.");
+        return;
+      }
       const lideres = obtenerLideresActuales(salon, tipoReunion);
       const datosReunion = obtenerDatosReunion(salonDatos, fecha, tipoReunion);
       const comentario = document.getElementById("comentarioReunion")?.value.trim() || "";
@@ -2524,22 +3579,21 @@ function configurarUsuariosIglesia() {
 
       const filasAsistencia = lideres.map((nombre, indice) => {
         const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
+        const presente = document.getElementById(`asistencia-${id}`).checked;
 
         return {
           Fecha: fecha,
           Salon: salonDatos,
           Nombre: nombre,
           TipoReunion: tipoReunion,
-          Asistencia: document.getElementById(`asistencia-${id}`).checked
-            ? "Sí"
-            : "No",
-          Participacion: document.getElementById(`asistencia-${id}`).checked
+          Asistencia: presente ? "Sí" : "No",
+          Participacion: presente
             ? document.getElementById(`participacion-${id}`).value
             : "",
-          Desarrollo: document.getElementById(`asistencia-${id}`).checked
+          Desarrollo: presente
             ? document.getElementById(`desarrollo-${id}`).value
             : "",
-          Observaciones: document.getElementById(`asistencia-${id}`).checked
+          Observaciones: presente
             ? document.getElementById(`observaciones-${id}`).value
             : "",
           Comentario: comentario,
@@ -2547,12 +3601,30 @@ function configurarUsuariosIglesia() {
           MediaData: multimedia.datos
         };
       });
+      const asistenciasADN = tipoReunion === "Discipulado Virtual"
+        ? filasAsistencia.flatMap((fila, indice) => {
+            const salonOrigen = obtenerLiderVirtual(fila.Nombre)?.SalonOrigen;
+            if (!salonOrigen || salonOrigen === "Virtual") return [];
+            return [{
+              Fecha: obtenerFechaADNDeVirtual(fecha),
+              Salon: salonOrigen,
+              Nombre: fila.Nombre,
+              TipoReunion: "ADN",
+              Asistencia: fila.Asistencia,
+              Participacion: "",
+              Desarrollo: "",
+              Observaciones: "*Discipulado virtual con el Pastor*",
+              OrigenVirtual: true
+            }];
+          })
+        : [];
 
       asistencias = asistencias.filter(fila =>
         String(fila.Fecha) !== fecha ||
         String(fila.Salon) !== salonDatos ||
         String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
       );
+      asistencias = aplicarAsistenciasVirtualesADN(asistencias, asistenciasADN);
       asistencias.push(...filasAsistencia);
       localStorage.setItem(
         "asistenciasIglesiaRedencion",
@@ -2563,7 +3635,8 @@ function configurarUsuariosIglesia() {
         fecha,
         salonDatos,
         tipoReunion,
-        filasAsistencia
+        filasAsistencia,
+        asistenciasADN
       );
 
       mostrarExito(
@@ -2584,16 +3657,25 @@ function configurarUsuariosIglesia() {
       const tipoReunion = document.getElementById("tipoReunion").value;
       const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
       const nombre = ninos[salon]?.[indice];
-
       const nombreActual = tipoReunion === "Reunión con el pastor"
         ? lideresPastor[indice]
-        : nombre;
+        : tipoReunion === "Discipulado Virtual"
+          ? lideresVirtuales[indice]?.Nombre
+          : nombre;
 
       if (!nombreActual || !obtenerAsistencia(salonDatos, fecha, nombreActual, tipoReunion)) {
         return;
       }
 
-      asistenciaPendiente = { salon: salonDatos, nombre: nombreActual, fecha, tipoReunion };
+      asistenciaPendiente = {
+        salon: salonDatos,
+        nombre: nombreActual,
+        fecha,
+        tipoReunion,
+        salonOrigen: tipoReunion === "Discipulado Virtual"
+          ? lideresVirtuales[indice]?.SalonOrigen
+          : ""
+      };
       document.getElementById("textoConfirmacionAsistencia").textContent =
         `¿Está seguro de eliminar la asistencia de ${nombre} del ${formatearFechaResumen(fecha)}?`;
       document.getElementById("modalConfirmacionAsistencia")
@@ -2605,7 +3687,7 @@ function configurarUsuariosIglesia() {
         return;
       }
 
-      const { salon, nombre, fecha, tipoReunion } = asistenciaPendiente;
+      const { salon, nombre, fecha, tipoReunion, salonOrigen } = asistenciaPendiente;
       asistenciaPendiente = null;
       cerrarModal("modalConfirmacionAsistencia");
 
@@ -2615,6 +3697,15 @@ function configurarUsuariosIglesia() {
         String(fila.Nombre) !== nombre ||
         String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
       );
+      if (tipoReunion === "Discipulado Virtual" && salonOrigen && salonOrigen !== "Virtual") {
+        asistencias = aplicarAsistenciasVirtualesADN(asistencias, [{
+          Fecha: obtenerFechaADNDeVirtual(fecha),
+          Salon: salonOrigen,
+          Nombre: nombre,
+          TipoReunion: "ADN",
+          Asistencia: "No"
+        }]);
+      }
 
       localStorage.setItem(
         "asistenciasIglesiaRedencion",
@@ -2629,7 +3720,17 @@ function configurarUsuariosIglesia() {
           String(fila.Nombre) !== nombre ||
           String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
         );
-        await reemplazarHoja(HOJAS.asistencias, restantes);
+        const sincronizadas = tipoReunion === "Discipulado Virtual" && salonOrigen &&
+          salonOrigen !== "Virtual"
+          ? aplicarAsistenciasVirtualesADN(restantes, [{
+              Fecha: obtenerFechaADNDeVirtual(fecha),
+              Salon: salonOrigen,
+              Nombre: nombre,
+              TipoReunion: "ADN",
+              Asistencia: "No"
+            }])
+          : restantes;
+        await reemplazarHoja(HOJAS.asistencias, sincronizadas);
         mostrarExito("El registro de asistencia fue eliminado.");
       } catch (error) {
         console.error(error);
@@ -2639,19 +3740,16 @@ function configurarUsuariosIglesia() {
       mostrarAsistencia();
     }
 
-    async function sincronizarAsistencias(fecha, salon, tipoReunion, filasNuevas) {
+    async function sincronizarAsistencias(fecha, salon, tipoReunion, filasNuevas, asistenciasADN = []) {
       try {
         const filasActuales = await leerHoja(HOJAS.asistencias);
-        const restantes = filasActuales.filter(fila =>
-          fila.Fecha !== fecha ||
-          fila.Salon !== salon ||
+        let restantes = filasActuales.filter(fila =>
+          String(fila.Fecha) !== fecha ||
+          String(fila.Salon) !== salon ||
           String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
         );
-
-        await reemplazarHoja(
-          HOJAS.asistencias,
-          restantes.concat(filasNuevas)
-        );
+        restantes = aplicarAsistenciasVirtualesADN(restantes, asistenciasADN);
+        await reemplazarHoja(HOJAS.asistencias, restantes.concat(filasNuevas));
         return true;
       } catch (error) {
         console.error(error);
@@ -2672,8 +3770,12 @@ function configurarUsuariosIglesia() {
   const botonResumen = document.getElementById("botonResumenNino");
   const botonResumenReunion = document.getElementById("botonResumenReunion");
 
-  if (usuarioActual && usuarioActual.rol === "Administrador") {
+  if (usuarioActual &&
+      ["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     boton.classList.remove("oculto");
+    boton.textContent = usuarioActual.rol === "Supervisor"
+      ? "Ver usuarios"
+      : "Administrar usuarios";
   } else {
     boton.classList.add("oculto");
   }
@@ -2688,7 +3790,8 @@ function configurarUsuariosIglesia() {
 
   botonResumenReunion.classList.toggle(
     "oculto",
-    !usuarioActual || usuarioActual.usuario !== "Pastor"
+    !usuarioActual ||
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)
   );
 }
 
@@ -2701,7 +3804,9 @@ function configurarUsuariosIglesia() {
   const selectorNino = document.getElementById("resumenNino");
   const lideres = tipoReunion === "Reunión con el pastor"
     ? lideresPastor
-    : (ninos[salon] || []);
+        : tipoReunion === "Discipulado Virtual"
+          ? lideresVirtuales.map(lider => lider.Nombre)
+          : (ninos[salon] || []);
 
   selectorNino.innerHTML = lideres
     .map(nino => `
@@ -2717,23 +3822,14 @@ function configurarUsuariosIglesia() {
     return;
   }
 
-  const salon = usuarioActual.salon === "todos"
+  let salon = usuarioActual.salon === "todos"
     ? document.getElementById("salon").value
     : usuarioActual.salon;
-  const tipoReunion = document.getElementById("resumenTipoReunion").value;
-  const domingoActual = obtenerFechaReunion(tipoReunion);
-  const fechaInicio = new Date(`${domingoActual}T00:00:00`);
-  fechaInicio.setDate(fechaInicio.getDate() - 12 * 7);
+  if (salon === "Zona 7") salon = "Virtual";
 
   document.getElementById("resumenSalon").value = salon;
-  document.getElementById("resumenDesde").value = [
-    fechaInicio.getFullYear(),
-    String(fechaInicio.getMonth() + 1).padStart(2, "0"),
-    String(fechaInicio.getDate()).padStart(2, "0")
-  ].join("-");
-  document.getElementById("resumenHasta").value = domingoActual;
-  document.getElementById("resumenTipoReunion").value = tipoReunion;
-  configurarRestriccionesResumen(tipoReunion);
+  actualizarResumenPorSalon();
+  actualizarFechasResumen();
   cargarNinosResumen();
   document.getElementById("contenidoResumenNino").innerHTML = "";
   document.getElementById("modalResumenNino").classList.remove("oculto");
@@ -2761,16 +3857,24 @@ function configurarUsuariosIglesia() {
     return;
   }
 
+  const fechaDesde = obtenerPrimerDiaDelMes(tipoReunion);
   const fechaHasta = obtenerFechaReunion(tipoReunion);
-  const fechaDesde = new Date(`${fechaHasta}T00:00:00`);
-  fechaDesde.setDate(fechaDesde.getDate() - 12 * 7);
+  document.getElementById("resumenDesde").value = fechaDesde;
+  document.getElementById("resumenHasta").value =
+    fechaHasta < fechaDesde ? fechaDesde : fechaHasta;
+}
 
-  document.getElementById("resumenDesde").value = [
-    fechaDesde.getFullYear(),
-    String(fechaDesde.getMonth() + 1).padStart(2, "0"),
-    String(fechaDesde.getDate()).padStart(2, "0")
-  ].join("-");
-  document.getElementById("resumenHasta").value = fechaHasta;
+function actualizarResumenPorSalon() {
+  const salon = document.getElementById("resumenSalon").value;
+  const reunionesPorSalon = {
+    Pastor: "Reunión con el pastor",
+    "Sabana de Parra": "Servicio dominical",
+    Virtual: "Discipulado Virtual"
+  };
+  document.getElementById("resumenTipoReunion").value =
+    reunionesPorSalon[salon] || "ADN";
+  actualizarFechasResumen();
+  cargarNinosResumen();
 }
 
     function actualizarTipoResumen() {
@@ -2779,7 +3883,17 @@ function configurarUsuariosIglesia() {
 
   if (tipoReunion === "Reunión con el pastor") {
     selectorSalon.value = "Pastor";
-  } else if (selectorSalon.value === "Pastor") {
+  } else if (tipoReunion === "Discipulado Virtual") {
+    selectorSalon.value = "Virtual";
+  } else if (tipoReunion === "Servicio dominical") {
+    if (selectorSalon.value === "Pastor" || selectorSalon.value === "Virtual") {
+      selectorSalon.value = "Sabana de Parra";
+    }
+  } else if (tipoReunion === "ADN" && (
+    selectorSalon.value === "Pastor" ||
+    selectorSalon.value === "Virtual" ||
+    selectorSalon.value === "Sabana de Parra"
+  )) {
     selectorSalon.value = "Zona 1";
   }
 
@@ -2827,7 +3941,8 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     const tipos = {
       0: "Servicio dominical",
       1: "Reunión con el pastor",
-      3: "ADN"
+      3: "ADN",
+      4: "Discipulado Virtual"
     };
     return tipos[dia] ? [{ fecha, tipo: tipos[dia] }] : [];
   });
@@ -2872,7 +3987,6 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const hasta = document.getElementById("resumenHasta").value;
 
   const tipoReunion = document.getElementById("resumenTipoReunion").value;
-
   if (!nino || !desde || !hasta ||
       (tipoReunion !== "Todas" &&
        (!esFechaDeReunion(desde, tipoReunion) || !esFechaDeReunion(hasta, tipoReunion)))) {
@@ -2885,9 +3999,32 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     return;
   }
 
-  const fechasPeriodo = tipoReunion === "Todas"
+  const fechaLimiteVirtual = new Date(`${hasta}T00:00:00`);
+  if (tipoReunion === "ADN") fechaLimiteVirtual.setDate(fechaLimiteVirtual.getDate() + 1);
+  const hastaIncluido = tipoReunion === "ADN"
+    ? formatearFechaISO(fechaLimiteVirtual)
+    : hasta;
+
+  let fechasPeriodo = tipoReunion === "Todas"
     ? obtenerFechasEntre(desde, hasta)
+  : tipoReunion === "Discipulado Virtual"
+    ? obtenerFechasEntre(desde, hasta).filter(fecha =>
+        esFechaDeReunion(fecha, "Discipulado Virtual")
+      )
     : obtenerDomingosEntre(desde, hasta);
+  if (tipoReunion === "ADN") {
+    const fechasVirtuales = asistencias
+      .filter(fila =>
+        fila.OrigenVirtual === true &&
+        String(fila.Salon) === salon &&
+        String(fila.Nombre) === nino &&
+        String(fila.TipoReunion) === "ADN" &&
+        String(fila.Fecha) >= desde &&
+        String(fila.Fecha) <= hastaIncluido
+      )
+      .map(fila => String(fila.Fecha));
+    fechasPeriodo = [...new Set(fechasPeriodo.concat(fechasVirtuales))].sort();
+  }
   const reunionesPeriodo = tipoReunion === "Todas"
     ? obtenerFechasDeTodasLasReuniones(desde, hasta)
     : fechasPeriodo.map(fecha => ({ fecha, tipo: tipoReunion }));
@@ -2899,12 +4036,24 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     String(fila.Nombre) === nino &&
     (tipoReunion === "Todas" ||
       String(fila.TipoReunion || "Servicio dominical") === tipoReunion) &&
+    (tipoReunion !== "Todas" || fila.OrigenVirtual !== true) &&
     fechasPeriodo.includes(String(fila.Fecha))
   );
-  const facilitador = maestrosSalon[salon] || "Sin asignar";
-  const cumpleanos = obtenerCumpleanos(salon, nino);
-  const datosLider = obtenerDatosLider(salon, nino);
-  const estadoLider = registros.length ? datosLider.estado : "Inactivo";
+  const liderVirtual = tipoReunion === "Discipulado Virtual"
+    ? lideresVirtuales.find(lider =>
+        normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nino)
+      )
+    : null;
+  const salonPerfil = liderVirtual?.SalonOrigen || salon;
+  const facilitador = maestrosSalon[salonPerfil] || "Sin asignar";
+  const nombrePerfil = liderVirtual
+    ? (ninos[salonPerfil] || []).find(nombre =>
+        normalizarNombreLider(nombre) === normalizarNombreLider(nino)
+      ) || nino
+    : nino;
+  const cumpleanos = obtenerCumpleanos(salonPerfil, nombrePerfil);
+  const datosLider = obtenerDatosLider(salonPerfil, nombrePerfil);
+  const estadoLider = datosLider.estado;
   const registrosPorFecha = Object.fromEntries(
     registros.map(fila => [String(fila.Fecha), fila])
   );
@@ -2924,10 +4073,10 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
         <tr>
           <td>${formatearFechaResumen(reunion.fecha)}</td>
           <td>${escaparTexto(reunion.tipo)}</td>
-          <td>${!registro ? "Sin registro" : registro.Asistencia === "Sí" ? "Asistió" : "Falta"}</td>
-          <td>${registro ? escaparTexto(registro.Participacion || "-") : "-"}</td>
-          <td>${registro ? escaparTexto(registro.Desarrollo || "-") : "-"}</td>
-          <td>${registro ? escaparTexto(registro.Observaciones || "-") : "-"}</td>
+          <td class="${registro?.Asistencia === "No" ? "asistencia-falta" : ""}">${!registro ? "Sin registro" : registro.Asistencia === "Sí" ? "Asistió" : "Faltó"}</td>
+          <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Participacion || "") : ""}</td>
+          <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
+          <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Observaciones || "") : ""}</td>
         </tr>
       `;
       }).join("")
@@ -2935,15 +4084,15 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     const registro = registrosPorFecha[fecha];
     const estado = !registro
       ? "Sin registro"
-      : registro.Asistencia === "Sí" ? "Asistió" : "Falta";
+      : registro.Asistencia === "Sí" ? "Asistió" : "Faltó";
 
     return `
       <tr>
         <td>${formatearFechaResumen(fecha)}</td>
-        <td>${estado}</td>
-        <td>${registro ? escaparTexto(registro.Participacion || "-") : "-"}</td>
-        <td>${registro ? escaparTexto(registro.Desarrollo || "-") : "-"}</td>
-        <td>${registro ? escaparTexto(registro.Observaciones || "-") : "-"}</td>
+        <td class="${registro?.Asistencia === "No" ? "asistencia-falta" : ""}">${estado}</td>
+        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Participacion || "") : ""}</td>
+        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
+        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Observaciones || "") : ""}</td>
       </tr>
     `;
   }).join("");
@@ -2961,10 +4110,14 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 
     <div class="resumen-datos">
       <div class="resumen-dato">Facilitador<strong>${escaparTexto(facilitador)}</strong></div>
+      ${liderVirtual ? `<div class="resumen-dato">Zona de origen<strong>${escaparTexto(salonPerfil)}</strong></div>` : ""}
       <div class="resumen-dato">Cumpleaños<strong>${cumpleanos ? nombreMesCumpleanos(cumpleanos) : "Sin registrar"}</strong></div>
       <div class="resumen-dato">Sector<strong>${escaparTexto(datosLider.sector || "Sin registrar")}</strong></div>
       <div class="resumen-dato">Comité o red<strong>${escaparTexto(datosLider.comiteRed || "Sin asignar")}</strong></div>
       <div class="resumen-dato">Estado<strong>${escaparTexto(estadoLider)}</strong></div>
+      <div class="resumen-dato">Bautizado<strong>${datosLider.bautizado ? "Sí" : "No"}</strong></div>
+      <div class="resumen-dato">Encuentro cara a cara con Dios<strong>${datosLider.encuentro ? "Sí" : "No"}</strong></div>
+      <div class="resumen-dato">Clase de Doctrina<strong>${escaparTexto(datosLider.doctrina || "Sin comenzar")}</strong></div>
       <div class="resumen-dato">Reuniones del periodo<strong>${reunionesEsperadas}</strong></div>
       <div class="resumen-dato">Asistencias<strong>${asistenciasContadas}</strong></div>
       <div class="resumen-dato">Faltas<strong>${faltasContadas}</strong></div>
@@ -2991,21 +4144,46 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 }
 
     function abrirResumenReunion() {
-  if (!usuarioActual || usuarioActual.usuario !== "Pastor") {
+  if (!usuarioActual ||
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     return;
   }
 
-  const salon = document.getElementById("salon").value;
   const tipoReunion = document.getElementById("tipoReunion").value;
+  const salon = tipoReunion === "Reunión con el pastor"
+    ? "Pastor"
+    : tipoReunion === "Discipulado Virtual"
+      ? "Virtual"
+      : document.getElementById("salon").value;
   document.getElementById("resumenReunionSalon").value = salon;
-  document.getElementById("resumenReunionTipo").value = tipoReunion;
-  document.getElementById("resumenReunionFecha").value = obtenerFechaReunion(tipoReunion);
+  actualizarResumenReunionPorSalon();
   document.getElementById("contenidoResumenReunion").innerHTML = "";
   document.getElementById("modalResumenReunion").classList.remove("oculto");
 }
 
+    function actualizarResumenReunionPorSalon() {
+  const salon = document.getElementById("resumenReunionSalon").value;
+  const reunionesPorSalon = {
+    Pastor: "Reunión con el pastor",
+    "Sabana de Parra": "Servicio dominical",
+    Virtual: "Discipulado Virtual"
+  };
+  document.getElementById("resumenReunionTipo").value =
+    reunionesPorSalon[salon] || "ADN";
+  actualizarFechaResumenReunion();
+}
+
+    function actualizarFechaResumenReunion() {
+  const tipo = document.getElementById("resumenReunionTipo").value;
+  const fecha = document.getElementById("resumenReunionFecha");
+  fecha.min = obtenerPrimerDiaValido(tipo);
+  fecha.step = "7";
+  fecha.value = obtenerPrimerDiaDelMes(tipo);
+}
+
     function mostrarResumenReunion() {
-  if (!usuarioActual || usuarioActual.usuario !== "Pastor") {
+  if (!usuarioActual ||
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     return;
   }
 
@@ -3016,8 +4194,17 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const lideres = obtenerLideresActuales(salon, tipoReunion);
 
   if (!fecha || !esFechaDeReunion(fecha, tipoReunion)) {
-    alert("Seleccione una fecha que corresponda al día de la reunión.");
-    return;
+    const asistenciaVirtualADN = tipoReunion === "ADN" &&
+      asistencias.some(fila =>
+        fila.OrigenVirtual === true &&
+        String(fila.Salon) === salonDatos &&
+        String(fila.Fecha) === fecha &&
+        String(fila.TipoReunion) === "ADN"
+      );
+    if (!asistenciaVirtualADN) {
+      alert("Seleccione una fecha que corresponda al día de la reunión.");
+      return;
+    }
   }
 
   const registros = asistencias.filter(fila =>
@@ -3033,13 +4220,14 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const faltantes = lideres.length - asistentes;
   const filas = lideres.map(nombre => {
     const registro = registrosPorNombre[nombre];
+    const falto = registro?.Asistencia !== "Sí";
     return `
       <tr>
         <td>${escaparTexto(nombre)}</td>
-        <td>${registro?.Asistencia === "Sí" ? "Asistió" : "Faltó"}</td>
-        <td>${escaparTexto(registro?.Participacion || "-")}</td>
-        <td>${escaparTexto(registro?.Desarrollo || "-")}</td>
-        <td>${escaparTexto(registro?.Observaciones || "-")}</td>
+        <td class="${falto ? "asistencia-falta" : ""}">${registro?.Asistencia === "Sí" ? "Asistió" : "Faltó"}</td>
+        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Participacion || "") : ""}</td>
+        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
+        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Observaciones || "") : ""}</td>
       </tr>
     `;
   }).join("");
@@ -3075,7 +4263,8 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 }
 
     function abrirAdministrarUsuarios() {
-  if (!usuarioActual || usuarioActual.rol !== "Administrador") {
+  if (!usuarioActual ||
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     return;
   }
 
@@ -3094,7 +4283,16 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   });
 
   document.getElementById("accionesUsuario").classList.add("oculto");
-  document.getElementById("mensajeUsuarios").textContent = "";
+  document.getElementById("tituloAdministrarUsuarios").textContent =
+    usuarioActual.rol === "Supervisor"
+      ? "Usuarios (solo lectura)"
+      : "Administrar usuarios";
+  document.getElementById("formularioNuevoUsuario").classList.toggle(
+    "oculto",
+    usuarioActual.rol !== "Administrador"
+  );
+  document.getElementById("mensajeUsuarios").textContent =
+    usuarioActual.rol === "Supervisor" ? "Vista de solo lectura." : "";
   document.getElementById("modalUsuarios").classList.remove("oculto");
 }
 
@@ -3107,7 +4305,7 @@ document.addEventListener("change", evento => {
 
   acciones.classList.toggle(
     "oculto",
-    !evento.target.value
+    !evento.target.value || usuarioActual?.rol !== "Administrador"
   );
 });
 
@@ -3165,11 +4363,17 @@ function crearUsuario() {
 let ninoPendiente = null;
 
     function editarNino(salon, indice) {
-      if (usuarioActual.rol !== "Administrador") {
+      if (!usuarioActual ||
+          (usuarioActual.rol !== "Administrador" &&
+           !(usuarioActual.rol === "Facilitador" &&
+             usuarioActual.salon === salon &&
+             salon !== "Pastor" &&
+             salon !== "Virtual"))) {
         return;
       }
 
       const lista = salon === "Pastor" ? lideresPastor : ninos[salon];
+      if (!lista || !lista[indice]) return;
       const nombreAnterior = lista[indice];
 
       ninoPendiente = { salon, indice };
@@ -3183,11 +4387,22 @@ let ninoPendiente = null;
       document.getElementById("sectorNinoModal").value = datosLider.sector;
       document.getElementById("comiteRedNinoModal").value = datosLider.comiteRed;
       document.getElementById("estadoNinoModal").value = datosLider.estado;
+      document.getElementById("bautizadoNinoModal").checked = datosLider.bautizado;
+      document.getElementById("encuentroNinoModal").checked = datosLider.encuentro;
+      document.getElementById("doctrinaNinoModal").value = datosLider.doctrina;
       document.getElementById("modalNombreNino").classList.remove("oculto");
     }
 
     function guardarNombreNino() {
       if (!ninoPendiente) {
+        return;
+      }
+      if (!usuarioActual ||
+          (usuarioActual.rol !== "Administrador" &&
+           !(usuarioActual.rol === "Facilitador" &&
+             usuarioActual.salon === ninoPendiente.salon &&
+             ninoPendiente.salon !== "Pastor" &&
+             ninoPendiente.salon !== "Virtual"))) {
         return;
       }
 
@@ -3199,6 +4414,9 @@ let ninoPendiente = null;
       const nuevoSector = document.getElementById("sectorNinoModal").value.trim();
       const nuevoComiteRed = document.getElementById("comiteRedNinoModal").value.trim();
       const nuevoEstado = document.getElementById("estadoNinoModal").value;
+      const nuevoBautizado = document.getElementById("bautizadoNinoModal").checked;
+      const nuevoEncuentro = document.getElementById("encuentroNinoModal").checked;
+      const nuevaDoctrina = document.getElementById("doctrinaNinoModal").value;
 
       if (!nuevoNombre) {
         alert("El nombre no puede estar vacío.");
@@ -3209,14 +4427,30 @@ let ninoPendiente = null;
         ? lideresPastor
         : ninos[ninoPendiente.salon];
       const nombreAnterior = lista[ninoPendiente.indice];
+      const origenVirtual = lideresVirtuales.some(lider =>
+        lider.SalonOrigen === ninoPendiente.salon &&
+        normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombreAnterior)
+      );
       delete lideresDatos[claveLider(ninoPendiente.salon, nombreAnterior)];
       lista[ninoPendiente.indice] = nuevoNombre;
       lideresDatos[claveLider(ninoPendiente.salon, nuevoNombre)] = {
         cumpleanos: nuevoCumpleanos,
         sector: nuevoSector,
         comiteRed: nuevoComiteRed,
-        estado: nuevoEstado
+        estado: nuevoEstado,
+        bautizado: nuevoBautizado,
+        encuentro: nuevoEncuentro,
+        doctrina: nuevaDoctrina
       };
+      if (origenVirtual) {
+        lideresVirtuales.forEach(lider => {
+          if (lider.SalonOrigen === ninoPendiente.salon &&
+              normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombreAnterior)) {
+            lider.Nombre = nuevoNombre;
+          }
+        });
+        guardarVirtuales();
+      }
       guardarDatosLideres();
       if (ninoPendiente.salon === "Pastor") {
         lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
@@ -3311,6 +4545,7 @@ function cerrarModal(id) {
 
   document.getElementById("pantallaSistema").classList.add("oculto");
   document.getElementById("pantallaLogin").classList.remove("oculto");
+  mostrarAnunciosLogin();
 
   document.getElementById("usuario").value = "";
   document.getElementById("contrasena").value = "";
