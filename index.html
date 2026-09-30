@@ -2142,6 +2142,7 @@ function configurarUsuariosIglesia() {
     window.addEventListener("beforeinstallprompt", evento => {
       evento.preventDefault();
       eventoInstalacionPendiente = evento;
+      document.getElementById("botonInstalarAplicacion").classList.remove("oculto");
     });
 
     window.addEventListener("appinstalled", () => {
@@ -2151,20 +2152,34 @@ function configurarUsuariosIglesia() {
 
     async function instalarAplicacion() {
       if (eventoInstalacionPendiente) {
-        eventoInstalacionPendiente.prompt();
-        await eventoInstalacionPendiente.userChoice;
+        const evento = eventoInstalacionPendiente;
         eventoInstalacionPendiente = null;
+        try {
+          await evento.prompt();
+          const resultado = await evento.userChoice;
+          if (resultado.outcome === "accepted") {
+            document.getElementById("botonInstalarAplicacion").classList.add("oculto");
+          }
+        } catch (error) {
+          console.error("No se pudo iniciar la instalación de la aplicación.", error);
+          alert("El navegador no pudo iniciar la instalación. Inténtalo desde el menú del navegador.");
+        }
         return;
       }
 
       const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
       alert(esIOS
         ? "En Safari, toca Compartir y selecciona «Agregar a pantalla de inicio»."
-        : "Para instalar la aplicación, abre esta página desde su dirección HTTPS en un navegador compatible y usa la opción «Instalar aplicación» del navegador.");
+        : "La instalación automática no está disponible en este momento. En Chrome o Edge, abre el menú del navegador y selecciona «Instalar aplicación» o «Instalar este sitio como aplicación». Si esa opción no aparece, actualiza la página y vuelve a intentarlo.");
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       mostrarAnunciosLogin();
+      const estaInstalada = window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+      if (estaInstalada) {
+        document.getElementById("botonInstalarAplicacion").classList.add("oculto");
+      }
       if ("serviceWorker" in navigator &&
           (location.protocol === "https:" || location.hostname === "localhost")) {
         navigator.serviceWorker.register("./sw.js").catch(error => {

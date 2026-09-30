@@ -1,12 +1,12 @@
-const CACHE_NAME = "iglesia-redencion-v1";
+const CACHE_NAME = "iglesia-redencion-v2";
 const APP_FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./src/img/bg2.png",
   "./src/img/lg1.png",
-  "./src/img/icon-192.svg",
-  "./src/img/icon-512.svg"
+  "./src/img/app-icon-192.png",
+  "./src/img/app-icon-512.png"
 ];
 
 self.addEventListener("install", evento => {
