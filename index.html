@@ -1053,6 +1053,11 @@
           Administrar usuarios
         </button>
 
+        <button id="botonHistorialRespaldo" class="oculto"
+          onclick="abrirHistorialRespaldo()">
+          Historial y respaldo
+        </button>
+
         <button id="botonResumenNino"
           class="oculto"
           onclick="abrirResumenNino()">
@@ -1527,6 +1532,25 @@
     </button>
   </div>
 </div>
+
+<div id="modalHistorialRespaldo" class="modal oculto">
+  <div class="ventana-usuarios">
+    <button class="cerrar-modal" onclick="cerrarModal('modalHistorialRespaldo')"
+      aria-label="Cerrar historial y respaldo">×</button>
+    <h2>Historial y recuperación</h2>
+    <p>La bitácora se guarda en Firebase. Las copias automáticas conservan las últimas 5 versiones de cada conjunto de datos.</p>
+    <p><strong>Importante:</strong> el respaldo descargado contiene datos personales y, para permitir la recuperación, las cuentas de usuario. Guárdalo en un lugar privado y no lo subas a GitHub.</p>
+    <button onclick="descargarRespaldoCompleto()">Descargar respaldo completo</button>
+    <button onclick="descargarBitacora()">Descargar bitácora</button>
+    <label for="archivoRespaldoImportar">Restaurar desde un archivo de respaldo:</label>
+    <input id="archivoRespaldoImportar" type="file" accept="application/json,.json">
+    <button onclick="importarRespaldo()">Restaurar archivo seleccionado</button>
+    <h3>Copias automáticas disponibles</h3>
+    <div id="listaRespaldosFirebase">Cargando copias...</div>
+    <h3>Últimos cambios</h3>
+    <div id="listaBitacoraFirebase">Cargando bitácora...</div>
+  </div>
+</div>
   </section>
 
   <script type="module">
@@ -1570,6 +1594,18 @@ const HOJAS = {
   anuncios: "Anuncios",
   lideresVirtuales: "DiscipuladoVirtualIglesiaRedencionV2"
 };
+
+const HOJA_BITACORA = "BitacoraIglesiaRedencionV1";
+const HOJA_RESPALDOS = "RespaldosIglesiaRedencionV1";
+const MAX_RESPALDOS_POR_HOJA = 5;
+const HOJAS_CON_RESPALDO = new Set([
+  HOJAS.ninos,
+  HOJAS.lideresPastor,
+  HOJAS.asistencias,
+  HOJAS.lideresVirtuales,
+  HOJAS.maestros,
+  HOJAS.anuncios
+]);
 
 const ZONAS = [
   ...Array.from({ length: 6 }, (_, indice) => `Zona ${indice + 1}`),
@@ -1667,10 +1703,141 @@ async function leerHoja(nombreHoja) {
 
 async function reemplazarHoja(nombreHoja, filas) {
   const firebase = await window.firebaseReady;
-  await firebase.set(
-    firebase.ref(firebase.database, nombreHoja),
-    filas
+  const referenciaDatos = firebase.ref(firebase.database, nombreHoja);
+  const resultadoAnterior = await firebase.get(referenciaDatos);
+  const filasAnteriores = resultadoAnterior.exists()
+    ? Object.values(resultadoAnterior.val())
+    : [];
+  const cambios = compararFilasParaBitacora(nombreHoja, filasAnteriores, filas);
+  if (!cambios.length) return;
+
+  const idCambio = `${Date.now()}_${crypto.randomUUID().replaceAll("-", "")}`;
+  const fecha = new Date().toISOString();
+  const evento = {
+    Id: idCambio,
+    Fecha: fecha,
+    Usuario: usuarioActual?.usuario || "Sistema",
+    Rol: usuarioActual?.rol || "Sistema",
+    Hoja: nombreHoja,
+    RegistrosAntes: filasAnteriores.length,
+    RegistrosDespues: filas.length,
+    Cambios: cambios,
+    Resultado: "Pendiente"
+  };
+
+  if (HOJAS_CON_RESPALDO.has(nombreHoja) && filasAnteriores.length) {
+    const referenciaRespaldos = firebase.ref(
+      firebase.database,
+      `${HOJA_RESPALDOS}/${nombreHoja}`
+    );
+    const resultadoRespaldos = await firebase.get(referenciaRespaldos);
+    const respaldosAnteriores = resultadoRespaldos.exists()
+      ? Object.values(resultadoRespaldos.val())
+      : [];
+    const nuevoRespaldo = {
+      Id: idCambio,
+      Fecha: fecha,
+      Usuario: evento.Usuario,
+      Registros: filasAnteriores.length,
+      Datos: filasAnteriores
+    };
+    await firebase.set(
+      referenciaRespaldos,
+      respaldosAnteriores.concat(nuevoRespaldo).slice(-MAX_RESPALDOS_POR_HOJA)
+    );
+  }
+
+  const referenciaEvento = firebase.ref(
+    firebase.database,
+    `${HOJA_BITACORA}/${idCambio}`
   );
+  await firebase.set(referenciaEvento, evento);
+
+  try {
+    await firebase.set(referenciaDatos, filas);
+  } catch (error) {
+    await firebase.set(referenciaEvento, {
+      ...evento,
+      Resultado: "Fallido",
+      Error: String(error?.message || error)
+    });
+    throw error;
+  }
+
+  try {
+    await firebase.set(referenciaEvento, {
+      ...evento,
+      Resultado: "Completado"
+    });
+  } catch (error) {
+    console.error("Los datos se guardaron, pero no se pudo confirmar la bitácora.", error);
+    alert("Los datos sí se guardaron en Firebase, pero la bitácora quedó pendiente de confirmación. Descargue un respaldo y revise la conexión antes de continuar.");
+  }
+}
+
+function claveFilaBitacora(nombreHoja, fila, indice) {
+  if (fila.Usuario) return `usuario:${fila.Usuario}`;
+  if (fila.Fecha && fila.Salon && fila.Nombre) {
+    return [
+      fila.Fecha,
+      fila.Salon,
+      fila.Nombre,
+      fila.TipoReunion || ""
+    ].join("|");
+  }
+  if (fila.Salon && fila.Nombre) return `${fila.Salon}|${fila.Nombre}`;
+  if (fila.Nombre) return `nombre:${fila.Nombre}`;
+  if (fila.Titulo) return `anuncio:${fila.Titulo}|${fila.FechaAnuncio || ""}`;
+  return `${nombreHoja}|${indice}`;
+}
+
+function firmaFilaBitacora(fila) {
+  return JSON.stringify(
+    Object.keys(fila).sort().reduce((ordenada, campo) => {
+      ordenada[campo] = fila[campo];
+      return ordenada;
+    }, {})
+  );
+}
+
+function compararFilasParaBitacora(nombreHoja, antes, despues) {
+  const anteriores = new Map(
+    antes.map((fila, indice) => [claveFilaBitacora(nombreHoja, fila, indice), fila])
+  );
+  const posteriores = new Map(
+    despues.map((fila, indice) => [claveFilaBitacora(nombreHoja, fila, indice), fila])
+  );
+  const cambios = [];
+
+  anteriores.forEach((filaAnterior, clave) => {
+    const filaNueva = posteriores.get(clave);
+    if (!filaNueva) {
+      cambios.push({ Registro: clave, Accion: "Eliminado", Campos: [] });
+      return;
+    }
+    if (firmaFilaBitacora(filaAnterior) === firmaFilaBitacora(filaNueva)) return;
+
+    const campos = [...new Set([
+      ...Object.keys(filaAnterior),
+      ...Object.keys(filaNueva)
+    ])].filter(campo =>
+      JSON.stringify(filaAnterior[campo]) !== JSON.stringify(filaNueva[campo])
+    ).map(campo => campo === "MediaData" ? "Archivo multimedia" : campo);
+
+    cambios.push({ Registro: clave, Accion: "Modificado", Campos: campos });
+  });
+
+  posteriores.forEach((fila, clave) => {
+    if (!anteriores.has(clave)) {
+      cambios.push({
+        Registro: clave,
+        Accion: "Agregado",
+        Campos: Object.keys(fila).filter(campo => campo !== "MediaData")
+      });
+    }
+  });
+
+  return cambios;
 }
 
 let cargaFirebaseCompleta = false;
@@ -3772,9 +3939,15 @@ function configurarUsuariosIglesia() {
   const boton = document.getElementById("botonAdministrarUsuarios");
   const botonResumen = document.getElementById("botonResumenNino");
   const botonResumenReunion = document.getElementById("botonResumenReunion");
+      const botonHistorial = document.getElementById("botonHistorialRespaldo");
 
-  if (usuarioActual &&
-      ["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
+      botonHistorial.classList.toggle(
+        "oculto",
+        !usuarioActual || usuarioActual.rol !== "Administrador"
+      );
+
+      if (usuarioActual &&
+          ["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     boton.classList.remove("oculto");
     boton.textContent = usuarioActual.rol === "Supervisor"
       ? "Ver usuarios"
@@ -4539,6 +4712,197 @@ function mostrarExito(mensaje) {
   document.getElementById("modalExito").classList.remove("oculto");
 }
 
+async function abrirHistorialRespaldo() {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
+  document.getElementById("modalHistorialRespaldo").classList.remove("oculto");
+  try {
+    const firebase = await window.firebaseReady;
+    const [resultadoBitacora, resultadoRespaldos] = await Promise.all([
+      firebase.get(firebase.ref(firebase.database, HOJA_BITACORA)),
+      firebase.get(firebase.ref(firebase.database, HOJA_RESPALDOS))
+    ]);
+    const eventos = resultadoBitacora.exists()
+      ? Object.values(resultadoBitacora.val())
+      : [];
+    const respaldosPorHoja = resultadoRespaldos.exists()
+      ? resultadoRespaldos.val()
+      : {};
+    mostrarBitacoraFirebase(eventos);
+    mostrarRespaldosFirebase(respaldosPorHoja);
+  } catch (error) {
+    console.error("No se pudo cargar el historial y los respaldos.", error);
+    document.getElementById("listaBitacoraFirebase").textContent =
+      "No se pudo cargar la bitácora. Verifique la conexión e inténtelo de nuevo.";
+    document.getElementById("listaRespaldosFirebase").textContent =
+      "No se pudieron cargar las copias automáticas.";
+  }
+}
+
+function mostrarBitacoraFirebase(eventos) {
+  const lista = document.getElementById("listaBitacoraFirebase");
+  if (!eventos.length) {
+    lista.textContent = "Todavía no hay cambios registrados.";
+    return;
+  }
+
+  const recientes = eventos
+    .sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)))
+    .slice(0, 50);
+  lista.innerHTML = recientes.map(evento => {
+    const fecha = new Date(evento.Fecha).toLocaleString("es");
+    const resumen = (evento.Cambios || []).slice(0, 12).map(cambio =>
+      `${cambio.Accion}: ${cambio.Registro}${cambio.Campos?.length
+        ? ` (${cambio.Campos.join(", ")})`
+        : ""}`
+    ).join("; ");
+    const restantes = (evento.Cambios || []).length - 12;
+    return `<article class="tarjeta-anuncio">
+      <strong>${escaparTexto(fecha)} | ${escaparTexto(evento.Usuario || "Sistema")}</strong>
+      <div>${escaparTexto(evento.Hoja || "")} — ${escaparTexto(evento.Resultado || "Pendiente")}</div>
+      <div>${escaparTexto(resumen)}${restantes > 0 ? `; y ${restantes} cambio(s) más` : ""}</div>
+    </article>`;
+  }).join("");
+}
+
+function mostrarRespaldosFirebase(respaldosPorHoja) {
+  const lista = document.getElementById("listaRespaldosFirebase");
+  const tarjetas = Object.entries(HOJAS)
+    .filter(([, nombreHoja]) => HOJAS_CON_RESPALDO.has(nombreHoja))
+    .map(([, nombreHoja]) => {
+      const respaldos = Object.values(respaldosPorHoja[nombreHoja] || {})
+        .sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)));
+      if (!respaldos.length) return "";
+      const idSelector = `respaldo-${nombreHoja}`;
+      const opciones = respaldos.map(respaldo =>
+        `<option value="${escaparTexto(respaldo.Id)}">${escaparTexto(
+          new Date(respaldo.Fecha).toLocaleString("es")
+        )} — ${Number(respaldo.Registros) || 0} registro(s)</option>`
+      ).join("");
+      return `<article class="tarjeta-anuncio">
+        <strong>${escaparTexto(nombreHoja)}</strong>
+        <select id="${idSelector}">${opciones}</select>
+        <button onclick="restaurarCopiaAutomatica('${escaparTexto(nombreHoja)}', '${idSelector}')">Restaurar copia elegida</button>
+      </article>`;
+    }).join("");
+  lista.innerHTML = tarjetas || "Todavía no hay copias automáticas. Se crearán antes del próximo cambio de cada conjunto.";
+}
+
+function crearDescargaJson(nombreArchivo, contenido) {
+  const archivo = new Blob(
+    [JSON.stringify(contenido, null, 2)],
+    { type: "application/json;charset=utf-8" }
+  );
+  const url = URL.createObjectURL(archivo);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = nombreArchivo;
+  enlace.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function descargarRespaldoCompleto() {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
+  try {
+    const data = {};
+    for (const [clave, nombreHoja] of Object.entries(HOJAS)) {
+      data[clave] = await leerHoja(nombreHoja);
+    }
+    crearDescargaJson(
+      `respaldo-iglesia-redencion-${formatearFechaISO(new Date())}.json`,
+      {
+        formato: "respaldo-iglesia-redencion",
+        version: 1,
+        proyecto: "asistencia-iglesia-zonas",
+        creado: new Date().toISOString(),
+        data
+      }
+    );
+  } catch (error) {
+    console.error("No se pudo crear el respaldo descargable.", error);
+    alert("No se pudo crear el respaldo. Verifique la conexión con Firebase e inténtelo de nuevo.");
+  }
+}
+
+async function descargarBitacora() {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
+  try {
+    const firebase = await window.firebaseReady;
+    const resultado = await firebase.get(
+      firebase.ref(firebase.database, HOJA_BITACORA)
+    );
+    crearDescargaJson(
+      `bitacora-iglesia-redencion-${formatearFechaISO(new Date())}.json`,
+      resultado.exists() ? Object.values(resultado.val()) : []
+    );
+  } catch (error) {
+    console.error("No se pudo descargar la bitácora.", error);
+    alert("No se pudo descargar la bitácora. Verifique la conexión e inténtelo de nuevo.");
+  }
+}
+
+async function restaurarCopiaAutomatica(nombreHoja, idSelector) {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador" ||
+      !HOJAS_CON_RESPALDO.has(nombreHoja)) return;
+  try {
+    const firebase = await window.firebaseReady;
+    const selector = document.getElementById(idSelector);
+    const resultado = await firebase.get(firebase.ref(
+      firebase.database,
+      `${HOJA_RESPALDOS}/${nombreHoja}`
+    ));
+    const respaldo = resultado.exists()
+      ? Object.values(resultado.val()).find(item => item.Id === selector.value)
+      : null;
+    if (!respaldo || !Array.isArray(respaldo.Datos)) {
+      alert("No se encontró la copia elegida o está incompleta.");
+      return;
+    }
+    if (!confirm(`Se reemplazará ${nombreHoja} con la copia del ${new Date(respaldo.Fecha).toLocaleString("es")}. Antes se conservará el estado actual. ¿Desea continuar?`)) {
+      return;
+    }
+    await reemplazarHoja(nombreHoja, respaldo.Datos);
+    location.reload();
+  } catch (error) {
+    console.error(`No se pudo restaurar la copia de ${nombreHoja}.`, error);
+    alert("No se pudo completar la restauración. Revise la bitácora antes de volver a intentarlo.");
+  }
+}
+
+async function importarRespaldo() {
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
+  const selector = document.getElementById("archivoRespaldoImportar");
+  const archivo = selector.files[0];
+  if (!archivo) {
+    alert("Seleccione primero un archivo JSON de respaldo.");
+    return;
+  }
+
+  try {
+    const texto = await archivo.text();
+    const respaldo = JSON.parse(texto);
+    if (respaldo.formato !== "respaldo-iglesia-redencion" ||
+        respaldo.version !== 1 ||
+        respaldo.proyecto !== "asistencia-iglesia-zonas" ||
+        !respaldo.data ||
+        Object.keys(HOJAS).some(clave => !Array.isArray(respaldo.data[clave]))) {
+      alert("El archivo no es un respaldo completo válido de esta aplicación.");
+      return;
+    }
+    if (!confirm("Esta acción reemplazará los conjuntos de datos actuales con los del archivo. Se guardará una copia automática del estado actual antes de cada reemplazo. ¿Desea continuar?")) {
+      return;
+    }
+
+    for (const [clave, nombreHoja] of Object.entries(HOJAS)) {
+      await reemplazarHoja(nombreHoja, respaldo.data[clave]);
+    }
+    alert("El respaldo se restauró correctamente. La página se actualizará.");
+    location.reload();
+  } catch (error) {
+    console.error("No se pudo importar el respaldo.", error);
+    alert("La restauración se detuvo por un error. Algunos conjuntos podrían haberse actualizado; revise la bitácora antes de volver a intentarlo.");
+  }
+}
+
 function cerrarModal(id) {
   document.getElementById(id).classList.add("oculto");
 }
@@ -4558,9 +4922,11 @@ function cerrarModal(id) {
   document.getElementById("modalResumenNino").classList.add("oculto");
   document.getElementById("modalResumenReunion").classList.add("oculto");
   document.getElementById("modalAnuncios").classList.add("oculto");
+  document.getElementById("modalHistorialRespaldo").classList.add("oculto");
   document.getElementById("modalConfirmacionAnuncio").classList.add("oculto");
   document.getElementById("cintaCumpleanosSistema").classList.remove("visible");
   document.getElementById("botonAdministrarUsuarios").classList.add("oculto");
+  document.getElementById("botonHistorialRespaldo").classList.add("oculto");
   document.getElementById("botonResumenNino").classList.add("oculto");
 
   document.getElementById("salon").disabled = false;
