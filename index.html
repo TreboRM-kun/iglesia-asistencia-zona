@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#171717">
-  <title>Asistencias - Iglesia Redención</title>
+  <title>Asistencias - Iglesia RedenciÃ³n</title>
   <link rel="icon" type="image/png" href="src/img/lg.png">
   <link rel="manifest" href="manifest.webmanifest">
 
@@ -1009,20 +1009,20 @@
 <body>
 
   <section id="pantallaLogin" class="contenedor login">
-    <img class="logo-login" src="src/img/lg1.png" alt="Logo Iglesia Redención">
+    <img class="logo-login" src="src/img/lg1.png" alt="Logo Iglesia RedenciÃ³n">
 
-    <h2>Iniciar sesión</h2>
+    <h2>Iniciar sesiÃ³n</h2>
 
     <input id="usuario" type="text" placeholder="Usuario">
     <br>
 
-    <input id="contrasena" type="password" placeholder="Contraseña">
+    <input id="contrasena" type="password" placeholder="ContraseÃ±a">
     <br>
 
     <button id="botonIngresar" onclick="iniciarSesion()">Ingresar</button>
     <button id="botonInstalarAplicacion" class="instalar-aplicacion"
       type="button" onclick="instalarAplicacion()">
-      Instalar aplicación
+      Instalar aplicaciÃ³n
     </button>
 
     <p id="mensajeLogin" class="mensaje"></p>
@@ -1041,7 +1041,7 @@
       <div class="titulo-pagina">
         <img class="logo-superior" src="src/img/lg1.png" alt="Logo">
         <div>
-          <h1>Asistencia de líderes</h1>
+          <h1>Asistencia de lÃ­deres</h1>
           <p id="informacionUsuario"></p>
         </div>
       </div>
@@ -1056,24 +1056,24 @@
         <button id="botonResumenNino"
           class="oculto"
           onclick="abrirResumenNino()">
-          Resumen de líder
+          Resumen de lÃ­der
         </button>
 
         <button id="botonResumenReunion"
           class="oculto"
           onclick="abrirResumenReunion()">
-          Resumen de la reunión
+          Resumen de la reuniÃ³n
         </button>
 
         <button onclick="abrirCalendarioCumpleanos()">
-          Cumpleaños
+          CumpleaÃ±os
         </button>
 
         <button onclick="abrirAnuncios()">
           Anuncios
         </button>
 
-        <button onclick="cerrarSesion()">Cerrar sesión</button>
+        <button onclick="cerrarSesion()">Cerrar sesiÃ³n</button>
       </div>
     </div>
 
@@ -1095,11 +1095,11 @@
       </div>
 
       <div class="control-asistencia">
-        <label for="tipoReunion">Reunión:</label>
+        <label for="tipoReunion">ReuniÃ³n:</label>
         <select id="tipoReunion" onchange="actualizarFechaReunion(); actualizarFormularioLideres()">
-      <option value="ADN">Discipulado ADN (miércoles)</option>
+      <option value="ADN">Discipulado ADN (miÃ©rcoles)</option>
       <option value="Servicio dominical">Servicio dominical</option>
-          <option id="opcionReunionPastor" value="Reunión con el pastor">Reunión con el pastor (lunes)</option>
+          <option id="opcionReunionPastor" value="ReuniÃ³n con el pastor">ReuniÃ³n con el pastor (lunes)</option>
             <option id="opcionReunionVirtual" value="Discipulado Virtual">Discipulado Virtual (jueves)</option>
         </select>
       </div>
@@ -1124,21 +1124,21 @@
     </div>
 
     <div id="formularioNino" class="formulario-nino oculto">
-      <h3>Agregar líder</h3>
+      <h3>Agregar lÃ­der</h3>
 
-      <input id="nombreNino" type="text" list="sugerenciasLideresVirtuales" placeholder="Nombre completo del líder"
+      <input id="nombreNino" type="text" list="sugerenciasLideresVirtuales" placeholder="Nombre completo del lÃ­der"
         oninput="mostrarCoincidenciaLiderVirtual()">
       <datalist id="sugerenciasLideresVirtuales"></datalist>
 
-      <label for="cumpleanosNino">Cumpleaños:</label>
+      <label for="cumpleanosNino">CumpleaÃ±os:</label>
       <input id="cumpleanosNino" type="text" inputmode="numeric"
         placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
-        aria-label="Cumpleaños del líder, día y mes"
+        aria-label="CumpleaÃ±os del lÃ­der, dÃ­a y mes"
         onblur="this.value = formatearCumpleanosEntrada(this.value)">
 
       <input id="sectorNino" type="text" placeholder="Sector al que pertenece">
 
-      <input id="comiteRedNino" type="text" placeholder="Comité o red">
+      <input id="comiteRedNino" type="text" placeholder="ComitÃ© o red">
 
       <label for="estadoNino">Estado:</label>
       <select id="estadoNino">
@@ -1169,7 +1169,7 @@
           <option value="Nivel 3">Nivel 3</option>
           <option value="Completado">Completado</option>
         </select>
-        <button onclick="agregarNino()">Agregar líder</button>
+        <button onclick="agregarNino()">Agregar lÃ­der</button>
       </div>
       <p id="mensajeNino"></p>
     </div>
@@ -1180,12 +1180,12 @@
       <div id="modalUsuarios" class="modal oculto">
     <div class="ventana-usuarios">
       <button class="cerrar-modal" onclick="cerrarAdministrarUsuarios()">
-        ×
+        Ã—
       </button>
 
       <h2 id="tituloAdministrarUsuarios">Administrar usuarios</h2>
 
-      <h3>Modificar contraseña</h3>
+      <h3>Modificar contraseÃ±a</h3>
 
       <select id="usuarioSeleccionado">
         <option value="">Seleccione un usuario</option>
@@ -1193,7 +1193,7 @@
 
     <div id="accionesUsuario" class="oculto">
       <button onclick="abrirCambioContrasena()">
-    Modificar contraseña
+    Modificar contraseÃ±a
       </button>
 
       <button class="boton-rojo" onclick="confirmarEliminarUsuario()">
@@ -1210,7 +1210,7 @@
         placeholder="Nombre de usuario">
 
       <input id="nuevaContrasena" type="password"
-        placeholder="Contraseña">
+        placeholder="ContraseÃ±a">
 
       <select id="nuevoRol">
         <option value="Facilitador">Facilitador</option>
@@ -1239,9 +1239,9 @@
 
   <div id="modalResumenNino" class="modal oculto">
     <div class="ventana-usuarios ventana-resumen">
-      <button class="cerrar-modal" onclick="cerrarResumenNino()">×</button>
+      <button class="cerrar-modal" onclick="cerrarResumenNino()">Ã—</button>
 
-      <h2>Resumen del líder</h2>
+      <h2>Resumen del lÃ­der</h2>
 
       <div class="filtros-resumen">
         <div>
@@ -1255,21 +1255,21 @@
             <option value="Zona 6">Zona 6</option>
             <option value="Virtual">Virtual</option>
             <option value="Sabana de Parra">Sabana de Parra</option>
-            <option value="Pastor">Líderes</option>
+            <option value="Pastor">LÃ­deres</option>
           </select>
         </div>
 
         <div>
-          <label for="resumenNino">Líder:</label>
+          <label for="resumenNino">LÃ­der:</label>
           <select id="resumenNino"></select>
         </div>
 
         <div>
-          <label for="resumenTipoReunion">Reunión:</label>
+          <label for="resumenTipoReunion">ReuniÃ³n:</label>
           <select id="resumenTipoReunion" onchange="actualizarTipoResumen()">
             <option value="ADN">Discipulado ADN</option>
             <option value="Servicio dominical">Servicio dominical</option>
-            <option value="Reunión con el pastor">Reunión con el pastor</option>
+            <option value="ReuniÃ³n con el pastor">ReuniÃ³n con el pastor</option>
             <option value="Discipulado Virtual">Discipulado Virtual</option>
             <option value="Todas">Todas las reuniones</option>
           </select>
@@ -1293,8 +1293,8 @@
 
   <div id="modalResumenReunion" class="modal oculto">
     <div class="ventana-usuarios ventana-resumen">
-      <button class="cerrar-modal" onclick="cerrarModal('modalResumenReunion')">×</button>
-      <h2>Resumen de la reunión</h2>
+      <button class="cerrar-modal" onclick="cerrarModal('modalResumenReunion')">Ã—</button>
+      <h2>Resumen de la reuniÃ³n</h2>
       <div class="filtros-resumen">
         <div>
           <label for="resumenReunionSalon">Zona:</label>
@@ -1307,15 +1307,15 @@
             <option value="Zona 6">Zona 6</option>
             <option value="Virtual">Virtual</option>
             <option value="Sabana de Parra">Sabana de Parra</option>
-            <option value="Pastor">Líderes</option>
+            <option value="Pastor">LÃ­deres</option>
           </select>
         </div>
         <div>
-          <label for="resumenReunionTipo">Reunión:</label>
+          <label for="resumenReunionTipo">ReuniÃ³n:</label>
           <select id="resumenReunionTipo" onchange="actualizarFechaResumenReunion()">
             <option value="ADN">Discipulado ADN</option>
             <option value="Servicio dominical">Servicio dominical</option>
-            <option value="Reunión con el pastor">Reunión con el pastor</option>
+            <option value="ReuniÃ³n con el pastor">ReuniÃ³n con el pastor</option>
             <option value="Discipulado Virtual">Discipulado Virtual</option>
           </select>
         </div>
@@ -1332,7 +1332,7 @@
   <div id="modalCumpleanos" class="modal oculto">
     <div class="ventana-usuarios ventana-cumpleanos">
       <div class="cabecera-cumpleanos">
-        <h2>Cumpleaños de los líderes</h2>
+        <h2>CumpleaÃ±os de los lÃ­deres</h2>
         <div class="controles-cumpleanos">
           <select id="mesCumpleanos" aria-label="Seleccionar mes" onchange="mostrarCalendarioCumpleanos()">
             <option value="01">Enero</option>
@@ -1348,7 +1348,7 @@
             <option value="11">Noviembre</option>
             <option value="12">Diciembre</option>
           </select>
-          <button class="cerrar-modal cerrar-cumpleanos" onclick="cerrarModal('modalCumpleanos')" aria-label="Cerrar ventana">×</button>
+          <button class="cerrar-modal cerrar-cumpleanos" onclick="cerrarModal('modalCumpleanos')" aria-label="Cerrar ventana">Ã—</button>
         </div>
       </div>
 
@@ -1358,11 +1358,11 @@
 
   <div id="modalAnuncios" class="modal oculto">
     <div class="ventana-usuarios ventana-anuncios">
-      <button class="cerrar-modal" onclick="cerrarModal('modalAnuncios')">×</button>
+      <button class="cerrar-modal" onclick="cerrarModal('modalAnuncios')">Ã—</button>
 
       <h2>Anuncios</h2>
       <section id="formularioEdicionAnuncio">
-      <input id="tituloAnuncio" type="text" placeholder="Título del anuncio">
+      <input id="tituloAnuncio" type="text" placeholder="TÃ­tulo del anuncio">
       <textarea id="textoAnuncio" placeholder="Escriba el anuncio"></textarea>
       <label for="fechaAnuncio">Fecha del anuncio:</label>
       <input id="fechaAnuncio" type="date">
@@ -1370,7 +1370,7 @@
       <input id="multimediaAnuncio" type="file" accept="image/*,video/*">
       <small>Imagen hasta 2 MB o video hasta 5 MB.</small>
       <button id="botonGuardarAnuncio" onclick="guardarAnuncio()">Publicar anuncio</button>
-      <button id="botonCancelarEdicionAnuncio" class="oculto" onclick="cancelarEdicionAnuncio()">Cancelar edición</button>
+      <button id="botonCancelarEdicionAnuncio" class="oculto" onclick="cancelarEdicionAnuncio()">Cancelar ediciÃ³n</button>
       </section>
       <div id="listaAnuncios" class="lista-anuncios"></div>
       <details id="seccionAnunciosPasados" class="oculto">
@@ -1382,10 +1382,10 @@
 
   <div id="modalConfirmacionAnuncio" class="modal oculto">
     <div class="ventana-usuarios">
-      <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionAnuncio')">×</button>
-      <h2>Confirmar eliminación</h2>
+      <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionAnuncio')">Ã—</button>
+      <h2>Confirmar eliminaciÃ³n</h2>
       <p id="textoConfirmacionAnuncio"></p>
-      <button class="boton-rojo" onclick="eliminarAnuncioConfirmado()">Sí, eliminar</button>
+      <button class="boton-rojo" onclick="eliminarAnuncioConfirmado()">SÃ­, eliminar</button>
       <button onclick="cerrarModal('modalConfirmacionAnuncio')">Cancelar</button>
     </div>
   </div>
@@ -1393,30 +1393,30 @@
   <div id="modalVisorMultimedia" class="modal oculto"
     onclick="if (event.target === this) cerrarVisorMultimedia()">
     <div class="ventana-usuarios visor-multimedia">
-      <button class="cerrar-modal" onclick="cerrarVisorMultimedia()" aria-label="Cerrar archivo multimedia">×</button>
+      <button class="cerrar-modal" onclick="cerrarVisorMultimedia()" aria-label="Cerrar archivo multimedia">Ã—</button>
       <div id="contenidoVisorMultimedia"></div>
     </div>
   </div>
 
     <div id="modalNombreNino" class="modal oculto">
   <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalNombreNino')">×</button>
+    <button class="cerrar-modal" onclick="cerrarModal('modalNombreNino')">Ã—</button>
 
-    <h2>Modificar datos del líder</h2>
+    <h2>Modificar datos del lÃ­der</h2>
     <p id="nombreNinoCambioTexto"></p>
 
     <input id="nombreNinoModal"
       type="text"
-      placeholder="Nombre completo del líder">
+      placeholder="Nombre completo del lÃ­der">
 
-    <label for="cumpleanosNinoModal">Cumpleaños:</label>
+    <label for="cumpleanosNinoModal">CumpleaÃ±os:</label>
     <input id="cumpleanosNinoModal" type="text" inputmode="numeric"
       placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
       onblur="this.value = formatearCumpleanosEntrada(this.value)">
 
     <input id="sectorNinoModal" type="text" placeholder="Sector al que pertenece">
 
-    <input id="comiteRedNinoModal" type="text" placeholder="Comité o red">
+    <input id="comiteRedNinoModal" type="text" placeholder="ComitÃ© o red">
 
     <label for="estadoNinoModal">Estado:</label>
     <select id="estadoNinoModal">
@@ -1451,30 +1451,30 @@
 
     <div id="modalContrasena" class="modal oculto">
   <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalContrasena')">×</button>
+    <button class="cerrar-modal" onclick="cerrarModal('modalContrasena')">Ã—</button>
 
-    <h2>Modificar contraseña</h2>
+    <h2>Modificar contraseÃ±a</h2>
     <p id="usuarioCambioTexto"></p>
 
     <input id="nuevaContrasenaModal"
       type="password"
-      placeholder="Nueva contraseña">
+      placeholder="Nueva contraseÃ±a">
 
     <button onclick="guardarNuevaContrasena()">
-      Guardar contraseña
+      Guardar contraseÃ±a
     </button>
   </div>
 </div>
 
 <div id="modalConfirmacion" class="modal oculto">
   <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacion')">×</button>
+    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacion')">Ã—</button>
 
-    <h2>Confirmar eliminación</h2>
+    <h2>Confirmar eliminaciÃ³n</h2>
     <p id="textoConfirmacion"></p>
 
     <button class="boton-rojo" onclick="eliminarUsuarioConfirmado()">
-      Sí, eliminar
+      SÃ­, eliminar
     </button>
 
     <button onclick="cerrarModal('modalConfirmacion')">
@@ -1485,13 +1485,13 @@
 
 <div id="modalConfirmacionNino" class="modal oculto">
   <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionNino')">×</button>
+    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionNino')">Ã—</button>
 
-    <h2>Confirmar eliminación</h2>
+    <h2>Confirmar eliminaciÃ³n</h2>
     <p id="textoConfirmacionNino"></p>
 
     <button class="boton-rojo" onclick="eliminarNinoConfirmado()">
-      Sí, eliminar
+      SÃ­, eliminar
     </button>
 
     <button onclick="cerrarModal('modalConfirmacionNino')">
@@ -1502,13 +1502,13 @@
 
 <div id="modalConfirmacionAsistencia" class="modal oculto">
   <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionAsistencia')">×</button>
+    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionAsistencia')">Ã—</button>
 
-    <h2>Confirmar eliminación</h2>
+    <h2>Confirmar eliminaciÃ³n</h2>
     <p id="textoConfirmacionAsistencia"></p>
 
     <button class="boton-rojo" onclick="eliminarAsistenciaConfirmada()">
-      Sí, eliminar
+      SÃ­, eliminar
     </button>
 
     <button onclick="cerrarModal('modalConfirmacionAsistencia')">
@@ -1519,7 +1519,7 @@
 
 <div id="modalExito" class="modal oculto">
   <div class="ventana-usuarios">
-    <h2 class="texto-exito">Operación realizada</h2>
+    <h2 class="texto-exito">OperaciÃ³n realizada</h2>
     <p id="textoExito"></p>
 
     <button onclick="cerrarModal('modalExito')">
@@ -1588,7 +1588,7 @@ function normalizarNombreLider(nombre) {
 
 function leerBooleanoLider(valor) {
   return valor === true || valor === 1 ||
-    String(valor || "").toLocaleLowerCase("es") === "sí" ||
+    String(valor || "").toLocaleLowerCase("es") === "sÃ­" ||
     String(valor || "").toLocaleLowerCase("es") === "true";
 }
 
@@ -1673,7 +1673,13 @@ async function reemplazarHoja(nombreHoja, filas) {
   );
 }
 
+let cargaFirebaseCompleta = false;
+
 function sincronizarHoja(nombreHoja, filas) {
+  if (!cargaFirebaseCompleta) {
+    console.warn(`Se omitiÃ³ la sincronizaciÃ³n de ${nombreHoja}: Firebase aÃºn no terminÃ³ de cargar.`);
+    return;
+  }
   const sincronizar = () => reemplazarHoja(nombreHoja, filas).catch(error => {
     console.error(`No se pudo sincronizar la hoja ${nombreHoja}.`, error);
   });
@@ -1798,12 +1804,11 @@ async function cargarDatosDesdeAPI() {
         leerHoja(HOJAS.anuncios),
         leerHoja(HOJAS.lideresVirtuales)
       ]);
+    cargaFirebaseCompleta = true;
 
     if (filasAnuncios.length) {
       anuncios = filasAnuncios;
       localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
-    } else {
-      sincronizarHoja(HOJAS.anuncios, anuncios);
     }
     mostrarAnunciosLogin();
 
@@ -1911,8 +1916,6 @@ async function cargarDatosDesdeAPI() {
         sincronizarHoja(HOJAS.ninos, filasDeNinos());
         guardarVirtuales();
       }
-    } else {
-      sincronizarHoja(HOJAS.ninos, filasDeNinos());
     }
 
     if (filasLideresPastor.length) {
@@ -1930,8 +1933,6 @@ async function cargarDatosDesdeAPI() {
       });
       guardarDatosLideres();
       localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
-    } else {
-      sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
     }
 
     if (filasUsuarios.length) {
@@ -1944,8 +1945,6 @@ async function cargarDatosDesdeAPI() {
         };
       });
       localStorage.setItem("usuariosIglesiaRedencion", JSON.stringify(usuarios));
-    } else {
-      sincronizarHoja(HOJAS.usuarios, filasDeUsuarios());
     }
 
     if (filasAsistencias.length) {
@@ -1970,8 +1969,6 @@ async function cargarDatosDesdeAPI() {
         "lideresVirtualesIglesiaRedencion",
         JSON.stringify(lideresVirtuales)
       );
-    } else if (!filasVirtuales.length) {
-      guardarVirtuales();
     }
 
     if (filasMaestros.length) {
@@ -1985,17 +1982,9 @@ async function cargarDatosDesdeAPI() {
         "facilitadoresIglesiaRedencion",
         JSON.stringify(maestrosSalon)
       );
-    } else {
-      sincronizarHoja(
-        HOJAS.maestros,
-        Object.entries(maestrosSalon).map(([salon, maestros]) => ({
-          Salon: salon,
-          Maestros: maestros
-        }))
-      );
     }
   } catch (error) {
-    console.error("Firebase no está disponible. Se usará la copia local.", error);
+    console.error("Firebase no estÃ¡ disponible. Se usarÃ¡ la copia local.", error);
   }
 
   mostrarAnunciosLogin();
@@ -2071,9 +2060,9 @@ function configurarUsuariosIglesia() {
     }
 
     let ninosIniciales = {
-      "Zona 1": ["Ana López", "Carlos Pérez", "María Gómez"],
-      "Zona 2": ["David Torres", "Sofía Ramírez", "Juan Díaz"],
-      "Zona 3": ["Luis Martínez", "Elena Vargas", "Mateo Castillo"],
+      "Zona 1": ["Ana LÃ³pez", "Carlos PÃ©rez", "MarÃ­a GÃ³mez"],
+      "Zona 2": ["David Torres", "SofÃ­a RamÃ­rez", "Juan DÃ­az"],
+      "Zona 3": ["Luis MartÃ­nez", "Elena Vargas", "Mateo Castillo"],
       "Zona 4": [],
       "Zona 5": [],
       "Zona 6": [],
@@ -2124,7 +2113,7 @@ function configurarUsuariosIglesia() {
 
     if (!ninos) {
       ninos = ninosIniciales;
-      guardarNinos();
+      localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
     }
     migrarZonaSieteLocal();
 
@@ -2161,16 +2150,16 @@ function configurarUsuariosIglesia() {
             document.getElementById("botonInstalarAplicacion").classList.add("oculto");
           }
         } catch (error) {
-          console.error("No se pudo iniciar la instalación de la aplicación.", error);
-          alert("El navegador no pudo iniciar la instalación. Inténtalo desde el menú del navegador.");
+          console.error("No se pudo iniciar la instalaciÃ³n de la aplicaciÃ³n.", error);
+          alert("El navegador no pudo iniciar la instalaciÃ³n. IntÃ©ntalo desde el menÃº del navegador.");
         }
         return;
       }
 
       const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
       alert(esIOS
-        ? "En Safari, toca Compartir y selecciona «Agregar a pantalla de inicio»."
-        : "La instalación automática no está disponible en este momento. En Chrome o Edge, abre el menú del navegador y selecciona «Instalar aplicación» o «Instalar este sitio como aplicación». Si esa opción no aparece, actualiza la página y vuelve a intentarlo.");
+        ? "En Safari, toca Compartir y selecciona Â«Agregar a pantalla de inicioÂ»."
+        : "La instalaciÃ³n automÃ¡tica no estÃ¡ disponible en este momento. En Chrome o Edge, abre el menÃº del navegador y selecciona Â«Instalar aplicaciÃ³nÂ» o Â«Instalar este sitio como aplicaciÃ³nÂ». Si esa opciÃ³n no aparece, actualiza la pÃ¡gina y vuelve a intentarlo.");
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -2217,7 +2206,7 @@ function configurarUsuariosIglesia() {
 
       fecha.setHours(0, 0, 0, 0);
       const diasPorTipo = {
-        "Reunión con el pastor": 1,
+        "ReuniÃ³n con el pastor": 1,
         ADN: 3,
         "Servicio dominical": 0,
         "Discipulado Virtual": 4
@@ -2235,7 +2224,7 @@ function configurarUsuariosIglesia() {
     function esFechaDeReunion(fechaTexto, tipo) {
       if (!fechaTexto) return false;
       const diasPorTipo = {
-        "Reunión con el pastor": 1,
+        "ReuniÃ³n con el pastor": 1,
         ADN: 3,
         "Servicio dominical": 0,
         "Discipulado Virtual": 4
@@ -2269,7 +2258,7 @@ function configurarUsuariosIglesia() {
         const automatico = coincidentes.find(fila => fila.OrigenVirtual === true);
         const manual = coincidentes.find(fila => fila.OrigenVirtual !== true);
 
-        if (filaVirtual.Asistencia === "Sí") {
+        if (filaVirtual.Asistencia === "SÃ­") {
           const anterior = automatico?.RegistroADNAnterior || manual || null;
           for (let indice = resultado.length - 1; indice >= 0; indice--) {
             if (coincide(resultado[indice])) resultado.splice(indice, 1);
@@ -2381,7 +2370,7 @@ function configurarUsuariosIglesia() {
     }
 
     function esReunionPastor() {
-      return document.getElementById("tipoReunion").value === "Reunión con el pastor";
+      return document.getElementById("tipoReunion").value === "ReuniÃ³n con el pastor";
     }
 
     function esReunionVirtual() {
@@ -2410,7 +2399,7 @@ function configurarUsuariosIglesia() {
         opcion.hidden = !puedeVerVirtual;
       });
 
-      if (esFacilitador && selectorReunion.value === "Reunión con el pastor") {
+      if (esFacilitador && selectorReunion.value === "ReuniÃ³n con el pastor") {
         selectorReunion.value = "ADN";
         actualizarFechaReunion();
       }
@@ -2421,7 +2410,7 @@ function configurarUsuariosIglesia() {
     }
 
     function obtenerLideresActuales(salon, tipoReunion) {
-      if (tipoReunion === "Reunión con el pastor") return lideresPastor;
+      if (tipoReunion === "ReuniÃ³n con el pastor") return lideresPastor;
       if (tipoReunion === "Discipulado Virtual") {
         return lideresVirtuales.map(lider => lider.Nombre);
       }
@@ -2448,7 +2437,7 @@ function configurarUsuariosIglesia() {
         "oculto",
         reunionPastor || reunionVirtual
       );
-      etiqueta.textContent = reunionVirtual ? "Agregar o enlazar líderes:" : "Facilitadores:";
+      etiqueta.textContent = reunionVirtual ? "Agregar o enlazar lÃ­deres:" : "Facilitadores:";
       selectorFacilitadores.classList.toggle("oculto", reunionPastor || reunionVirtual);
       selectorZona.classList.toggle("oculto", reunionPastor || reunionVirtual);
       formulario.classList.toggle("oculto", !puedeAgregar);
@@ -2578,7 +2567,7 @@ function configurarUsuariosIglesia() {
         fila.MediaTipo,
         fila.MediaData,
         "multimedia-reunion",
-        "Archivo de la reunión"
+        "Archivo de la reuniÃ³n"
       );
     }
 
@@ -2642,7 +2631,7 @@ function configurarUsuariosIglesia() {
 
       if (!datos || datos.contrasena !== contrasena) {
         document.getElementById("mensajeLogin").textContent =
-          "Usuario o contraseña incorrectos.";
+          "Usuario o contraseÃ±a incorrectos.";
         return;
       }
 
@@ -2727,7 +2716,7 @@ function configurarUsuariosIglesia() {
             .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos("Pastor", nombre)))
             .map(nombre => ({
               nombre,
-              salon: "Líderes",
+              salon: "LÃ­deres",
               fecha: obtenerCumpleanos("Pastor", nombre)
             }))
         : [];
@@ -2743,7 +2732,7 @@ function configurarUsuariosIglesia() {
       const detalle = cumpleanos
         .map(persona => `${persona.nombre} (${persona.salon}, ${nombreMesCumpleanos(persona.fecha)})`)
         .join("\n");
-      alert(`Cumpleaños de esta semana:\n\n${detalle}`);
+      alert(`CumpleaÃ±os de esta semana:\n\n${detalle}`);
     }
 
     function ordenarAnuncios(lista) {
@@ -2806,7 +2795,7 @@ function configurarUsuariosIglesia() {
 
       cinta.innerHTML = `<div class="cinta-contenido">${mensajes
         .map((mensaje, indice) => `
-          ${indice ? '<span class="separador-cumpleanos" aria-hidden="true"> ✦ </span>' : ""}
+          ${indice ? '<span class="separador-cumpleanos" aria-hidden="true"> âœ¦ </span>' : ""}
           <span>${escaparTexto(mensaje)}</span>
         `)
         .join("")}</div>`;
@@ -2849,11 +2838,11 @@ function configurarUsuariosIglesia() {
 
     function mostrarCintaCumpleanos() {
       const mensajes = obtenerCumpleanosDeLaSemana().map(persona =>
-        `🎂 ${persona.nombre} (${persona.salon}) · ${nombreMesCumpleanos(persona.fecha)}`
+        `ðŸŽ‚ ${persona.nombre} (${persona.salon}) Â· ${nombreMesCumpleanos(persona.fecha)}`
       );
       mostrarCinta(
         "cintaCumpleanosSistema",
-        mensajes.length ? [`Cumpleaños de la semana: ${mensajes.join("  ·  ")}`] : []
+        mensajes.length ? [`CumpleaÃ±os de la semana: ${mensajes.join("  Â·  ")}`] : []
       );
     }
 
@@ -2917,7 +2906,7 @@ function configurarUsuariosIglesia() {
         return;
       }
       if (!fechaAnuncio) {
-        alert("Seleccione la fecha en que se publicará el anuncio.");
+        alert("Seleccione la fecha en que se publicarÃ¡ el anuncio.");
         return;
       }
 
@@ -2925,7 +2914,7 @@ function configurarUsuariosIglesia() {
       const limite = archivo?.type.startsWith("video/") ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
 
       if (archivo && archivo.size > limite) {
-        alert(`El archivo supera el límite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
+        alert(`El archivo supera el lÃ­mite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
         return;
       }
 
@@ -3006,7 +2995,7 @@ function configurarUsuariosIglesia() {
       if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
       anuncioPendiente = indice;
       document.getElementById("textoConfirmacionAnuncio").textContent =
-        `¿Está seguro de eliminar el anuncio "${anuncios[indice].Titulo || "Anuncio"}"?`;
+        `Â¿EstÃ¡ seguro de eliminar el anuncio "${anuncios[indice].Titulo || "Anuncio"}"?`;
       document.getElementById("modalConfirmacionAnuncio").classList.remove("oculto");
     }
 
@@ -3035,7 +3024,7 @@ function configurarUsuariosIglesia() {
       );
       const delPastor = lideresPastor.map(nombre => ({
         nombre,
-        salon: "Líderes",
+        salon: "LÃ­deres",
         datos: obtenerDatosLider("Pastor", nombre)
       })).filter(persona => persona.datos.cumpleanos);
       return porZonas.concat(delPastor);
@@ -3064,7 +3053,7 @@ function configurarUsuariosIglesia() {
         porDia[clave].push(persona);
       });
 
-      const nombresDias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+      const nombresDias = ["Dom", "Lun", "Mar", "MiÃ©", "Jue", "Vie", "SÃ¡b"];
       let html = '<div class="calendario-cumpleanos">';
 
       nombresDias.forEach(dia => {
@@ -3087,7 +3076,7 @@ function configurarUsuariosIglesia() {
             ${personas.map(persona => `
               <span class="cumpleanero">
                 <strong>${escaparTexto(persona.nombre)}</strong><br>
-                ${escaparTexto(persona.salon)}${persona.datos.sector ? ` · ${escaparTexto(persona.datos.sector)}` : ""}
+                ${escaparTexto(persona.salon)}${persona.datos.sector ? ` Â· ${escaparTexto(persona.datos.sector)}` : ""}
               </span>
             `).join("")}
           </div>
@@ -3112,13 +3101,13 @@ function configurarUsuariosIglesia() {
       const fecha = document.getElementById("fecha").value;
       const tipoReunion = document.getElementById("tipoReunion").value;
       const lideres = obtenerLideresActuales(salon, tipoReunion);
-      const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      const salonDatos = tipoReunion === "ReuniÃ³n con el pastor" ? "Pastor" : salon;
 
       mostrarMaestroSalon();
 
       if (!usuarioActual) return;
 
-      if (tipoReunion === "Reunión con el pastor") {
+      if (tipoReunion === "ReuniÃ³n con el pastor") {
         lideres.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
         if (usuarioActual.rol !== "Supervisor") {
           localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
@@ -3126,25 +3115,24 @@ function configurarUsuariosIglesia() {
       } else if (tipoReunion !== "Discipulado Virtual" &&
           usuarioActual.rol !== "Supervisor") {
         ordenarNinos(salon);
-        guardarNinos();
       }
 
       const puedeModificar =
         usuarioActual.rol === "Administrador" ||
         (usuarioActual.rol === "Facilitador" &&
-          tipoReunion !== "Reunión con el pastor" &&
+          tipoReunion !== "ReuniÃ³n con el pastor" &&
           tipoReunion !== "Discipulado Virtual");
 
       const puedeEliminar = usuarioActual.rol === "Administrador";
 
       let html = `
-        <h2>${tipoReunion === "Reunión con el pastor" ? "Líderes" : salon} | ${tipoReunion}</h2>
+        <h2>${tipoReunion === "ReuniÃ³n con el pastor" ? "LÃ­deres" : salon} | ${tipoReunion}</h2>
         <div class="tabla-scroll">
         <table class="tabla-asistencia">
           <tr>
-            <th>Líder</th>
+            <th>LÃ­der</th>
             <th>Asistencia</th>
-            <th>Participación</th>
+            <th>ParticipaciÃ³n</th>
             <th>Desarrollo de habilidades</th>
             <th>Observaciones</th>
           </tr>
@@ -3153,12 +3141,12 @@ function configurarUsuariosIglesia() {
       lideres.forEach((nino, indice) => {
         const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
         const asistenciaGuardada = obtenerAsistencia(salonDatos, fecha, nino, tipoReunion);
-        const tieneAsistencia = asistenciaGuardada?.Asistencia === "Sí";
+        const tieneAsistencia = asistenciaGuardada?.Asistencia === "SÃ­";
         const origenVirtual = tipoReunion === "Discipulado Virtual"
           ? obtenerLiderVirtual(nino)?.SalonOrigen
           : "";
         const detalleOrigen = origenVirtual && origenVirtual !== "Virtual"
-          ? `<small class="origen-lider">Líder de ${escaparTexto(origenVirtual)}; la asistencia se refleja en su ADN.</small>`
+          ? `<small class="origen-lider">LÃ­der de ${escaparTexto(origenVirtual)}; la asistencia se refleja en su ADN.</small>`
           : "";
 
         html += `
@@ -3169,8 +3157,8 @@ function configurarUsuariosIglesia() {
                 <span class="acciones-lider">
                   ${puedeEliminar ? `
                     <button class="accion-lider"
-                      title="Eliminar líder"
-                      aria-label="Eliminar líder"
+                      title="Eliminar lÃ­der"
+                      aria-label="Eliminar lÃ­der"
                       onclick="eliminarLiderActual(${indice})">
                       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
@@ -3180,11 +3168,11 @@ function configurarUsuariosIglesia() {
                   ${(usuarioActual.rol === "Administrador" ||
                     (usuarioActual.rol === "Facilitador" &&
                      usuarioActual.salon === salon &&
-                     tipoReunion !== "Reunión con el pastor" &&
+                     tipoReunion !== "ReuniÃ³n con el pastor" &&
                      tipoReunion !== "Discipulado Virtual")) ? `
                     <button class="accion-lider"
-                      title="Modificar líder"
-                      aria-label="Modificar líder"
+                      title="Modificar lÃ­der"
+                      aria-label="Modificar lÃ­der"
                       onclick="editarLiderActual(${indice})">
                       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16v4Z" />
@@ -3208,7 +3196,7 @@ function configurarUsuariosIglesia() {
 
             <td>
               <input id="asistencia-${id}" type="checkbox"
-                ${asistenciaGuardada?.Asistencia === "Sí" ? "checked" : ""}
+                ${asistenciaGuardada?.Asistencia === "SÃ­" ? "checked" : ""}
                 ${puedeModificar ? "" : "disabled"}>
             </td>
 
@@ -3250,7 +3238,7 @@ function configurarUsuariosIglesia() {
           <div class="datos-reunion">
             <div>
               <label for="comentarioReunion">Comentario del facilitador:</label>
-              <textarea id="comentarioReunion" placeholder="Comentario de la reunión">${escaparTexto(datosReunion?.Comentario || "")}</textarea>
+              <textarea id="comentarioReunion" placeholder="Comentario de la reuniÃ³n">${escaparTexto(datosReunion?.Comentario || "")}</textarea>
             </div>
             <div>
               <label for="multimediaReunion">Archivo multimedia (imagen, video o audio):</label>
@@ -3264,7 +3252,7 @@ function configurarUsuariosIglesia() {
         `;
       } else {
         html += `
-          <p><strong>Modo consulta:</strong> este usuario puede ver la información, pero no modificarla.</p>
+          <p><strong>Modo consulta:</strong> este usuario puede ver la informaciÃ³n, pero no modificarla.</p>
         `;
       }
 
@@ -3310,19 +3298,19 @@ function configurarUsuariosIglesia() {
         document.getElementById("doctrinaNino").value = datos.doctrina;
         mensaje.className = "mensaje";
         mensaje.textContent =
-          `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazará sin duplicar su ficha.`;
+          `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazarÃ¡ sin duplicar su ficha.`;
       } else if (coincidencias.length > 1) {
         mensaje.className = "mensaje";
         mensaje.textContent =
-          `Ese nombre está duplicado en ${[...new Set(coincidencias.map(lider => lider.salon))].join(", ")}.`;
+          `Ese nombre estÃ¡ duplicado en ${[...new Set(coincidencias.map(lider => lider.salon))].join(", ")}.`;
       } else {
         mensaje.className = "mensaje";
         const coincidenciasParciales = todosLosLideresDeZona.filter(lider =>
           normalizarNombreLider(lider.nombre).includes(busqueda)
         );
         mensaje.textContent = coincidenciasParciales.length
-          ? "Hay nombres parecidos; seleccione el líder correcto de la lista para cargar sus datos."
-          : "No encontramos ese nombre en otra zona. Al agregarlo, se registrará como líder de Virtual.";
+          ? "Hay nombres parecidos; seleccione el lÃ­der correcto de la lista para cargar sus datos."
+          : "No encontramos ese nombre en otra zona. Al agregarlo, se registrarÃ¡ como lÃ­der de Virtual.";
       }
     }
 
@@ -3347,7 +3335,7 @@ function configurarUsuariosIglesia() {
       const mensaje = document.getElementById("mensajeNino");
 
       if (!puedeAgregar) {
-        mensaje.textContent = "No tiene permiso para agregar líderes en esta reunión.";
+        mensaje.textContent = "No tiene permiso para agregar lÃ­deres en esta reuniÃ³n.";
         return;
       }
 
@@ -3355,20 +3343,20 @@ function configurarUsuariosIglesia() {
         usuarioActual.rol === "Facilitador" &&
         salonNuevo !== usuarioActual.salon
       ) {
-        mensaje.textContent = "Solo puede agregar líderes en su zona asignada.";
+        mensaje.textContent = "Solo puede agregar lÃ­deres en su zona asignada.";
         return;
       }
 
       if (!nombre) {
         mensaje.className = "mensaje";
-        mensaje.textContent = "Escriba el nombre del líder.";
+        mensaje.textContent = "Escriba el nombre del lÃ­der.";
         return;
       }
 
       if (reunionVirtual) {
         if (nombre.trim().split(/\s+/).length < 2) {
           mensaje.className = "mensaje";
-          mensaje.textContent = "Escriba el nombre y apellido del líder.";
+          mensaje.textContent = "Escriba el nombre y apellido del lÃ­der.";
           return;
         }
 
@@ -3376,7 +3364,7 @@ function configurarUsuariosIglesia() {
           normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombre)
         )) {
           mensaje.className = "mensaje";
-          mensaje.textContent = "Ese líder ya está registrado en Discipulado Virtual.";
+          mensaje.textContent = "Ese lÃ­der ya estÃ¡ registrado en Discipulado Virtual.";
           return;
         }
 
@@ -3436,7 +3424,7 @@ function configurarUsuariosIglesia() {
         normalizarNombreLider(lider) === normalizarNombreLider(nombre)
       )) {
         mensaje.className = "mensaje";
-        mensaje.textContent = "Ese líder ya existe en esta zona.";
+        mensaje.textContent = "Ese lÃ­der ya existe en esta zona.";
         return;
       }
 
@@ -3470,7 +3458,7 @@ function configurarUsuariosIglesia() {
       document.getElementById("encuentroNino").checked = false;
       document.getElementById("doctrinaNino").value = "";
       mensaje.className = "exito";
-      mensaje.textContent = "Líder agregado correctamente.";
+      mensaje.textContent = "LÃ­der agregado correctamente.";
 
       if (reunionPastor || document.getElementById("salon").value === salonNuevo) {
         mostrarAsistencia();
@@ -3483,7 +3471,7 @@ function configurarUsuariosIglesia() {
       } else if (esReunionVirtual()) {
         ninoEliminacionPendiente = { salon: "Virtual", indice, referenciaVirtual: true };
         document.getElementById("textoConfirmacionNino").textContent =
-          `¿Está seguro de quitar a ${lideresVirtuales[indice]?.Nombre} del listado Virtual?`;
+          `Â¿EstÃ¡ seguro de quitar a ${lideresVirtuales[indice]?.Nombre} del listado Virtual?`;
         document.getElementById("modalConfirmacionNino").classList.remove("oculto");
       } else {
         eliminarNino(document.getElementById("salon").value, indice);
@@ -3510,7 +3498,7 @@ function configurarUsuariosIglesia() {
 
       ninoEliminacionPendiente = { salon, indice };
       document.getElementById("textoConfirmacionNino").textContent =
-        `¿Está seguro de eliminar a ${nombre}?`;
+        `Â¿EstÃ¡ seguro de eliminar a ${nombre}?`;
       document.getElementById("modalConfirmacionNino")
         .classList.remove("oculto");
     }
@@ -3556,10 +3544,10 @@ function configurarUsuariosIglesia() {
       const salon = document.getElementById("salon").value;
       const fecha = document.getElementById("fecha").value;
       const tipoReunion = document.getElementById("tipoReunion").value;
-      const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      const salonDatos = tipoReunion === "ReuniÃ³n con el pastor" ? "Pastor" : salon;
       if (tipoReunion === "Discipulado Virtual" &&
           usuarioActual?.rol !== "Administrador") {
-        alert("Discipulado Virtual está disponible solo para el administrador.");
+        alert("Discipulado Virtual estÃ¡ disponible solo para el administrador.");
         return;
       }
       const lideres = obtenerLideresActuales(salon, tipoReunion);
@@ -3570,7 +3558,7 @@ function configurarUsuariosIglesia() {
       if (archivo) {
         const limite = archivo.type.startsWith("video/") ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
         if (archivo.size > limite) {
-          alert(`El archivo supera el límite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
+          alert(`El archivo supera el lÃ­mite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
           return;
         }
       }
@@ -3588,7 +3576,7 @@ function configurarUsuariosIglesia() {
           };
 
       if (!esFechaDeReunion(fecha, tipoReunion)) {
-        alert("No se puede guardar la asistencia: seleccione el día correcto para la reunión.");
+        alert("No se puede guardar la asistencia: seleccione el dÃ­a correcto para la reuniÃ³n.");
         return;
       }
 
@@ -3601,7 +3589,7 @@ function configurarUsuariosIglesia() {
           Salon: salonDatos,
           Nombre: nombre,
           TipoReunion: tipoReunion,
-          Asistencia: presente ? "Sí" : "No",
+          Asistencia: presente ? "SÃ­" : "No",
           Participacion: presente
             ? document.getElementById(`participacion-${id}`).value
             : "",
@@ -3657,7 +3645,7 @@ function configurarUsuariosIglesia() {
       mostrarExito(
         sincronizada
           ? "Asistencia guardada correctamente."
-          : "Asistencia guardada en este navegador, pero no se pudo sincronizar en línea."
+          : "Asistencia guardada en este navegador, pero no se pudo sincronizar en lÃ­nea."
       );
     }
 
@@ -3670,9 +3658,9 @@ function configurarUsuariosIglesia() {
 
       const fecha = document.getElementById("fecha").value;
       const tipoReunion = document.getElementById("tipoReunion").value;
-      const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      const salonDatos = tipoReunion === "ReuniÃ³n con el pastor" ? "Pastor" : salon;
       const nombre = ninos[salon]?.[indice];
-      const nombreActual = tipoReunion === "Reunión con el pastor"
+      const nombreActual = tipoReunion === "ReuniÃ³n con el pastor"
         ? lideresPastor[indice]
         : tipoReunion === "Discipulado Virtual"
           ? lideresVirtuales[indice]?.Nombre
@@ -3692,7 +3680,7 @@ function configurarUsuariosIglesia() {
           : ""
       };
       document.getElementById("textoConfirmacionAsistencia").textContent =
-        `¿Está seguro de eliminar la asistencia de ${nombre} del ${formatearFechaResumen(fecha)}?`;
+        `Â¿EstÃ¡ seguro de eliminar la asistencia de ${nombre} del ${formatearFechaResumen(fecha)}?`;
       document.getElementById("modalConfirmacionAsistencia")
         .classList.remove("oculto");
     }
@@ -3749,7 +3737,7 @@ function configurarUsuariosIglesia() {
         mostrarExito("El registro de asistencia fue eliminado.");
       } catch (error) {
         console.error(error);
-        mostrarExito("El registro se eliminó en este navegador, pero no se pudo sincronizar en línea.");
+        mostrarExito("El registro se eliminÃ³ en este navegador, pero no se pudo sincronizar en lÃ­nea.");
       }
 
       mostrarAsistencia();
@@ -3813,11 +3801,11 @@ function configurarUsuariosIglesia() {
     function cargarNinosResumen() {
   const salonSeleccionado = document.getElementById("resumenSalon").value;
   const tipoReunion = document.getElementById("resumenTipoReunion").value;
-  const salon = tipoReunion === "Reunión con el pastor"
+  const salon = tipoReunion === "ReuniÃ³n con el pastor"
     ? "Pastor"
     : salonSeleccionado;
   const selectorNino = document.getElementById("resumenNino");
-  const lideres = tipoReunion === "Reunión con el pastor"
+  const lideres = tipoReunion === "ReuniÃ³n con el pastor"
     ? lideresPastor
         : tipoReunion === "Discipulado Virtual"
           ? lideresVirtuales.map(lider => lider.Nombre)
@@ -3882,7 +3870,7 @@ function configurarUsuariosIglesia() {
 function actualizarResumenPorSalon() {
   const salon = document.getElementById("resumenSalon").value;
   const reunionesPorSalon = {
-    Pastor: "Reunión con el pastor",
+    Pastor: "ReuniÃ³n con el pastor",
     "Sabana de Parra": "Servicio dominical",
     Virtual: "Discipulado Virtual"
   };
@@ -3896,7 +3884,7 @@ function actualizarResumenPorSalon() {
   const tipoReunion = document.getElementById("resumenTipoReunion").value;
   const selectorSalon = document.getElementById("resumenSalon");
 
-  if (tipoReunion === "Reunión con el pastor") {
+  if (tipoReunion === "ReuniÃ³n con el pastor") {
     selectorSalon.value = "Pastor";
   } else if (tipoReunion === "Discipulado Virtual") {
     selectorSalon.value = "Virtual";
@@ -3955,7 +3943,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     const dia = new Date(`${fecha}T00:00:00`).getDay();
     const tipos = {
       0: "Servicio dominical",
-      1: "Reunión con el pastor",
+      1: "ReuniÃ³n con el pastor",
       3: "ADN",
       4: "Discipulado Virtual"
     };
@@ -4005,7 +3993,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   if (!nino || !desde || !hasta ||
       (tipoReunion !== "Todas" &&
        (!esFechaDeReunion(desde, tipoReunion) || !esFechaDeReunion(hasta, tipoReunion)))) {
-    alert("Seleccione fechas que correspondan al día de la reunión.");
+    alert("Seleccione fechas que correspondan al dÃ­a de la reuniÃ³n.");
     return;
   }
 
@@ -4072,7 +4060,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const registrosPorFecha = Object.fromEntries(
     registros.map(fila => [String(fila.Fecha), fila])
   );
-  const asistenciasContadas = registros.filter(fila => fila.Asistencia === "Sí").length;
+  const asistenciasContadas = registros.filter(fila => fila.Asistencia === "SÃ­").length;
   const faltasContadas = registros.filter(fila => fila.Asistencia === "No").length;
   const totalRegistradas = registros.length;
   const sinRegistro = Math.max(reunionesEsperadas - totalRegistradas, 0);
@@ -4088,10 +4076,10 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
         <tr>
           <td>${formatearFechaResumen(reunion.fecha)}</td>
           <td>${escaparTexto(reunion.tipo)}</td>
-          <td class="${registro?.Asistencia === "No" ? "asistencia-falta" : ""}">${!registro ? "Sin registro" : registro.Asistencia === "Sí" ? "Asistió" : "Faltó"}</td>
-          <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Participacion || "") : ""}</td>
-          <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
-          <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Observaciones || "") : ""}</td>
+          <td class="${registro?.Asistencia === "No" ? "asistencia-falta" : ""}">${!registro ? "Sin registro" : registro.Asistencia === "SÃ­" ? "AsistiÃ³" : "FaltÃ³"}</td>
+          <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Participacion || "") : ""}</td>
+          <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
+          <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Observaciones || "") : ""}</td>
         </tr>
       `;
       }).join("")
@@ -4099,15 +4087,15 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     const registro = registrosPorFecha[fecha];
     const estado = !registro
       ? "Sin registro"
-      : registro.Asistencia === "Sí" ? "Asistió" : "Faltó";
+      : registro.Asistencia === "SÃ­" ? "AsistiÃ³" : "FaltÃ³";
 
     return `
       <tr>
         <td>${formatearFechaResumen(fecha)}</td>
         <td class="${registro?.Asistencia === "No" ? "asistencia-falta" : ""}">${estado}</td>
-        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Participacion || "") : ""}</td>
-        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
-        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Observaciones || "") : ""}</td>
+        <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Participacion || "") : ""}</td>
+        <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
+        <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Observaciones || "") : ""}</td>
       </tr>
     `;
   }).join("");
@@ -4126,19 +4114,19 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     <div class="resumen-datos">
       <div class="resumen-dato">Facilitador<strong>${escaparTexto(facilitador)}</strong></div>
       ${liderVirtual ? `<div class="resumen-dato">Zona de origen<strong>${escaparTexto(salonPerfil)}</strong></div>` : ""}
-      <div class="resumen-dato">Cumpleaños<strong>${cumpleanos ? nombreMesCumpleanos(cumpleanos) : "Sin registrar"}</strong></div>
+      <div class="resumen-dato">CumpleaÃ±os<strong>${cumpleanos ? nombreMesCumpleanos(cumpleanos) : "Sin registrar"}</strong></div>
       <div class="resumen-dato">Sector<strong>${escaparTexto(datosLider.sector || "Sin registrar")}</strong></div>
-      <div class="resumen-dato">Comité o red<strong>${escaparTexto(datosLider.comiteRed || "Sin asignar")}</strong></div>
+      <div class="resumen-dato">ComitÃ© o red<strong>${escaparTexto(datosLider.comiteRed || "Sin asignar")}</strong></div>
       <div class="resumen-dato">Estado<strong>${escaparTexto(estadoLider)}</strong></div>
-      <div class="resumen-dato">Bautizado<strong>${datosLider.bautizado ? "Sí" : "No"}</strong></div>
-      <div class="resumen-dato">Encuentro cara a cara con Dios<strong>${datosLider.encuentro ? "Sí" : "No"}</strong></div>
+      <div class="resumen-dato">Bautizado<strong>${datosLider.bautizado ? "SÃ­" : "No"}</strong></div>
+      <div class="resumen-dato">Encuentro cara a cara con Dios<strong>${datosLider.encuentro ? "SÃ­" : "No"}</strong></div>
       <div class="resumen-dato">Clase de Doctrina<strong>${escaparTexto(datosLider.doctrina || "Sin comenzar")}</strong></div>
       <div class="resumen-dato">Reuniones del periodo<strong>${reunionesEsperadas}</strong></div>
       <div class="resumen-dato">Asistencias<strong>${asistenciasContadas}</strong></div>
       <div class="resumen-dato">Faltas<strong>${faltasContadas}</strong></div>
       <div class="resumen-dato">Registros guardados<strong>${totalRegistradas}</strong></div>
       <div class="resumen-dato">Sin registro<strong>${sinRegistro}</strong></div>
-      <div class="resumen-dato">Participación predominante<strong>${escaparTexto(valorMasFrecuente(registros, "Participacion"))}</strong></div>
+      <div class="resumen-dato">ParticipaciÃ³n predominante<strong>${escaparTexto(valorMasFrecuente(registros, "Participacion"))}</strong></div>
       <div class="resumen-dato">Desarrollo predominante<strong>${escaparTexto(valorMasFrecuente(registros, "Desarrollo"))}</strong></div>
     </div>
 
@@ -4146,9 +4134,9 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
       <table class="tabla-resumen">
         <tr>
           <th>Fecha</th>
-          ${tipoReunion === "Todas" ? "<th>Reunión</th>" : ""}
+          ${tipoReunion === "Todas" ? "<th>ReuniÃ³n</th>" : ""}
           <th>Estado</th>
-          <th>Participación</th>
+          <th>ParticipaciÃ³n</th>
           <th>Desarrollo</th>
           <th>Observaciones</th>
         </tr>
@@ -4165,7 +4153,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   }
 
   const tipoReunion = document.getElementById("tipoReunion").value;
-  const salon = tipoReunion === "Reunión con el pastor"
+  const salon = tipoReunion === "ReuniÃ³n con el pastor"
     ? "Pastor"
     : tipoReunion === "Discipulado Virtual"
       ? "Virtual"
@@ -4179,7 +4167,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     function actualizarResumenReunionPorSalon() {
   const salon = document.getElementById("resumenReunionSalon").value;
   const reunionesPorSalon = {
-    Pastor: "Reunión con el pastor",
+    Pastor: "ReuniÃ³n con el pastor",
     "Sabana de Parra": "Servicio dominical",
     Virtual: "Discipulado Virtual"
   };
@@ -4205,7 +4193,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const salon = document.getElementById("resumenReunionSalon").value;
   const tipoReunion = document.getElementById("resumenReunionTipo").value;
   const fecha = document.getElementById("resumenReunionFecha").value;
-  const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+  const salonDatos = tipoReunion === "ReuniÃ³n con el pastor" ? "Pastor" : salon;
   const lideres = obtenerLideresActuales(salon, tipoReunion);
 
   if (!fecha || !esFechaDeReunion(fecha, tipoReunion)) {
@@ -4217,7 +4205,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
         String(fila.TipoReunion) === "ADN"
       );
     if (!asistenciaVirtualADN) {
-      alert("Seleccione una fecha que corresponda al día de la reunión.");
+      alert("Seleccione una fecha que corresponda al dÃ­a de la reuniÃ³n.");
       return;
     }
   }
@@ -4231,18 +4219,18 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     registros.map(fila => [String(fila.Nombre), fila])
   );
   const datosReunion = registros.find(fila => fila.Comentario || fila.MediaData);
-  const asistentes = lideres.filter(nombre => registrosPorNombre[nombre]?.Asistencia === "Sí").length;
+  const asistentes = lideres.filter(nombre => registrosPorNombre[nombre]?.Asistencia === "SÃ­").length;
   const faltantes = lideres.length - asistentes;
   const filas = lideres.map(nombre => {
     const registro = registrosPorNombre[nombre];
-    const falto = registro?.Asistencia !== "Sí";
+    const falto = registro?.Asistencia !== "SÃ­";
     return `
       <tr>
         <td>${escaparTexto(nombre)}</td>
-        <td class="${falto ? "asistencia-falta" : ""}">${registro?.Asistencia === "Sí" ? "Asistió" : "Faltó"}</td>
-        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Participacion || "") : ""}</td>
-        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
-        <td>${registro?.Asistencia === "Sí" ? escaparTexto(registro.Observaciones || "") : ""}</td>
+        <td class="${falto ? "asistencia-falta" : ""}">${registro?.Asistencia === "SÃ­" ? "AsistiÃ³" : "FaltÃ³"}</td>
+        <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Participacion || "") : ""}</td>
+        <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Desarrollo || "") : ""}</td>
+        <td>${registro?.Asistencia === "SÃ­" ? escaparTexto(registro.Observaciones || "") : ""}</td>
       </tr>
     `;
   }).join("");
@@ -4258,16 +4246,16 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
       </div>
     </div>
     <div class="resumen-datos">
-      <div class="resumen-dato">Líderes<strong>${lideres.length}</strong></div>
+      <div class="resumen-dato">LÃ­deres<strong>${lideres.length}</strong></div>
       <div class="resumen-dato">Asistieron<strong>${asistentes}</strong></div>
       <div class="resumen-dato">Faltaron<strong>${faltantes}</strong></div>
       <div class="resumen-dato">Registros guardados<strong>${registros.length}</strong></div>
     </div>
-    <h3>Desempeño</h3>
+    <h3>DesempeÃ±o</h3>
     <div class="tabla-scroll">
       <table class="tabla-resumen">
-        <tr><th>Líder</th><th>Estado</th><th>Participación</th><th>Desarrollo</th><th>Observaciones</th></tr>
-        ${filas || "<tr><td colspan=\"5\">No hay líderes registrados en esta zona.</td></tr>"}
+        <tr><th>LÃ­der</th><th>Estado</th><th>ParticipaciÃ³n</th><th>Desarrollo</th><th>Observaciones</th></tr>
+        ${filas || "<tr><td colspan=\"5\">No hay lÃ­deres registrados en esta zona.</td></tr>"}
       </table>
     </div>
     <div class="resumen-datos">
@@ -4340,7 +4328,7 @@ function crearUsuario() {
   const mensaje = document.getElementById("mensajeUsuarios");
 
   if (!nombre || !contrasena) {
-    mensaje.textContent = "Complete el usuario y la contraseña.";
+    mensaje.textContent = "Complete el usuario y la contraseÃ±a.";
     mensaje.style.color = "#6e1f2a";
     return;
   }
@@ -4434,7 +4422,7 @@ let ninoPendiente = null;
       const nuevaDoctrina = document.getElementById("doctrinaNinoModal").value;
 
       if (!nuevoNombre) {
-        alert("El nombre no puede estar vacío.");
+        alert("El nombre no puede estar vacÃ­o.");
         return;
       }
 
@@ -4504,7 +4492,7 @@ function guardarNuevaContrasena() {
     document.getElementById("nuevaContrasenaModal").value.trim();
 
   if (!nuevaContrasena) {
-    alert("Escriba una contraseña.");
+    alert("Escriba una contraseÃ±a.");
     return;
   }
 
@@ -4512,7 +4500,7 @@ function guardarNuevaContrasena() {
   guardarUsuarios();
 
   cerrarModal("modalContrasena");
-  mostrarExito("La contraseña fue modificada correctamente.");
+  mostrarExito("La contraseÃ±a fue modificada correctamente.");
 }
 
 function confirmarEliminarUsuario() {
@@ -4523,14 +4511,14 @@ function confirmarEliminarUsuario() {
   }
 
   if (usuario === usuarioActual.usuario) {
-    alert("No puede eliminar el usuario con el que inició sesión.");
+    alert("No puede eliminar el usuario con el que iniciÃ³ sesiÃ³n.");
     return;
   }
 
   usuarioPendiente = usuario;
 
   document.getElementById("textoConfirmacion").textContent =
-    `¿Está seguro de eliminar al usuario "${usuario}"?`;
+    `Â¿EstÃ¡ seguro de eliminar al usuario "${usuario}"?`;
 
   document.getElementById("modalConfirmacion")
     .classList.remove("oculto");
