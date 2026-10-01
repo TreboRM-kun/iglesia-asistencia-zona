@@ -1574,7 +1574,7 @@
     <h2 class="texto-exito">Operación realizada</h2>
     <p id="textoExito"></p>
 
-    <button onclick="cerrarModal('modalExito')">
+    <button onclick="aceptarExito()">
       Aceptar
     </button>
   </div>
@@ -4123,9 +4123,9 @@ function configurarUsuariosIglesia() {
           mostrarExito(
             archivo
               ? `La asistencia y el archivo multimedia "${archivo.name}" se guardaron correctamente en Firebase.`
-              : "Asistencia guardada correctamente."
+              : "Asistencia guardada correctamente.",
+            true
           );
-          window.setTimeout(() => window.location.reload(), 3000);
         } else {
           actualizarEstado(
             "La asistencia quedó guardada en este navegador, pero no se pudo sincronizar con Firebase."
@@ -5059,9 +5059,19 @@ function eliminarUsuarioConfirmado() {
   mostrarExito("El usuario fue eliminado correctamente.");
 }
 
-function mostrarExito(mensaje) {
+let recargarAlAceptarExito = false;
+
+function mostrarExito(mensaje, recargarAlAceptar = false) {
   document.getElementById("textoExito").textContent = mensaje;
+  recargarAlAceptarExito = recargarAlAceptar;
   document.getElementById("modalExito").classList.remove("oculto");
+}
+
+function aceptarExito() {
+  const recargar = recargarAlAceptarExito;
+  recargarAlAceptarExito = false;
+  cerrarModal("modalExito");
+  if (recargar) window.location.reload();
 }
 
 async function abrirHistorialRespaldo() {
