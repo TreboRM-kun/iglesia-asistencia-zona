@@ -4119,12 +4119,17 @@ function configurarUsuariosIglesia() {
         );
 
         if (sincronizada) {
+          actualizarEstado("");
           mostrarExito(
             archivo
               ? `La asistencia y el archivo multimedia "${archivo.name}" se guardaron correctamente en Firebase.`
               : "Asistencia guardada correctamente."
           );
+          window.setTimeout(() => window.location.reload(), 3000);
         } else {
+          actualizarEstado(
+            "La asistencia quedó guardada en este navegador, pero no se pudo sincronizar con Firebase."
+          );
           mostrarExito(
             archivo
               ? `La asistencia y el archivo multimedia "${archivo.name}" quedaron guardados en este navegador, pero no se pudieron sincronizar con Firebase.`
