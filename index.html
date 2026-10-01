@@ -1701,13 +1701,16 @@ async function leerHoja(nombreHoja) {
   return resultado.exists() ? Object.values(resultado.val()) : [];
 }
 
-async function reemplazarHoja(nombreHoja, filas) {
+async function reemplazarHoja(nombreHoja, filas, filasAnterioresIniciales) {
   const firebase = await window.firebaseReady;
   const referenciaDatos = firebase.ref(firebase.database, nombreHoja);
-  const resultadoAnterior = await firebase.get(referenciaDatos);
-  const filasAnteriores = resultadoAnterior.exists()
-    ? Object.values(resultadoAnterior.val())
-    : [];
+  let filasAnteriores = filasAnterioresIniciales;
+  if (!Array.isArray(filasAnteriores)) {
+    const resultadoAnterior = await firebase.get(referenciaDatos);
+    filasAnteriores = resultadoAnterior.exists()
+      ? Object.values(resultadoAnterior.val())
+      : [];
+  }
   const cambios = compararFilasParaBitacora(nombreHoja, filasAnteriores, filas);
   if (!cambios.length) return;
 
@@ -1739,7 +1742,9 @@ async function reemplazarHoja(nombreHoja, filas) {
       Fecha: fecha,
       Usuario: evento.Usuario,
       Registros: filasAnteriores.length,
-      Datos: filasAnteriores
+      Datos: nombreHoja === HOJAS.asistencias
+        ? compactarMediaAsistencias(filasAnteriores)
+        : filasAnteriores
     };
     await firebase.set(
       referenciaRespaldos,
@@ -1773,6 +1778,23 @@ async function reemplazarHoja(nombreHoja, filas) {
     console.error("Los datos se guardaron, pero no se pudo confirmar la bitácora.", error);
     alert("Los datos sí se guardaron en Firebase, pero la bitácora quedó pendiente de confirmación. Descargue un respaldo y revise la conexión antes de continuar.");
   }
+}
+
+function compactarMediaAsistencias(filas) {
+  const reunionesConMultimedia = new Set();
+  return filas.map(fila => {
+    if (!fila.MediaData) return fila;
+    const claveReunion = [
+      fila.Fecha,
+      fila.Salon,
+      fila.TipoReunion || "Servicio dominical"
+    ].join("|");
+    if (!reunionesConMultimedia.has(claveReunion)) {
+      reunionesConMultimedia.add(claveReunion);
+      return fila;
+    }
+    return { ...fila, MediaTipo: "", MediaData: "" };
+  });
 }
 
 function claveFilaBitacora(nombreHoja, fila, indice) {
@@ -3410,12 +3432,13 @@ function configurarUsuariosIglesia() {
             <div>
               <label for="multimediaReunion">Archivo multimedia (imagen, video o audio):</label>
               <input id="multimediaReunion" type="file" accept="image/*,video/*,audio/*">
-              <small>Imagen/audio hasta 2 MB o video hasta 5 MB.</small>
+              <small>JPEG, PNG y WebP de hasta 25 MB se comprimen automáticamente a 2 MB o menos. Otros archivos: imagen/audio hasta 2 MB; video hasta 5 MB.</small>
               ${mostrarMultimediaReunion(datosReunion)}
             </div>
           </div>
           <br>
-          <button onclick="guardarAsistencia()">Guardar asistencia</button>
+          <button id="botonGuardarAsistencia" onclick="guardarAsistencia()">Guardar asistencia</button>
+          <p id="estadoGuardadoAsistencia" role="status" aria-live="polite"></p>
         `;
       } else {
         html += `
@@ -3707,113 +3730,225 @@ function configurarUsuariosIglesia() {
       mostrarAsistencia();
     }
 
+    const LIMITE_IMAGEN_ASISTENCIA = 2 * 1024 * 1024;
+    const LIMITE_ARCHIVO_ASISTENCIA = 25 * 1024 * 1024;
+
+    async function prepararArchivoAsistencia(archivo) {
+      const esImagenComprimible = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ].includes(archivo.type);
+
+      if (esImagenComprimible && archivo.size > LIMITE_IMAGEN_ASISTENCIA) {
+        if (archivo.size > LIMITE_ARCHIVO_ASISTENCIA) {
+          throw new Error("La imagen original supera el máximo de 25 MB.");
+        }
+        return comprimirImagenAsistencia(archivo);
+      }
+
+      const limite = archivo.type.startsWith("video/")
+        ? 5 * 1024 * 1024
+        : LIMITE_IMAGEN_ASISTENCIA;
+      if (archivo.size > limite) {
+        throw new Error(
+          `El archivo supera el límite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`
+        );
+      }
+      return archivo;
+    }
+
+    async function comprimirImagenAsistencia(archivo) {
+      const url = URL.createObjectURL(archivo);
+      const imagen = new Image();
+      try {
+        await new Promise((resolver, rechazar) => {
+          imagen.onload = resolver;
+          imagen.onerror = () => rechazar(
+            new Error("No se pudo abrir la imagen para comprimirla.")
+          );
+          imagen.src = url;
+        });
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+
+      const factorInicial = Math.min(
+        1,
+        1920 / Math.max(imagen.naturalWidth, imagen.naturalHeight)
+      );
+      let ancho = Math.max(1, Math.round(imagen.naturalWidth * factorInicial));
+      let alto = Math.max(1, Math.round(imagen.naturalHeight * factorInicial));
+      const calidades = [0.82, 0.72, 0.62, 0.52];
+      let mejorBlob = archivo;
+
+      for (let intentoDimensiones = 0; intentoDimensiones < 4; intentoDimensiones++) {
+        const lienzo = document.createElement("canvas");
+        lienzo.width = ancho;
+        lienzo.height = alto;
+        const contexto = lienzo.getContext("2d");
+        if (!contexto) {
+          throw new Error("El navegador no pudo preparar la compresión de la imagen.");
+        }
+        contexto.drawImage(imagen, 0, 0, ancho, alto);
+
+        for (const calidad of calidades) {
+          const blob = await new Promise(resolver =>
+            lienzo.toBlob(resolver, "image/webp", calidad)
+          );
+          if (blob && blob.size < mejorBlob.size) mejorBlob = blob;
+          if (blob?.size <= LIMITE_IMAGEN_ASISTENCIA) {
+            return new File(
+              [blob],
+              `${archivo.name.replace(/\.[^.]+$/, "")}.webp`,
+              { type: blob.type, lastModified: Date.now() }
+            );
+          }
+        }
+        ancho = Math.max(1, Math.round(ancho * 0.8));
+        alto = Math.max(1, Math.round(alto * 0.8));
+      }
+
+      if (mejorBlob.size <= LIMITE_IMAGEN_ASISTENCIA && mejorBlob !== archivo) {
+        const tipo = mejorBlob.type || archivo.type;
+        const extension = tipo === "image/webp" ? ".webp" : ".jpg";
+        return new File(
+          [mejorBlob],
+          `${archivo.name.replace(/\.[^.]+$/, "")}${extension}`,
+          { type: tipo, lastModified: Date.now() }
+        );
+      }
+      throw new Error(
+        "No se pudo reducir la imagen a 2 MB. Elija una imagen más pequeña."
+      );
+    }
+
     async function guardarAsistencia() {
       const salon = document.getElementById("salon").value;
       const fecha = document.getElementById("fecha").value;
       const tipoReunion = document.getElementById("tipoReunion").value;
       const salonDatos = tipoReunion === "Reunión con el pastor" ? "Pastor" : salon;
+      const botonGuardar = document.getElementById("botonGuardarAsistencia");
+      const estadoGuardado = document.getElementById("estadoGuardadoAsistencia");
+      const actualizarEstado = mensaje => {
+        if (estadoGuardado) estadoGuardado.textContent = mensaje;
+      };
       if (tipoReunion === "Discipulado Virtual" &&
           usuarioActual?.rol !== "Administrador") {
         alert("Discipulado Virtual está disponible solo para el administrador.");
         return;
       }
-      const lideres = obtenerLideresActuales(salon, tipoReunion);
-      const datosReunion = obtenerDatosReunion(salonDatos, fecha, tipoReunion);
-      const comentario = document.getElementById("comentarioReunion")?.value.trim() || "";
-      const archivo = document.getElementById("multimediaReunion")?.files[0];
-
-      if (archivo) {
-        const limite = archivo.type.startsWith("video/") ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
-        if (archivo.size > limite) {
-          alert(`El archivo supera el límite permitido de ${archivo.type.startsWith("video/") ? "5 MB" : "2 MB"}.`);
-          return;
-        }
-      }
-
-      const multimedia = archivo
-        ? await new Promise((resolver, rechazar) => {
-            const lector = new FileReader();
-            lector.onload = () => resolver({ tipo: archivo.type, datos: lector.result });
-            lector.onerror = rechazar;
-            lector.readAsDataURL(archivo);
-          })
-        : {
-            tipo: datosReunion?.MediaTipo || "",
-            datos: datosReunion?.MediaData || ""
-          };
-
       if (!esFechaDeReunion(fecha, tipoReunion)) {
         alert("No se puede guardar la asistencia: seleccione el día correcto para la reunión.");
         return;
       }
+      if (botonGuardar?.disabled) return;
 
-      const filasAsistencia = lideres.map((nombre, indice) => {
-        const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
-        const presente = document.getElementById(`asistencia-${id}`).checked;
+      const lideres = obtenerLideresActuales(salon, tipoReunion);
+      const datosReunion = obtenerDatosReunion(salonDatos, fecha, tipoReunion);
+      const comentario = document.getElementById("comentarioReunion")?.value.trim() || "";
+      const archivo = document.getElementById("multimediaReunion")?.files[0];
+      if (botonGuardar) botonGuardar.disabled = true;
 
-        return {
-          Fecha: fecha,
-          Salon: salonDatos,
-          Nombre: nombre,
-          TipoReunion: tipoReunion,
-          Asistencia: presente ? "Sí" : "No",
-          Participacion: presente
-            ? document.getElementById(`participacion-${id}`).value
-            : "",
-          Desarrollo: presente
-            ? document.getElementById(`desarrollo-${id}`).value
-            : "",
-          Observaciones: presente
-            ? document.getElementById(`observaciones-${id}`).value
-            : "",
-          Comentario: comentario,
-          MediaTipo: multimedia.tipo,
-          MediaData: multimedia.datos
-        };
-      });
-      const asistenciasADN = tipoReunion === "Discipulado Virtual"
-        ? filasAsistencia.flatMap((fila, indice) => {
-            const salonOrigen = obtenerLiderVirtual(fila.Nombre)?.SalonOrigen;
-            if (!salonOrigen || salonOrigen === "Virtual") return [];
-            return [{
-              Fecha: obtenerFechaADNDeVirtual(fecha),
-              Salon: salonOrigen,
-              Nombre: fila.Nombre,
-              TipoReunion: "ADN",
-              Asistencia: fila.Asistencia,
-              Participacion: "",
-              Desarrollo: "",
-              Observaciones: "*Discipulado virtual con el Pastor*",
-              OrigenVirtual: true
-            }];
-          })
-        : [];
+      try {
+        actualizarEstado(archivo ? "Preparando el archivo multimedia..." : "Guardando asistencia...");
+        const archivoPreparado = archivo
+          ? await prepararArchivoAsistencia(archivo)
+          : null;
+        const multimedia = archivoPreparado
+          ? await new Promise((resolver, rechazar) => {
+              const lector = new FileReader();
+              lector.onload = () => resolver({
+                tipo: archivoPreparado.type,
+                datos: lector.result
+              });
+              lector.onerror = () => rechazar(
+                new Error("No se pudo leer el archivo multimedia.")
+              );
+              lector.readAsDataURL(archivoPreparado);
+            })
+          : {
+              tipo: datosReunion?.MediaTipo || "",
+              datos: datosReunion?.MediaData || ""
+            };
 
-      asistencias = asistencias.filter(fila =>
-        String(fila.Fecha) !== fecha ||
-        String(fila.Salon) !== salonDatos ||
-        String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
-      );
-      asistencias = aplicarAsistenciasVirtualesADN(asistencias, asistenciasADN);
-      asistencias.push(...filasAsistencia);
-      localStorage.setItem(
-        "asistenciasIglesiaRedencion",
-        JSON.stringify(asistencias)
-      );
+        const filasAsistencia = lideres.map((nombre, indice) => {
+          const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
+          const presente = document.getElementById(`asistencia-${id}`).checked;
 
-      const sincronizada = await sincronizarAsistencias(
-        fecha,
-        salonDatos,
-        tipoReunion,
-        filasAsistencia,
-        asistenciasADN
-      );
+          return {
+            Fecha: fecha,
+            Salon: salonDatos,
+            Nombre: nombre,
+            TipoReunion: tipoReunion,
+            Asistencia: presente ? "Sí" : "No",
+            Participacion: presente
+              ? document.getElementById(`participacion-${id}`).value
+              : "",
+            Desarrollo: presente
+              ? document.getElementById(`desarrollo-${id}`).value
+              : "",
+            Observaciones: presente
+              ? document.getElementById(`observaciones-${id}`).value
+              : "",
+            Comentario: comentario,
+            MediaTipo: indice === 0 ? multimedia.tipo : "",
+            MediaData: indice === 0 ? multimedia.datos : ""
+          };
+        });
+        const asistenciasADN = tipoReunion === "Discipulado Virtual"
+          ? filasAsistencia.flatMap(fila => {
+              const salonOrigen = obtenerLiderVirtual(fila.Nombre)?.SalonOrigen;
+              if (!salonOrigen || salonOrigen === "Virtual") return [];
+              return [{
+                Fecha: obtenerFechaADNDeVirtual(fecha),
+                Salon: salonOrigen,
+                Nombre: fila.Nombre,
+                TipoReunion: "ADN",
+                Asistencia: fila.Asistencia,
+                Participacion: "",
+                Desarrollo: "",
+                Observaciones: "*Discipulado virtual con el Pastor*",
+                OrigenVirtual: true
+              }];
+            })
+          : [];
 
-      mostrarExito(
-        sincronizada
-          ? "Asistencia guardada correctamente."
-          : "Asistencia guardada en este navegador, pero no se pudo sincronizar en línea."
-      );
+        asistencias = asistencias.filter(fila =>
+          String(fila.Fecha) !== fecha ||
+          String(fila.Salon) !== salonDatos ||
+          String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
+        );
+        asistencias = aplicarAsistenciasVirtualesADN(asistencias, asistenciasADN);
+        asistencias.push(...filasAsistencia);
+        asistencias = compactarMediaAsistencias(asistencias);
+        localStorage.setItem(
+          "asistenciasIglesiaRedencion",
+          JSON.stringify(asistencias)
+        );
+
+        actualizarEstado("Asistencia guardada en este navegador. Sincronizando con Firebase...");
+        const sincronizada = await sincronizarAsistencias(
+          fecha,
+          salonDatos,
+          tipoReunion,
+          filasAsistencia,
+          asistenciasADN
+        );
+
+        mostrarExito(
+          sincronizada
+            ? "Asistencia guardada correctamente."
+            : "Asistencia guardada en este navegador, pero no se pudo sincronizar en línea."
+        );
+      } catch (error) {
+        console.error("No se pudo guardar la asistencia.", error);
+        actualizarEstado(
+          `No se pudo guardar la asistencia: ${error.message || "revise la conexión y el archivo seleccionado."}`
+        );
+      } finally {
+        if (botonGuardar) botonGuardar.disabled = false;
+      }
     }
 
     let asistenciaPendiente = null;
@@ -3919,7 +4054,11 @@ function configurarUsuariosIglesia() {
           String(fila.TipoReunion || "Servicio dominical") !== tipoReunion
         );
         restantes = aplicarAsistenciasVirtualesADN(restantes, asistenciasADN);
-        await reemplazarHoja(HOJAS.asistencias, restantes.concat(filasNuevas));
+        await reemplazarHoja(
+          HOJAS.asistencias,
+          compactarMediaAsistencias(restantes.concat(filasNuevas)),
+          filasActuales
+        );
         return true;
       } catch (error) {
         console.error(error);
