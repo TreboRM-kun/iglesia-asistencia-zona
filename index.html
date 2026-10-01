@@ -4855,7 +4855,7 @@ function obtenerSalonesLiderEnTodasLasReuniones(salon, nombre) {
   const fecha = document.getElementById("resumenReunionFecha");
   fecha.min = obtenerPrimerDiaValido(tipo);
   fecha.step = "7";
-  fecha.value = obtenerPrimerDiaDelMes(tipo);
+  fecha.value = obtenerFechaReunion(tipo);
 }
 
     function mostrarResumenReunion() {
