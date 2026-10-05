@@ -3129,9 +3129,7 @@ function configurarUsuariosIglesia() {
       const todasLasZonas = usuarioActual && (
         usuarioActual.rol === "Administrador" || usuarioActual.rol === "Supervisor"
       );
-      const zonas = todasLasZonas
-        ? Object.entries(ninos)
-        : Object.entries(ninos).filter(([salon]) => salon === usuarioActual?.salon);
+      const zonas = Object.entries(ninos);
       const cumpleanosZonas = zonas.flatMap(([salon, nombres]) =>
         nombres
           .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos(salon, nombre)))
