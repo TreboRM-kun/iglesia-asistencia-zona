@@ -2,7 +2,7 @@
 
 Firebase Authentication con correo y contraseña está habilitado en este proyecto. La aplicación actualizada usa esa autenticación para iniciar sesión en **toda la aplicación**, incluidos los aportes. Ya no consulta ni guarda contraseñas en la ruta antigua `Usuarios`.
 
-La versión que separa los datos por zona está publicada en GitHub Pages y las reglas definitivas de Realtime Database ya están activas. Se comprobó que las lecturas anónimas de la raíz, de las rutas nuevas, de la ruta antigua de líderes y de los aportes devuelven HTTP 401. El proyecto sigue en Spark y todavía no tiene un bucket para guardar comprobantes.
+La versión que separa los datos por zona está publicada en GitHub Pages y las reglas de Realtime Database para los datos existentes ya están activas. Las nuevas reglas para comprobantes deben publicarse junto con la versión que las usa. Los comprobantes se comprimen y se guardan en una ruta protegida de Realtime Database; no requieren un bucket de Cloud Storage ni el plan Blaze.
 
 ## Estado del despliegue
 
@@ -41,7 +41,7 @@ El archivo de migración contiene información personal y debe mantenerse privad
 - Los perfiles no pueden modificarse desde la aplicación; su mantenimiento requiere una operación administrativa.
 - Los datos históricos de las rutas antiguas se conservaron, pero las reglas no conceden acceso a las antiguas rutas compartidas de líderes y asistencias. La lista separada de líderes del Pastor permanece accesible solo para administradores y supervisores; los facilitadores no intentan leerla.
 - Los aportes sí tienen restricciones de servidor: los facilitadores solo pueden crear aportes para su zona y leer los propios; administradores y supervisores pueden revisar todos y cambiar su estado.
-- El módulo de aportes está disponible. La carga y visualización de comprobantes requiere crear el bucket de Storage y publicar sus reglas; aún no está disponible porque no hay una cuenta de Cloud Billing asociada al proyecto.
+- El módulo de aportes guarda los comprobantes comprimidos en `ComprobantesAportes/{uid}/{id}` dentro de Realtime Database. Solo los facilitadores pueden crear o limpiar comprobantes temporales de su propia cuenta; solo administradores y supervisores pueden leerlos. Las imágenes se descargan únicamente al pulsar el botón para ver el comprobante.
 - La bitácora y los respaldos conservan permisos de revisión. Los respaldos automáticos de cambios realizados por facilitadores ya no se generan; los cambios siguen registrándose en la bitácora.
 
-`database.rules.json` contiene las reglas definitivas que ya están publicadas. `firebase.json` vincula los archivos de reglas para Firebase CLI; el sitio se aloja en GitHub Pages. El propietario autorizó Blaze, pero Firebase Console indica que no existe una cuenta de Cloud Billing disponible para asociar. El propietario debe crear o vincular esa cuenta antes de habilitar Storage, crear el bucket y desplegar `storage.rules`.
+`database.rules.json` contiene las reglas de Realtime Database para proteger las transacciones y sus comprobantes; después de publicar los cambios, estas reglas deben quedar activas en Firebase. `firebase.json` vincula los archivos de reglas para Firebase CLI; el sitio se aloja en GitHub Pages. El proyecto puede seguir en Spark para usar los comprobantes guardados en Realtime Database; Cloud Storage no forma parte de este flujo.

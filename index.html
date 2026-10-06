@@ -1704,26 +1704,19 @@
       query,
       orderByChild,
       equalTo,
-      serverTimestamp
+      serverTimestamp,
+      remove
     } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
     import {
       getAuth,
       signInWithEmailAndPassword,
       signOut
     } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-    import {
-      getStorage,
-      ref as storageRef,
-      uploadBytes,
-      getBlob
-    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
-
     const firebaseConfig = {
       apiKey: "AIzaSyDtPVsqzbr6BBRC6o5nQUhtnWsOhLP5rac",
       authDomain: "asistencia-iglesia-zonas.firebaseapp.com",
       databaseURL: "https://asistencia-iglesia-zonas-default-rtdb.firebaseio.com",
       projectId: "asistencia-iglesia-zonas",
-      storageBucket: "asistencia-iglesia-zonas.firebasestorage.app",
       messagingSenderId: "369962831363",
       appId: "1:369962831363:web:c1f754e8186421e8310836",
       measurementId: "G-97DY720EQY"
@@ -1732,12 +1725,10 @@
     const firebaseApp = initializeApp(firebaseConfig);
     const firebaseDatabase = getDatabase(firebaseApp);
     const firebaseAuth = getAuth(firebaseApp);
-    const firebaseStorage = getStorage(firebaseApp);
 
     window.firebaseReady = Promise.resolve({
       database: firebaseDatabase,
       auth: firebaseAuth,
-      storage: firebaseStorage,
       ref,
       get,
       set,
@@ -1747,11 +1738,9 @@
       orderByChild,
       equalTo,
       serverTimestamp,
+      remove,
       signInWithEmailAndPassword,
-      signOut,
-      storageRef,
-      uploadBytes,
-      getBlob
+      signOut
     });
   </script>
 
@@ -4288,6 +4277,22 @@ async function cargarDatosDesdeAPI() {
       );
     }
 
+    function leerArchivoComoDataUrl(archivo) {
+      return new Promise((resolver, rechazar) => {
+        const lector = new FileReader();
+        lector.onload = () => {
+          if (typeof lector.result !== "string") {
+            rechazar(new Error("No se pudo leer el archivo como imagen."));
+            return;
+          }
+          resolver(lector.result);
+        };
+        lector.onerror = () =>
+          rechazar(new Error("No se pudo leer el archivo multimedia."));
+        lector.readAsDataURL(archivo);
+      });
+    }
+
     async function guardarAsistencia() {
       const salon = document.getElementById("salon").value;
       const fecha = document.getElementById("fecha").value;
@@ -4321,17 +4326,10 @@ async function cargarDatosDesdeAPI() {
           ? await prepararArchivoAsistencia(archivo)
           : null;
         const multimedia = archivoPreparado
-          ? await new Promise((resolver, rechazar) => {
-              const lector = new FileReader();
-              lector.onload = () => resolver({
-                tipo: archivoPreparado.type,
-                datos: lector.result
-              });
-              lector.onerror = () => rechazar(
-                new Error("No se pudo leer el archivo multimedia.")
-              );
-              lector.readAsDataURL(archivoPreparado);
-            })
+          ? {
+              tipo: archivoPreparado.type,
+              datos: await leerArchivoComoDataUrl(archivoPreparado)
+            }
           : {
               tipo: datosReunion?.MediaTipo || "",
               datos: datosReunion?.MediaData || ""
@@ -5425,6 +5423,7 @@ const MAX_COMPROBANTE_APORTE_ORIGINAL_BYTES = 25 * 1024 * 1024;
 let perfilAportesActual = null;
 let registrosAportesCache = [];
 let urlComprobanteActual = null;
+const MAX_COMPROBANTE_APORTE_DATA_URL_CHARS = 2800000;
 
 function normalizarUsuarioAportes(usuario) {
   const nombreNormalizado = String(usuario || "")
@@ -5626,7 +5625,10 @@ async function registrarAporteLimpieza(evento) {
   const boton = document.getElementById("botonGuardarAporte");
   boton.disabled = true;
   mostrarMensajeAportesRegistro("Guardando aporte...");
-  let comprobanteSubido = false;
+  let comprobanteGuardado = false;
+  let comprobanteEscritoIntentado = false;
+  let registroGuardado = false;
+  let referenciaComprobante = null;
 
   try {
     const firebase = await window.firebaseReady;
@@ -5657,13 +5659,15 @@ async function registrarAporteLimpieza(evento) {
       ? await comprimirImagenAsistencia(archivoOriginal)
       : null;
     if (archivo) {
-      const ruta = `comprobantes-limpieza/${perfilAportesActual.uid}/${id}`;
-      await firebase.uploadBytes(
-        firebase.storageRef(firebase.storage, ruta),
-        archivo,
-        { contentType: archivo.type }
-      );
-      comprobanteSubido = true;
+      const datosComprobante = await leerArchivoComoDataUrl(archivo);
+      if (datosComprobante.length > MAX_COMPROBANTE_APORTE_DATA_URL_CHARS) {
+        throw new Error("La imagen comprimida supera el tamaño permitido.");
+      }
+      const ruta = `ComprobantesAportes/${perfilAportesActual.uid}/${id}`;
+      referenciaComprobante = firebase.ref(firebase.database, ruta);
+      comprobanteEscritoIntentado = true;
+      await firebase.set(referenciaComprobante, datosComprobante);
+      comprobanteGuardado = true;
       registro.rutaComprobante = ruta;
     }
 
@@ -5671,17 +5675,35 @@ async function registrarAporteLimpieza(evento) {
       firebase.ref(firebase.database, `AportesLimpieza/${id}`),
       registro
     );
+    registroGuardado = true;
     document.getElementById("formularioAporte").reset();
     establecerSemanaActualAportes();
     mostrarMensajeAportesRegistro("Aporte registrado correctamente.");
   } catch (error) {
     console.error("No se pudo registrar el aporte de limpieza.", error);
+    let errorLimpiezaComprobante = null;
+    if (comprobanteEscritoIntentado && !registroGuardado && referenciaComprobante) {
+      try {
+        const firebase = await window.firebaseReady;
+        await firebase.remove(referenciaComprobante);
+      } catch (errorLimpieza) {
+        errorLimpiezaComprobante = errorLimpieza;
+        console.error(
+          "No se pudo limpiar el comprobante de un aporte no registrado.",
+          errorLimpieza
+        );
+      }
+    }
     mostrarMensajeAportesRegistro(
-      comprobanteSubido
-        ? "El comprobante se subió, pero el aporte no quedó registrado. Contacte al administrador antes de volver a intentarlo."
-        : archivoOriginal
-          ? "No se pudo comprimir o subir el comprobante. Verifique la imagen y la conexión, e inténtelo de nuevo."
-          : "No se pudo registrar el aporte. Revise la conexión y la configuración de Firebase.",
+      registroGuardado
+        ? "El aporte quedó registrado, pero no se pudo completar una operación posterior. Contacte al administrador."
+        : errorLimpiezaComprobante
+          ? "No se pudo confirmar el registro y tampoco limpiar el comprobante temporal. Contacte al administrador antes de volver a intentarlo."
+          : archivoOriginal && comprobanteGuardado
+            ? "No se pudo registrar el aporte y se limpió el comprobante temporal. Puede volver a intentarlo."
+            : archivoOriginal
+              ? "No se pudo comprimir el comprobante ni completar el registro. Verifique la imagen y la conexión, e inténtelo de nuevo."
+              : "No se pudo registrar el aporte. Revise la conexión y la configuración de Firebase.",
       true
     );
   } finally {
@@ -5841,13 +5863,26 @@ async function verComprobanteAporte(uid, id) {
       !/^[A-Za-z0-9_-]+$/.test(id)) return;
   try {
     const firebase = await window.firebaseReady;
-    const archivo = await firebase.getBlob(firebase.storageRef(
-      firebase.storage,
-      `comprobantes-limpieza/${uid}/${id}`
+    const resultado = await firebase.get(firebase.ref(
+      firebase.database,
+      `ComprobantesAportes/${uid}/${id}`
     ));
-    if (!archivo.type.startsWith("image/")) {
+    if (!resultado.exists()) {
+      throw new Error("No se encontró el comprobante guardado.");
+    }
+    const datos = resultado.val();
+    const coincidencia = typeof datos === "string" &&
+      datos.length <= MAX_COMPROBANTE_APORTE_DATA_URL_CHARS
+      ? datos.match(/^data:image\/webp;base64,([A-Za-z0-9+/]+=*)$/)
+      : null;
+    if (!coincidencia) {
       throw new Error("El archivo guardado no es una imagen.");
     }
+    const bytes = Uint8Array.from(
+      atob(coincidencia[1]),
+      caracter => caracter.charCodeAt(0)
+    );
+    const archivo = new Blob([bytes], { type: "image/webp" });
     cerrarVisorMultimedia();
     urlComprobanteActual = URL.createObjectURL(archivo);
     mostrarEnVisorMultimedia(
