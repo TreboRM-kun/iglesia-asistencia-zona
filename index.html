@@ -2376,7 +2376,9 @@ async function cargarDatosDesdeAPI() {
     const [filasNinos, filasLideresPastor, filasAsistencias, filasMaestros, filasAnuncios, filasVirtuales] =
       await Promise.all([
         leerHoja(HOJAS.ninos),
-        leerHoja(HOJAS.lideresPastor),
+        puedeVerTodasLasZonas()
+          ? leerHoja(HOJAS.lideresPastor)
+          : Promise.resolve([]),
         leerHoja(HOJAS.asistencias),
         leerHoja(HOJAS.maestros),
         leerHoja(HOJAS.anuncios),

@@ -38,6 +38,10 @@
       ".read": "auth != null && root.child('Perfiles').child(auth.uid).exists()",
       ".write": "auth != null && root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador'"
     },
+    "LideresPastorIglesiaRedencionV2": {
+      ".read": "auth != null && (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador' || root.child('Perfiles').child(auth.uid).child('rol').val() == 'Supervisor')",
+      ".write": "auth != null && root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador'"
+    },
     "Perfiles": {
       ".read": "auth != null && (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador' || root.child('Perfiles').child(auth.uid).child('rol').val() == 'Supervisor')",
       ".write": false,

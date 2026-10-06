@@ -39,7 +39,7 @@ El archivo de migración contiene información personal y debe mantenerse privad
 
 - Sin una cuenta autenticada y un perfil válido en `/Perfiles`, las rutas de datos de la aplicación quedan denegadas. La antigua ruta `Usuarios`, que contenía contraseñas, no se concede a la aplicación.
 - Los perfiles no pueden modificarse desde la aplicación; su mantenimiento requiere una operación administrativa.
-- Los datos históricos de las rutas antiguas se conservaron, pero las reglas definitivas ya no conceden acceso a ellas. La aplicación publicada usa las rutas separadas por zona.
+- Los datos históricos de las rutas antiguas se conservaron, pero las reglas no conceden acceso a las antiguas rutas compartidas de líderes y asistencias. La lista separada de líderes del Pastor permanece accesible solo para administradores y supervisores; los facilitadores no intentan leerla.
 - Los aportes sí tienen restricciones de servidor: los facilitadores solo pueden crear aportes para su zona y leer los propios; administradores y supervisores pueden revisar todos y cambiar su estado.
 - El módulo de aportes está disponible. La carga y visualización de comprobantes requiere crear el bucket de Storage y publicar sus reglas; aún no está disponible porque no hay una cuenta de Cloud Billing asociada al proyecto.
 - La bitácora y los respaldos conservan permisos de revisión. Los respaldos automáticos de cambios realizados por facilitadores ya no se generan; los cambios siguen registrándose en la bitácora.
