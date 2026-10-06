@@ -696,6 +696,46 @@
   max-width: 1100px;
 }
 
+.ventana-aportes {
+  max-width: 1050px;
+  text-align: left;
+}
+
+.formulario-aporte,
+.filtros-aportes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.formulario-aporte label,
+.filtros-aportes label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: bold;
+}
+
+.formulario-aporte textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.tabla-aportes {
+  overflow-x: auto;
+  margin-top: 18px;
+}
+
+.tabla-aportes table {
+  min-width: 760px;
+}
+
+.estado-aporte {
+  font-weight: bold;
+  color: #6e1f2a;
+}
+
 .ventana-anuncios #seccionAnunciosPasados {
   margin-top: 20px;
   padding-top: 10px;
@@ -970,14 +1010,6 @@
   font-weight: bold;
 }
 
-#accionesUsuario {
-  margin-top: 10px;
-}
-
-#accionesUsuario.oculto {
-  display: none;
-}
-
 .texto-exito {
   color: #6e1f2a !important;
 }
@@ -1050,6 +1082,7 @@
 
     <input id="contrasena" type="password" placeholder="Contraseña">
     <br>
+    <p>Use la cuenta segura que le asignó el administrador. La contraseña anterior de Asistencias ya no sirve.</p>
 
     <button id="botonIngresar" onclick="iniciarSesion()">Ingresar</button>
     <button id="botonInstalarAplicacion" class="instalar-aplicacion"
@@ -1097,6 +1130,11 @@
 
         <button onclick="abrirAnuncios()">
           Anuncios
+        </button>
+
+        <button id="botonAportesLimpieza" type="button"
+          onclick="abrirControlAportes()">
+          Aporte de limpieza
         </button>
 
         <button id="botonAdministrarUsuarios"
@@ -1236,56 +1274,82 @@
       </button>
 
       <h2 id="tituloAdministrarUsuarios">Administrar usuarios</h2>
-
-      <h3>Modificar contraseña</h3>
-
-      <select id="usuarioSeleccionado">
-        <option value="">Seleccione un usuario</option>
-      </select>
-
-    <div id="accionesUsuario" class="oculto">
-      <button onclick="abrirCambioContrasena()">
-    Modificar contraseña
-      </button>
-
-      <button class="boton-rojo" onclick="confirmarEliminarUsuario()">
-    Eliminar usuario
-      </button>
-    </div>
-
-      <hr>
-
-      <section id="formularioNuevoUsuario">
-      <h3>Crear nuevo usuario</h3>
-
-      <input id="nuevoUsuario" type="text"
-        placeholder="Nombre de usuario">
-
-      <input id="nuevaContrasena" type="password"
-        placeholder="Contraseña">
-
-      <select id="nuevoRol">
-        <option value="Facilitador">Facilitador</option>
-        <option value="Supervisor">Supervisor</option>
-        <option value="Administrador">Administrador</option>
-      </select>
-
-      <select id="nuevoSalon">
-        <option value="Zona 1">Zona 1</option>
-        <option value="Zona 2">Zona 2</option>
-        <option value="Zona 3">Zona 3</option>
-        <option value="Zona 4">Zona 4</option>
-        <option value="Zona 5">Zona 5</option>
-        <option value="Zona 6">Zona 6</option>
-        <option value="Virtual">Virtual</option>
-        <option value="Sabana de Parra">Sabana de Parra</option>
-        <option value="todos">Todas las zonas</option>
-      </select>
-
-      <button onclick="crearUsuario()">Crear usuario</button>
-
+      <p>Las cuentas y los permisos ahora se administran en Firebase Authentication y en los perfiles autorizados. No se guardan contraseñas en la aplicación.</p>
+      <p>Usuarios configurados:</p>
+      <div id="listaUsuariosSeguros"></div>
       <p id="mensajeUsuarios"></p>
+    </div>
+  </div>
+
+  <div id="modalAportesLimpieza" class="modal oculto">
+    <div class="ventana-usuarios ventana-aportes">
+      <button class="cerrar-modal" type="button"
+        onclick="cerrarModalAportes()" aria-label="Cerrar aportes">×</button>
+      <h2>Control de aportes de limpieza</h2>
+
+      <section id="contenidoAportes" class="oculto">
+        <p id="informacionPerfilAportes"></p>
+        <button type="button" onclick="cerrarModalAportes()">Cerrar módulo</button>
+
+        <form id="formularioAporte" class="formulario-aporte"
+          onsubmit="registrarAporteLimpieza(event)">
+          <label for="semanaAporte">Semana correspondiente (seleccione el lunes)
+            <input id="semanaAporte" type="date" required>
+          </label>
+          <label for="montoAporte">Monto aportado
+            <input id="montoAporte" type="number" min="0.01" step="0.01"
+              inputmode="decimal" required>
+          </label>
+          <label for="comprobanteAporte">Comprobante (JPG, PNG o WebP; máximo 5 MB)
+            <input id="comprobanteAporte" type="file"
+              accept="image/jpeg,image/png,image/webp">
+          </label>
+          <label for="comentarioAporte">Comentario (opcional)
+            <textarea id="comentarioAporte" maxlength="500"></textarea>
+          </label>
+          <button id="botonGuardarAporte" type="submit">Registrar aporte</button>
+        </form>
+
+        <section id="filtrosAportes" class="filtros-aportes oculto">
+          <label for="filtroZonaAportes">Zona
+            <select id="filtroZonaAportes" onchange="mostrarAportesLimpieza()">
+              <option value="">Todas las zonas</option>
+              <option value="Zona 1">Zona 1</option>
+              <option value="Zona 2">Zona 2</option>
+              <option value="Zona 3">Zona 3</option>
+              <option value="Zona 4">Zona 4</option>
+              <option value="Zona 5">Zona 5</option>
+              <option value="Zona 6">Zona 6</option>
+            </select>
+          </label>
+          <label for="filtroEstadoAportes">Estado
+            <select id="filtroEstadoAportes" onchange="mostrarAportesLimpieza()">
+              <option value="">Todos</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Confirmado">Confirmado</option>
+              <option value="Requiere aclaración">Requiere aclaración</option>
+            </select>
+          </label>
+          <label for="filtroSemanaAportes">Semana
+            <input id="filtroSemanaAportes" type="date"
+              onchange="mostrarAportesLimpieza()">
+          </label>
+          <button type="button" onclick="cargarAportesLimpieza()">Actualizar lista</button>
+        </section>
+
+        <p id="mensajeRegistroAporte" role="status" aria-live="polite"></p>
+        <div id="listaAportesLimpieza" class="tabla-aportes"></div>
       </section>
+    </div>
+  </div>
+
+  <div id="modalVisorComprobante" class="modal oculto"
+    onclick="if (event.target === this) cerrarVisorComprobante()">
+    <div class="ventana-usuarios">
+      <button class="cerrar-modal" type="button"
+        onclick="cerrarVisorComprobante()" aria-label="Cerrar comprobante">×</button>
+      <img id="imagenComprobante" class="anuncio-multimedia"
+        alt="Comprobante de transferencia">
     </div>
   </div>
 
@@ -1501,40 +1565,6 @@
   </div>
 </div>
 
-    <div id="modalContrasena" class="modal oculto">
-  <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalContrasena')">×</button>
-
-    <h2>Modificar contraseña</h2>
-    <p id="usuarioCambioTexto"></p>
-
-    <input id="nuevaContrasenaModal"
-      type="password"
-      placeholder="Nueva contraseña">
-
-    <button onclick="guardarNuevaContrasena()">
-      Guardar contraseña
-    </button>
-  </div>
-</div>
-
-<div id="modalConfirmacion" class="modal oculto">
-  <div class="ventana-usuarios">
-    <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacion')">×</button>
-
-    <h2>Confirmar eliminación</h2>
-    <p id="textoConfirmacion"></p>
-
-    <button class="boton-rojo" onclick="eliminarUsuarioConfirmado()">
-      Sí, eliminar
-    </button>
-
-    <button onclick="cerrarModal('modalConfirmacion')">
-      Cancelar
-    </button>
-  </div>
-</div>
-
 <div id="modalConfirmacionNino" class="modal oculto">
   <div class="ventana-usuarios">
     <button class="cerrar-modal" onclick="cerrarModal('modalConfirmacionNino')">×</button>
@@ -1607,8 +1637,24 @@
       ref,
       get,
       set,
-      update
+      update,
+      push,
+      query,
+      orderByChild,
+      equalTo,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import {
+      getStorage,
+      ref as storageRef,
+      uploadBytes,
+      getBlob
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDtPVsqzbr6BBRC6o5nQUhtnWsOhLP5rac",
@@ -1623,13 +1669,27 @@
 
     const firebaseApp = initializeApp(firebaseConfig);
     const firebaseDatabase = getDatabase(firebaseApp);
+    const firebaseAuth = getAuth(firebaseApp);
+    const firebaseStorage = getStorage(firebaseApp);
 
     window.firebaseReady = Promise.resolve({
       database: firebaseDatabase,
+      auth: firebaseAuth,
+      storage: firebaseStorage,
       ref,
       get,
       set,
-      update
+      update,
+      push,
+      query,
+      orderByChild,
+      equalTo,
+      serverTimestamp,
+      signInWithEmailAndPassword,
+      signOut,
+      storageRef,
+      uploadBytes,
+      getBlob
     });
   </script>
 
@@ -1637,7 +1697,6 @@
 const HOJAS = {
   ninos: "LideresIglesiaRedencionV2",
   lideresPastor: "LideresPastorIglesiaRedencionV2",
-  usuarios: "Usuarios",
   asistencias: "AsistenciasIglesiaRedencionV2",
   maestros: "Facilitadores",
   anuncios: "Anuncios",
@@ -1800,16 +1859,30 @@ async function reemplazarHoja(
       filas
     );
     if (!huboCambios) return;
-    void completarRespaldoYBitacoraAsistencia(
-      firebase,
-      filasAnteriores,
-      filas,
-      evento
-    );
+    if (usuarioActual?.rol === "Administrador") {
+      void completarRespaldoYBitacoraAsistencia(
+        firebase,
+        filasAnteriores,
+        filas,
+        evento
+      );
+    } else {
+      evento.Cambios = compararFilasParaBitacora(
+        HOJAS.asistencias,
+        filasAnteriores,
+        filas
+      );
+      await firebase.set(referenciaEvento, evento);
+      await firebase.set(referenciaEvento, {
+        ...evento,
+        Resultado: "Completado"
+      });
+    }
     return;
   }
 
-  if (HOJAS_CON_RESPALDO.has(nombreHoja) && filasAnteriores.length) {
+  if (usuarioActual?.rol === "Administrador" &&
+      HOJAS_CON_RESPALDO.has(nombreHoja) && filasAnteriores.length) {
     const referenciaRespaldos = firebase.ref(
       firebase.database,
       `${HOJA_RESPALDOS}/${nombreHoja}`
@@ -2163,35 +2236,48 @@ function formatearCumpleanosEntrada(valor) {
   return normalizado.split("-").reverse().join("/");
 }
 
-function filasDeUsuarios() {
-  return Object.entries(usuarios).map(([usuario, datos]) => ({
-    Usuario: usuario,
-    Contrasena: datos.contrasena,
-    Rol: datos.rol,
-    Salon: datos.salon
-  }));
-}
-
 async function cargarDatosDesdeAPI() {
   try {
-    const [filasNinos, filasLideresPastor, filasUsuarios, filasAsistencias, filasMaestros, filasAnuncios, filasVirtuales] =
+    const firebase = await window.firebaseReady;
+    const [filasNinos, filasLideresPastor, filasAsistencias, filasMaestros, filasAnuncios, filasVirtuales] =
       await Promise.all([
         leerHoja(HOJAS.ninos),
         leerHoja(HOJAS.lideresPastor),
-        leerHoja(HOJAS.usuarios),
         leerHoja(HOJAS.asistencias),
         leerHoja(HOJAS.maestros),
         leerHoja(HOJAS.anuncios),
         leerHoja(HOJAS.lideresVirtuales)
       ]);
+
+    const puedeListarPerfiles = ["Administrador", "Supervisor"].includes(
+      usuarioActual?.rol
+    );
+    if (puedeListarPerfiles) {
+      const resultadoPerfiles = await firebase.get(
+        firebase.ref(firebase.database, "Perfiles")
+      );
+      const perfiles = resultadoPerfiles.exists()
+        ? Object.values(resultadoPerfiles.val())
+        : [];
+      usuarios = Object.fromEntries(perfiles.map(perfil => [
+        perfil.usuario,
+        { rol: perfil.rol, salon: perfil.salon }
+      ]));
+    } else if (usuarioActual) {
+      usuarios = {
+        [usuarioActual.usuario]: {
+          rol: usuarioActual.rol,
+          salon: usuarioActual.salon
+        }
+      };
+    }
+
     cargaFirebaseCompleta = true;
 
     if (filasAnuncios.length) {
       anuncios = filasAnuncios;
       localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
     }
-    mostrarAnunciosLogin();
-
     if (filasNinos.length) {
       ninos = Object.fromEntries(ZONAS.map(zona => [zona, []]));
       const filasZonaSiete = [];
@@ -2324,18 +2410,6 @@ async function cargarDatosDesdeAPI() {
       localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
     }
 
-    if (filasUsuarios.length) {
-      usuarios = {};
-      filasUsuarios.forEach(fila => {
-        usuarios[fila.Usuario] = {
-          contrasena: fila.Contrasena,
-          rol: fila.Rol,
-          salon: fila.Salon
-        };
-      });
-      localStorage.setItem("usuariosIglesiaRedencion", JSON.stringify(usuarios));
-    }
-
     if (filasAsistencias.length) {
       asistencias = filasAsistencias;
       localStorage.setItem(
@@ -2373,80 +2447,18 @@ async function cargarDatosDesdeAPI() {
       );
     }
   } catch (error) {
-    console.error("Firebase no está disponible. Se usará la copia local.", error);
+    cargaFirebaseCompleta = false;
+    console.error("No se pudieron cargar los datos protegidos desde Firebase.", error);
+    throw error;
   }
 
-  mostrarAnunciosLogin();
   if (usuarioActual) {
     mostrarCintaCumpleanos();
   }
-
-  configurarUsuariosIglesia();
 }
 
-function configurarUsuariosIglesia() {
-  Object.keys(usuarios).forEach(usuario => {
-    if (usuarios[usuario].rol === "Facilitador") {
-      delete usuarios[usuario];
-    }
-  });
-
-  for (let numeroZona = 1; numeroZona <= 6; numeroZona++) {
-    usuarios[`Zona${numeroZona}`] = {
-      contrasena: `123z${numeroZona}`,
-      rol: "Facilitador",
-      salon: `Zona ${numeroZona}`
-    };
-  }
-
-  usuarios.Sabana = {
-    contrasena: "iglesiasdp",
-    rol: "Facilitador",
-    salon: "Sabana de Parra"
-  };
-
-  usuarios.Cuidador = {
-    contrasena: "admin123",
-    rol: "Administrador",
-    salon: "todos"
-  };
-
-  guardarUsuarios();
-}
-
-    const usuariosIniciales = {
-      Zona1: { contrasena: "123z1", rol: "Facilitador", salon: "Zona 1" },
-      Zona2: { contrasena: "123z2", rol: "Facilitador", salon: "Zona 2" },
-      Zona3: { contrasena: "123z3", rol: "Facilitador", salon: "Zona 3" },
-      Zona4: { contrasena: "123z4", rol: "Facilitador", salon: "Zona 4" },
-      Zona5: { contrasena: "123z5", rol: "Facilitador", salon: "Zona 5" },
-      Zona6: { contrasena: "123z6", rol: "Facilitador", salon: "Zona 6" },
-      Sabana: { contrasena: "iglesiasdp", rol: "Facilitador", salon: "Sabana de Parra" },
-      Cuidador: {
-        contrasena: "admin123",
-        rol: "Administrador",
-        salon: "todos"
-      },
-      Pastor: {
-        contrasena: "admin123",
-        rol: "Administrador",
-        salon: "todos"
-      },
-      Supervisor: {
-        contrasena: "super123",
-        rol: "Supervisor",
-        salon: "todos"
-      }
-    };
-
-    let usuarios = JSON.parse(
-      localStorage.getItem("usuariosIglesiaRedencion")
-    );
-
-    if (!usuarios) {
-      usuarios = usuariosIniciales;
-      guardarUsuarios();
-    }
+    let usuarios = {};
+    localStorage.removeItem("usuariosIglesiaRedencion");
 
     let ninosIniciales = {
       "Zona 1": ["Ana López", "Carlos Pérez", "María Gómez"],
@@ -2552,7 +2564,6 @@ function configurarUsuariosIglesia() {
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      mostrarAnunciosLogin();
       const estaInstalada = window.matchMedia("(display-mode: standalone)").matches ||
         window.navigator.standalone === true;
       if (estaInstalada) {
@@ -2585,7 +2596,6 @@ function configurarUsuariosIglesia() {
       });
 
       document.getElementById("fechaAnuncio").value = formatearFechaISO(new Date());
-      cargarDatosDesdeAPI();
     });
 
     function obtenerFechaReunion(tipo = document.getElementById("tipoReunion")?.value, fechaTexto) {
@@ -2921,11 +2931,6 @@ function configurarUsuariosIglesia() {
       selector2.disabled = !puedeEditar;
     }
 
-    function guardarUsuarios() {
-      localStorage.setItem("usuariosIglesiaRedencion", JSON.stringify(usuarios));
-      sincronizarHoja(HOJAS.usuarios, filasDeUsuarios());
-    }
-
     function escaparTexto(texto) {
       return texto
         .replaceAll("&", "&amp;")
@@ -3016,47 +3021,93 @@ function configurarUsuariosIglesia() {
       document.getElementById("modalVisorMultimedia").classList.add("oculto");
     }
 
-    function iniciarSesion() {
+    async function iniciarSesion() {
       const usuario = document.getElementById("usuario").value.trim();
       const contrasena = document.getElementById("contrasena").value;
-      const datos = usuarios[usuario];
-
-      if (!datos || datos.contrasena !== contrasena) {
-        document.getElementById("mensajeLogin").textContent =
-          "Usuario o contraseña incorrectos.";
+      const boton = document.getElementById("botonIngresar");
+      const mensaje = document.getElementById("mensajeLogin");
+      if (!usuario || !contrasena) {
+        mensaje.textContent = "Escriba su usuario y contraseña.";
         return;
       }
 
-      usuarioActual = {
-        usuario,
-        ...datos
-      };
+      boton.disabled = true;
+      mensaje.textContent = "Verificando acceso seguro...";
+      try {
+        const firebase = await window.firebaseReady;
+        const credencial = await firebase.signInWithEmailAndPassword(
+          firebase.auth,
+          normalizarUsuarioAportes(usuario),
+          contrasena
+        );
+        const resultadoPerfil = await firebase.get(
+          firebase.ref(
+            firebase.database,
+            `Perfiles/${credencial.user.uid}`
+          )
+        );
+        if (!resultadoPerfil.exists()) {
+          throw new Error("La cuenta no tiene un perfil autorizado.");
+        }
 
-      document.getElementById("pantallaLogin").classList.add("oculto");
-      document.getElementById("pantallaSistema").classList.remove("oculto");
-      mostrarAnunciosLogin();
+        const perfil = resultadoPerfil.val();
+        const rolesPermitidos = ["Facilitador", "Supervisor", "Administrador"];
+        const perfilValido = rolesPermitidos.includes(perfil.rol) &&
+          normalizarNombreLider(perfil.usuario) ===
+            normalizarNombreLider(usuario) &&
+          (perfil.rol !== "Facilitador"
+            ? perfil.salon === "todos"
+            : typeof perfil.salon === "string" && perfil.salon.length > 0);
+        if (!perfilValido) {
+          throw new Error("El perfil no coincide con el usuario o el rol.");
+        }
 
-      document.getElementById("informacionUsuario").textContent =
-        `Usuario: ${usuarioActual.usuario} | Rol: ${usuarioActual.rol}`;
+        usuarioActual = {
+          uid: credencial.user.uid,
+          usuario: perfil.usuario,
+          rol: perfil.rol,
+          salon: perfil.salon
+        };
+        await cargarDatosDesdeAPI();
 
-      const selectorSalon = document.getElementById("salon");
-      const formulario = document.getElementById("formularioNino");
+        mensaje.textContent = "";
+        document.getElementById("pantallaLogin").classList.add("oculto");
+        document.getElementById("pantallaSistema").classList.remove("oculto");
+        document.getElementById("informacionUsuario").textContent =
+          `Usuario: ${usuarioActual.usuario} | Rol: ${usuarioActual.rol}`;
 
-      if (usuarioActual.salon !== "todos") {
-        selectorSalon.value = usuarioActual.salon;
-        selectorSalon.disabled = true;
-        document.getElementById("salonNuevoNino").value = usuarioActual.salon;
-        document.getElementById("salonNuevoNino").disabled = true;
-      } else {
-        selectorSalon.disabled = false;
-        document.getElementById("salonNuevoNino").disabled = false;
+        const selectorSalon = document.getElementById("salon");
+        if (usuarioActual.salon !== "todos") {
+          selectorSalon.value = usuarioActual.salon;
+          selectorSalon.disabled = true;
+          document.getElementById("salonNuevoNino").value = usuarioActual.salon;
+          document.getElementById("salonNuevoNino").disabled = true;
+        } else {
+          selectorSalon.disabled = false;
+          document.getElementById("salonNuevoNino").disabled = false;
+        }
+
+        mostrarAnunciosLogin();
+        actualizarOpcionesReunion();
+        actualizarFormularioLideres();
+        mostrarAsistencia();
+        mostrarPanelUsuarios();
+        mostrarCintaCumpleanos();
+      } catch (error) {
+        console.error("No se pudo iniciar sesión en la aplicación.", error);
+        try {
+          const firebase = await window.firebaseReady;
+          await firebase.signOut(firebase.auth);
+        } catch (errorCerrarSesion) {
+          console.error("No se pudo cerrar la sesión de Firebase.", errorCerrarSesion);
+        }
+        usuarioActual = null;
+        cargaFirebaseCompleta = false;
+        mensaje.textContent =
+          "No se pudo iniciar sesión. Verifique sus credenciales y que el administrador haya creado su cuenta y perfil en Firebase.";
+      } finally {
+        boton.disabled = false;
       }
-
-      actualizarOpcionesReunion();
-      actualizarFormularioLideres();
-      mostrarAsistencia();
-      mostrarPanelUsuarios();
-      mostrarCintaCumpleanos();
     }
 
     function nombreMesCumpleanos(fechaTexto) {
@@ -4291,19 +4342,22 @@ function configurarUsuariosIglesia() {
       }
     }
 
-    function guardarUsuarios() {
-  localStorage.setItem(
-    "usuariosIglesiaRedencion",
-    JSON.stringify(usuarios)
-  );
-  sincronizarHoja(HOJAS.usuarios, filasDeUsuarios());
-}
-
     function mostrarPanelUsuarios() {
   const boton = document.getElementById("botonAdministrarUsuarios");
   const botonResumen = document.getElementById("botonResumenNino");
   const botonResumenReunion = document.getElementById("botonResumenReunion");
+  const botonAportes = document.getElementById("botonAportesLimpieza");
       const botonHistorial = document.getElementById("botonHistorialRespaldo");
+
+      botonAportes.classList.toggle(
+        "oculto",
+        !usuarioActual ||
+          !(
+            ["Administrador", "Supervisor"].includes(usuarioActual.rol) ||
+            (usuarioActual.rol === "Facilitador" &&
+              ZONAS_APORTES.includes(usuarioActual.salon))
+          )
+      );
 
       botonHistorial.classList.toggle(
         "oculto",
@@ -4812,96 +4866,29 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     return;
   }
 
-  const selector = document.getElementById("usuarioSeleccionado");
-
-  selector.innerHTML =
-    '<option value="">Seleccione un usuario</option>';
-
-  Object.keys(usuarios).forEach(usuario => {
-    selector.innerHTML += `
-      <option value="${escaparTexto(usuario)}">
-        ${escaparTexto(usuario)} -
-        ${escaparTexto(usuarios[usuario].rol)}
-      </option>
-    `;
-  });
-
-  document.getElementById("accionesUsuario").classList.add("oculto");
+  const lista = document.getElementById("listaUsuariosSeguros");
+  const usuariosOrdenados = Object.entries(usuarios)
+    .sort(([nombreA], [nombreB]) => nombreA.localeCompare(nombreB, "es"));
+  lista.innerHTML = usuariosOrdenados.length
+    ? usuariosOrdenados.map(([nombre, perfil]) =>
+        `<p>${escaparTexto(nombre)} — ${escaparTexto(perfil.rol)} — ${escaparTexto(perfil.salon)}</p>`
+      ).join("")
+    : "<p>No hay otros perfiles cargados.</p>";
   document.getElementById("tituloAdministrarUsuarios").textContent =
-    usuarioActual.rol === "Supervisor"
-      ? "Usuarios (solo lectura)"
-      : "Administrar usuarios";
-  document.getElementById("formularioNuevoUsuario").classList.toggle(
-    "oculto",
-    usuarioActual.rol !== "Administrador"
-  );
+    "Perfiles de usuario";
   document.getElementById("mensajeUsuarios").textContent =
-    usuarioActual.rol === "Supervisor" ? "Vista de solo lectura." : "";
+    "Para crear cuentas, cambiar contraseñas o asignar zonas, use Firebase Console. Esta aplicación no almacena ni modifica contraseñas.";
   document.getElementById("modalUsuarios").classList.remove("oculto");
 }
-
-document.addEventListener("change", evento => {
-  if (evento.target.id !== "usuarioSeleccionado") {
-    return;
-  }
-
-  const acciones = document.getElementById("accionesUsuario");
-
-  acciones.classList.toggle(
-    "oculto",
-    !evento.target.value || usuarioActual?.rol !== "Administrador"
-  );
-});
 
     function cerrarAdministrarUsuarios() {
   document.getElementById("modalUsuarios").classList.add("oculto");
 }
 
 function crearUsuario() {
-  if (!usuarioActual || usuarioActual.rol !== "Administrador") {
-    return;
-  }
-
-  const nombre = document.getElementById("nuevoUsuario").value.trim();
-  const contrasena = document.getElementById("nuevaContrasena").value.trim();
-  const rol = document.getElementById("nuevoRol").value;
-  const salon = document.getElementById("nuevoSalon").value;
-  const mensaje = document.getElementById("mensajeUsuarios");
-
-  if (!nombre || !contrasena) {
-    mensaje.textContent = "Complete el usuario y la contraseña.";
-    mensaje.style.color = "#6e1f2a";
-    return;
-  }
-
-  if (usuarios[nombre]) {
-    mensaje.textContent = "Ese usuario ya existe.";
-    mensaje.style.color = "#6e1f2a";
-    return;
-  }
-
-  if (rol === "Facilitador" && salon === "todos") {
-    mensaje.textContent = "El facilitador debe tener una zona asignada.";
-    mensaje.style.color = "#6e1f2a";
-    return;
-  }
-
-  usuarios[nombre] = {
-    contrasena,
-    rol,
-    salon: rol === "Facilitador" ? salon : "todos"
-  };
-
-  guardarUsuarios();
-
-  document.getElementById("nuevoUsuario").value = "";
-  document.getElementById("nuevaContrasena").value = "";
-
-  mensaje.textContent = "Usuario creado correctamente.";
-  mensaje.style.color = "#6e1f2a";
-
-  // Actualiza la lista desplegable de usuarios
-  abrirAdministrarUsuarios();
+  if (!usuarioActual || usuarioActual.rol !== "Administrador") return;
+  document.getElementById("mensajeUsuarios").textContent =
+    "Cree la cuenta en Firebase Authentication y luego agregue su perfil autorizado en Realtime Database.";
 }
 
 let ninoPendiente = null;
@@ -5009,71 +4996,7 @@ let ninoPendiente = null;
       mostrarAsistencia();
     }
 
-let usuarioPendiente = null;
 let ninoEliminacionPendiente = null;
-
-function abrirCambioContrasena() {
-  const usuario = document.getElementById("usuarioSeleccionado").value;
-
-  if (!usuario) {
-    return;
-  }
-
-  usuarioPendiente = usuario;
-
-  document.getElementById("usuarioCambioTexto").textContent =
-    `Usuario: ${usuario}`;
-
-  document.getElementById("nuevaContrasenaModal").value = "";
-  document.getElementById("modalContrasena").classList.remove("oculto");
-}
-
-function guardarNuevaContrasena() {
-  const nuevaContrasena =
-    document.getElementById("nuevaContrasenaModal").value.trim();
-
-  if (!nuevaContrasena) {
-    alert("Escriba una contraseña.");
-    return;
-  }
-
-  usuarios[usuarioPendiente].contrasena = nuevaContrasena;
-  guardarUsuarios();
-
-  cerrarModal("modalContrasena");
-  mostrarExito("La contraseña fue modificada correctamente.");
-}
-
-function confirmarEliminarUsuario() {
-  const usuario = document.getElementById("usuarioSeleccionado").value;
-
-  if (!usuario) {
-    return;
-  }
-
-  if (usuario === usuarioActual.usuario) {
-    alert("No puede eliminar el usuario con el que inició sesión.");
-    return;
-  }
-
-  usuarioPendiente = usuario;
-
-  document.getElementById("textoConfirmacion").textContent =
-    `¿Está seguro de eliminar al usuario "${usuario}"?`;
-
-  document.getElementById("modalConfirmacion")
-    .classList.remove("oculto");
-}
-
-function eliminarUsuarioConfirmado() {
-  delete usuarios[usuarioPendiente];
-  guardarUsuarios();
-
-  cerrarModal("modalConfirmacion");
-  abrirAdministrarUsuarios();
-
-  mostrarExito("El usuario fue eliminado correctamente.");
-}
 
 let recargarAlAceptarExito = false;
 
@@ -5281,16 +5204,399 @@ async function importarRespaldo() {
   }
 }
 
+const ZONAS_APORTES = Array.from(
+  { length: 6 },
+  (_, indice) => `Zona ${indice + 1}`
+);
+const MAX_COMPROBANTE_APORTE_BYTES = 5 * 1024 * 1024;
+const TIPOS_COMPROBANTE_APORTE = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp"
+]);
+let perfilAportesActual = null;
+let registrosAportesCache = [];
+let urlComprobanteActual = null;
+
+function normalizarUsuarioAportes(usuario) {
+  const nombreNormalizado = String(usuario || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es")
+    .replace(/[^a-z0-9._-]+/g, ".");
+  return `${nombreNormalizado}@asistencia-iglesia-zonas.firebaseapp.com`;
+}
+
+function mostrarMensajeAportes(mensaje, esError = false) {
+  const elemento = document.getElementById("mensajeRegistroAporte");
+  elemento.textContent = mensaje;
+  elemento.style.color = esError ? "#b00020" : "";
+}
+
+function establecerSemanaActualAportes() {
+  const fecha = new Date();
+  const dia = (fecha.getDay() + 6) % 7;
+  fecha.setDate(fecha.getDate() - dia);
+  const fechaISO = new Date(
+    Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate())
+  ).toISOString().slice(0, 10);
+  document.getElementById("semanaAporte").value = fechaISO;
+}
+
+async function abrirControlAportes() {
+  if (!usuarioActual) return;
+  document.getElementById("modalAportesLimpieza").classList.remove("oculto");
+  document.getElementById("contenidoAportes").classList.add("oculto");
+  mostrarMensajeAportes("");
+
+  try {
+    const firebase = await window.firebaseReady;
+    if (!firebase.auth.currentUser) {
+      throw new Error("La sesión autenticada de la aplicación ya no está activa.");
+    }
+    await cargarPerfilAportes(firebase.auth.currentUser);
+  } catch (error) {
+    console.error("No se pudo validar el perfil del módulo de aportes.", error);
+    mostrarMensajeAportes(
+      "No se pudo validar el perfil seguro. Cierre la sesión e inicie de nuevo; si el problema continúa, avise al administrador.",
+      true
+    );
+  }
+}
+
+async function cargarPerfilAportes(usuarioFirebase) {
+  const firebase = await window.firebaseReady;
+  const resultado = await firebase.get(
+    firebase.ref(firebase.database, `Perfiles/${usuarioFirebase.uid}`)
+  );
+  if (!resultado.exists()) {
+    throw new Error("La cuenta no tiene un perfil autorizado para el módulo.");
+  }
+
+  const perfil = resultado.val();
+  const esFacilitadorValido = perfil.rol === "Facilitador" &&
+    ZONAS_APORTES.includes(perfil.salon);
+  const esRevisorValido = ["Administrador", "Supervisor"].includes(perfil.rol);
+  if ((!esFacilitadorValido && !esRevisorValido) ||
+      normalizarNombreLider(perfil.usuario) !==
+        normalizarNombreLider(usuarioActual?.usuario)) {
+    throw new Error("El perfil de Firebase no corresponde al usuario o rol.");
+  }
+
+  perfilAportesActual = {
+    uid: usuarioFirebase.uid,
+    usuario: String(perfil.usuario),
+    rol: perfil.rol,
+    zona: perfil.salon || "Todas las zonas"
+  };
+  document.getElementById("contenidoAportes").classList.remove("oculto");
+  document.getElementById("informacionPerfilAportes").textContent =
+    `${perfilAportesActual.usuario} | ${perfilAportesActual.rol}` +
+    (perfilAportesActual.rol === "Facilitador"
+      ? ` | ${perfilAportesActual.zona}`
+      : " | Todas las zonas");
+
+  const esFacilitador = perfilAportesActual.rol === "Facilitador";
+  document.getElementById("formularioAporte").classList.toggle(
+    "oculto",
+    !esFacilitador
+  );
+  document.getElementById("filtrosAportes").classList.toggle(
+    "oculto",
+    esFacilitador
+  );
+  document.getElementById("filtroZonaAportes").value = "";
+  document.getElementById("filtroSemanaAportes").value = "";
+  document.getElementById("filtroEstadoAportes").value = "";
+  establecerSemanaActualAportes();
+  await cargarAportesLimpieza();
+}
+
+function cerrarModalAportes() {
+  perfilAportesActual = null;
+  document.getElementById("modalAportesLimpieza").classList.add("oculto");
+  document.getElementById("contenidoAportes").classList.add("oculto");
+}
+
+async function registrarAporteLimpieza(evento) {
+  evento.preventDefault();
+  if (!perfilAportesActual ||
+      perfilAportesActual.rol !== "Facilitador") return;
+
+  const semana = document.getElementById("semanaAporte").value;
+  const fechaSemana = new Date(`${semana}T00:00:00`);
+  if (!semana || Number.isNaN(fechaSemana.getTime()) ||
+      fechaSemana.getDay() !== 1) {
+    mostrarMensajeAportesRegistro(
+      "Seleccione el lunes de la semana a la que corresponde el aporte.",
+      true
+    );
+    return;
+  }
+
+  const monto = Number(document.getElementById("montoAporte").value);
+  if (!Number.isFinite(monto) || monto <= 0) {
+    mostrarMensajeAportesRegistro("Ingrese un monto mayor que cero.", true);
+    return;
+  }
+
+  const archivo = document.getElementById("comprobanteAporte").files[0] || null;
+  if (archivo &&
+      (!TIPOS_COMPROBANTE_APORTE.has(archivo.type) ||
+       archivo.size > MAX_COMPROBANTE_APORTE_BYTES)) {
+    mostrarMensajeAportesRegistro(
+      "El comprobante debe ser JPG, PNG o WebP y no superar 5 MB.",
+      true
+    );
+    return;
+  }
+
+  const boton = document.getElementById("botonGuardarAporte");
+  boton.disabled = true;
+  mostrarMensajeAportesRegistro("Guardando aporte...");
+
+  try {
+    const firebase = await window.firebaseReady;
+    const sesionFirebase = firebase.auth.currentUser;
+    if (!sesionFirebase || sesionFirebase.uid !== perfilAportesActual.uid) {
+      throw new Error("La sesión de Firebase ya no está activa.");
+    }
+
+    const referenciaColeccion = firebase.ref(
+      firebase.database,
+      "AportesLimpieza"
+    );
+    const id = firebase.push(referenciaColeccion).key;
+    const registro = {
+      uid: perfilAportesActual.uid,
+      usuario: perfilAportesActual.usuario,
+      zona: perfilAportesActual.zona,
+      monto,
+      semana,
+      comentario: document.getElementById("comentarioAporte").value.trim(),
+      fechaRegistro: firebase.serverTimestamp(),
+      estado: "Pendiente",
+      rutaComprobante: ""
+    };
+
+    if (archivo) {
+      const ruta = `comprobantes-limpieza/${perfilAportesActual.uid}/${id}`;
+      await firebase.uploadBytes(
+        firebase.storageRef(firebase.storage, ruta),
+        archivo,
+        { contentType: archivo.type }
+      );
+      registro.rutaComprobante = ruta;
+    }
+
+    await firebase.set(
+      firebase.ref(firebase.database, `AportesLimpieza/${id}`),
+      registro
+    );
+    document.getElementById("formularioAporte").reset();
+    establecerSemanaActualAportes();
+    mostrarMensajeAportesRegistro("Aporte registrado y enviado para revisión.");
+    await cargarAportesLimpieza();
+  } catch (error) {
+    console.error("No se pudo registrar el aporte de limpieza.", error);
+    mostrarMensajeAportesRegistro(
+      archivo
+        ? "No se pudo completar el registro. Si adjuntó un comprobante, contacte al administrador antes de volver a subirlo."
+        : "No se pudo registrar el aporte. Revise la conexión y la configuración de Firebase.",
+      true
+    );
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+function mostrarMensajeAportesRegistro(mensaje, esError = false) {
+  const elemento = document.getElementById("mensajeRegistroAporte");
+  elemento.textContent = mensaje;
+  elemento.style.color = esError ? "#b00020" : "";
+}
+
+async function cargarAportesLimpieza() {
+  if (!perfilAportesActual) return;
+  const lista = document.getElementById("listaAportesLimpieza");
+  lista.textContent = "Cargando aportes...";
+  try {
+    const firebase = await window.firebaseReady;
+    const referencia = firebase.ref(firebase.database, "AportesLimpieza");
+    const consulta = perfilAportesActual.rol === "Facilitador"
+      ? firebase.query(
+          referencia,
+          firebase.orderByChild("uid"),
+          firebase.equalTo(perfilAportesActual.uid)
+        )
+      : referencia;
+    const resultado = await firebase.get(consulta);
+    registrosAportesCache = resultado.exists()
+      ? Object.entries(resultado.val()).map(([id, registro]) => ({
+          id,
+          ...registro
+        }))
+      : [];
+    mostrarAportesLimpieza();
+  } catch (error) {
+    console.error("No se pudieron cargar los aportes de limpieza.", error);
+    lista.textContent =
+      "No se pudieron cargar los aportes. Verifique los permisos y la conexión a Firebase.";
+  }
+}
+
+function mostrarAportesLimpieza() {
+  const lista = document.getElementById("listaAportesLimpieza");
+  const esRevisor = perfilAportesActual &&
+    ["Administrador", "Supervisor"].includes(perfilAportesActual.rol);
+  const zona = esRevisor
+    ? document.getElementById("filtroZonaAportes").value
+    : perfilAportesActual?.zona;
+  const semana = esRevisor
+    ? document.getElementById("filtroSemanaAportes").value
+    : "";
+  const estado = esRevisor
+    ? document.getElementById("filtroEstadoAportes").value
+    : "";
+  const filas = registrosAportesCache
+    .filter(registro =>
+      (!zona || registro.zona === zona) &&
+      (!semana || registro.semana === semana) &&
+      (!estado || registro.estado === estado)
+    )
+    .sort((a, b) =>
+      String(b.semana).localeCompare(String(a.semana)) ||
+      Number(b.fechaRegistro || 0) - Number(a.fechaRegistro || 0)
+    );
+
+  if (!filas.length) {
+    lista.textContent = "No hay aportes que coincidan con los filtros.";
+    return;
+  }
+
+  const cuerpo = filas.map(registro => {
+    const semanaVisible = escaparTexto(registro.semana || "");
+    const fechaVisible = Number(registro.fechaRegistro)
+      ? new Date(Number(registro.fechaRegistro)).toLocaleString("es")
+      : "—";
+    const recibo = registro.rutaComprobante
+      ? `<button type="button" onclick="verComprobanteAporte('${escaparTexto(registro.uid)}','${escaparTexto(registro.id)}')">Ver comprobante</button>`
+      : "Sin comprobante";
+    const revision = esRevisor && registro.estado === "Pendiente"
+      ? `<button type="button" onclick="actualizarEstadoAporte('${escaparTexto(registro.id)}','Confirmado')">Confirmar</button>
+         <button type="button" onclick="actualizarEstadoAporte('${escaparTexto(registro.id)}','Requiere aclaración')">Pedir aclaración</button>`
+      : "";
+    const comentarioRevision = registro.comentarioRevision
+      ? `<small>Revisión: ${escaparTexto(registro.comentarioRevision)}</small>`
+      : "";
+    return `<tr>
+      <td>${escaparTexto(registro.zona || "")}</td>
+      <td>${semanaVisible}</td>
+      <td>${Number(registro.monto).toFixed(2)}</td>
+      <td>${escaparTexto(registro.usuario || "")}</td>
+      <td>${escaparTexto(registro.comentario || "—")}${comentarioRevision}</td>
+      <td>${escaparTexto(fechaVisible)}</td>
+      <td><span class="estado-aporte">${escaparTexto(registro.estado || "Pendiente")}</span></td>
+      <td>${recibo}</td>
+      ${esRevisor ? `<td>${revision}</td>` : ""}
+    </tr>`;
+  }).join("");
+  lista.innerHTML = `<table>
+    <thead><tr>
+      <th>Zona</th><th>Semana</th><th>Monto</th><th>Facilitador</th>
+      <th>Comentario</th><th>Registrado</th><th>Estado</th><th>Comprobante</th>
+      ${esRevisor ? "<th>Revisión</th>" : ""}
+    </tr></thead>
+    <tbody>${cuerpo}</tbody>
+  </table>`;
+}
+
+async function actualizarEstadoAporte(id, estado) {
+  if (!perfilAportesActual ||
+      !["Administrador", "Supervisor"].includes(perfilAportesActual.rol) ||
+      !["Confirmado", "Requiere aclaración"].includes(estado)) return;
+  const comentarioRevision = prompt(
+    estado === "Confirmado"
+      ? "Comentario de revisión (opcional):"
+      : "Indique qué aclaración se necesita:"
+  );
+  if (comentarioRevision === null) return;
+  if (estado === "Requiere aclaración" && !comentarioRevision.trim()) {
+    alert("Escriba qué aclaración se necesita.");
+    return;
+  }
+
+  try {
+    const firebase = await window.firebaseReady;
+    await firebase.update(
+      firebase.ref(firebase.database, `AportesLimpieza/${id}`),
+      {
+        estado,
+        comentarioRevision: comentarioRevision.trim(),
+        revisadoPor: perfilAportesActual.usuario,
+        uidRevisor: perfilAportesActual.uid,
+        fechaRevision: firebase.serverTimestamp()
+      }
+    );
+    await cargarAportesLimpieza();
+  } catch (error) {
+    console.error("No se pudo actualizar el estado del aporte.", error);
+    alert("No se pudo guardar la revisión. Verifique que su perfil tenga permisos de Supervisor o Administrador.");
+  }
+}
+
+async function verComprobanteAporte(uid, id) {
+  if (!perfilAportesActual ||
+      (perfilAportesActual.uid !== uid &&
+       !["Administrador", "Supervisor"].includes(perfilAportesActual.rol)) ||
+      !/^[A-Za-z0-9_-]+$/.test(uid) ||
+      !/^[A-Za-z0-9_-]+$/.test(id)) return;
+  try {
+    const firebase = await window.firebaseReady;
+    const archivo = await firebase.getBlob(firebase.storageRef(
+      firebase.storage,
+      `comprobantes-limpieza/${uid}/${id}`
+    ));
+    cerrarVisorComprobante();
+    urlComprobanteActual = URL.createObjectURL(archivo);
+    document.getElementById("imagenComprobante").src = urlComprobanteActual;
+    document.getElementById("modalVisorComprobante").classList.remove("oculto");
+  } catch (error) {
+    console.error("No se pudo abrir el comprobante de transferencia.", error);
+    alert("No se pudo abrir el comprobante. Verifique que el archivo exista y que su perfil tenga permiso para verlo.");
+  }
+}
+
+function cerrarVisorComprobante() {
+  document.getElementById("modalVisorComprobante").classList.add("oculto");
+  document.getElementById("imagenComprobante").removeAttribute("src");
+  if (urlComprobanteActual) {
+    URL.revokeObjectURL(urlComprobanteActual);
+    urlComprobanteActual = null;
+  }
+}
+
 function cerrarModal(id) {
   document.getElementById(id).classList.add("oculto");
 }
 
-    function cerrarSesion() {
+    async function cerrarSesion() {
+  try {
+    const firebase = await window.firebaseReady;
+    await firebase.signOut(firebase.auth);
+  } catch (error) {
+    console.error("No se pudo cerrar la sesión de Firebase.", error);
+    alert("No se pudo cerrar la sesión segura del módulo. Verifique su conexión y vuelva a cerrar sesión.");
+    return;
+  }
+  perfilAportesActual = null;
   usuarioActual = null;
+  usuarios = {};
+  cargaFirebaseCompleta = false;
 
   document.getElementById("pantallaSistema").classList.add("oculto");
   document.getElementById("pantallaLogin").classList.remove("oculto");
-  mostrarAnunciosLogin();
 
   document.getElementById("usuario").value = "";
   document.getElementById("contrasena").value = "";
@@ -5301,8 +5607,12 @@ function cerrarModal(id) {
   document.getElementById("modalResumenReunion").classList.add("oculto");
   document.getElementById("modalAnuncios").classList.add("oculto");
   document.getElementById("modalHistorialRespaldo").classList.add("oculto");
+  document.getElementById("modalAportesLimpieza").classList.add("oculto");
+  document.getElementById("contenidoAportes").classList.add("oculto");
+  cerrarVisorComprobante();
   document.getElementById("modalConfirmacionAnuncio").classList.add("oculto");
   document.getElementById("cintaCumpleanosSistema").classList.remove("visible");
+  document.getElementById("anunciosInicio").replaceChildren();
   document.getElementById("botonAdministrarUsuarios").classList.add("oculto");
   document.getElementById("botonHistorialRespaldo").classList.add("oculto");
   document.getElementById("botonResumenNino").classList.add("oculto");
