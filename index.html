@@ -647,11 +647,6 @@
       stroke-width: 1.8;
     }
 
-    #accionesBarra:not([data-rol="Administrador"]) #botonAdministrarUsuarios,
-    #accionesBarra:not([data-rol="Administrador"]) #botonHistorialRespaldo {
-      display: none !important;
-    }
-
 .modal {
   position: fixed;
   inset: 0;
@@ -1083,7 +1078,7 @@
         </div>
       </div>
 
-      <div id="accionesBarra" class="acciones-barra">
+      <div class="acciones-barra">
         <button id="botonResumenNino"
           class="oculto"
           onclick="abrirResumenNino()">
@@ -1183,9 +1178,9 @@
     <div id="formularioNino" class="formulario-nino oculto">
       <h3>Agregar líder</h3>
 
-      <input id="nombreNino" type="text" list="sugerenciasLideresRelacionados" placeholder="Nombre completo del líder"
-        oninput="mostrarCoincidenciaLider()">
-      <datalist id="sugerenciasLideresRelacionados"></datalist>
+      <input id="nombreNino" type="text" list="sugerenciasLideresVirtuales" placeholder="Nombre completo del líder"
+        oninput="mostrarCoincidenciaLiderVirtual()">
+      <datalist id="sugerenciasLideresVirtuales"></datalist>
 
       <label for="cumpleanosNino">Cumpleaños:</label>
       <input id="cumpleanosNino" type="text" inputmode="numeric"
@@ -1651,6 +1646,7 @@ const HOJAS = {
 
 const HOJA_BITACORA = "BitacoraIglesiaRedencionV1";
 const HOJA_RESPALDOS = "RespaldosIglesiaRedencionV1";
+const OBSERVACION_ASISTENCIA_VIRTUAL = "Discipulado virtual con el pastor";
 const MAX_RESPALDOS_POR_HOJA = 5;
 const HOJAS_CON_RESPALDO = new Set([
   HOJAS.ninos,
@@ -2110,18 +2106,24 @@ function filasDeLideresPastor() {
 }
 
 function filasDeLideresVirtuales() {
-  return lideresVirtuales.map(({ Nombre, SalonOrigen }) => ({
-    Nombre,
+  return lideresVirtuales.map(lider => ({
+    Nombre: lider.Nombre,
     Salon: "Virtual",
-    SalonOrigen: SalonOrigen || "Virtual"
+    SalonOrigen: obtenerLiderVirtual(lider.Nombre)?.SalonOrigen || "Virtual"
   }));
 }
 
 function obtenerLiderVirtual(nombre) {
   const clave = normalizarNombreLider(nombre);
-  return lideresVirtuales.find(lider =>
+  const liderVirtual = lideresVirtuales.find(lider =>
     normalizarNombreLider(lider.Nombre) === clave
   );
+  if (!liderVirtual) return null;
+
+  const liderZona = buscarLiderPorNombre(nombre);
+  return liderZona
+    ? { ...liderVirtual, Nombre: liderZona.nombre, SalonOrigen: liderZona.salon }
+    : liderVirtual;
 }
 
 function normalizarCumpleanos(valor) {
@@ -2283,6 +2285,13 @@ async function cargarDatosDesdeAPI() {
           SalonOrigen: liderEncontrado?.salon || "Virtual"
         });
       });
+      const origenVirtualDesactualizado = filasVirtuales.some(fila => {
+        const liderActualizado = lideresVirtualesUnicos.get(
+          normalizarNombreLider(fila.Nombre)
+        );
+        return liderActualizado &&
+          (fila.SalonOrigen || "Virtual") !== liderActualizado.SalonOrigen;
+      });
       lideresVirtuales = [...lideresVirtualesUnicos.values()];
       localStorage.setItem(
         "lideresVirtualesIglesiaRedencion",
@@ -2290,8 +2299,10 @@ async function cargarDatosDesdeAPI() {
       );
       guardarDatosLideres();
       localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
-      if (filasZonaSiete.length) {
-        sincronizarHoja(HOJAS.ninos, filasDeNinos());
+      if (filasZonaSiete.length || origenVirtualDesactualizado) {
+        if (filasZonaSiete.length) {
+          sincronizarHoja(HOJAS.ninos, filasDeNinos());
+        }
         guardarVirtuales();
       }
     }
@@ -2461,56 +2472,15 @@ function configurarUsuariosIglesia() {
     }
 
     function obtenerDatosLider(salon, nombre) {
-      const ubicaciones = [{ salon, nombre }];
-      if (salon === "Pastor") {
-        ubicaciones.push(...buscarLideresPorNombre(nombre));
-      } else if (salon !== "Virtual") {
-        ubicaciones.push(...buscarLideresPorNombre(nombre));
-        const nombrePastor = lideresPastor.find(nombreLider =>
-          normalizarNombreLider(nombreLider) === normalizarNombreLider(nombre)
-        );
-        if (nombrePastor) {
-          ubicaciones.push({ salon: "Pastor", nombre: nombrePastor });
-        }
-      }
-      const fuentes = [...new Map(ubicaciones.map(ubicacion => [
-        claveLider(ubicacion.salon, ubicacion.nombre),
-        lideresDatos[claveLider(ubicacion.salon, ubicacion.nombre)] || {}
-      ])).values()];
-      const obtenerCampo = campo =>
-        fuentes.find(datos => datos[campo] !== undefined &&
-          datos[campo] !== null && datos[campo] !== "")?.[campo];
-      const bautizado = obtenerCampo("bautizado");
-      const encuentro = obtenerCampo("encuentro");
-
       return {
-        cumpleanos: normalizarCumpleanos(obtenerCampo("cumpleanos")),
-        sector: obtenerCampo("sector") || "",
-        comiteRed: obtenerCampo("comiteRed") || "",
-        estado: obtenerCampo("estado") || "Inactivo",
-        bautizado: leerBooleanoLider(bautizado),
-        encuentro: leerBooleanoLider(encuentro),
-        doctrina: obtenerCampo("doctrina") || ""
+        cumpleanos: normalizarCumpleanos(lideresDatos[claveLider(salon, nombre)]?.cumpleanos),
+        sector: lideresDatos[claveLider(salon, nombre)]?.sector || "",
+        comiteRed: lideresDatos[claveLider(salon, nombre)]?.comiteRed || "",
+        estado: lideresDatos[claveLider(salon, nombre)]?.estado || "Inactivo",
+        bautizado: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.bautizado),
+        encuentro: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.encuentro),
+        doctrina: lideresDatos[claveLider(salon, nombre)]?.doctrina || ""
       };
-    }
-
-    function guardarDatosLiderVinculados(salon, nombre, datos) {
-      const ubicaciones = [{ salon, nombre }];
-      if (salon === "Pastor") {
-        ubicaciones.push(...buscarLideresPorNombre(nombre));
-      } else if (salon !== "Virtual") {
-        ubicaciones.push(...buscarLideresPorNombre(nombre));
-        const nombrePastor = lideresPastor.find(nombreLider =>
-          normalizarNombreLider(nombreLider) === normalizarNombreLider(nombre)
-        );
-        if (nombrePastor) {
-          ubicaciones.push({ salon: "Pastor", nombre: nombrePastor });
-        }
-      }
-
-      ubicaciones.forEach(ubicacion => {
-        lideresDatos[claveLider(ubicacion.salon, ubicacion.nombre)] = { ...datos };
-      });
     }
 
     function guardarDatosLideres() {
@@ -2685,7 +2655,7 @@ function configurarUsuariosIglesia() {
           resultado.push({
             ...(manual || automatico || {}),
             ...filaVirtual,
-            Observaciones: "*Discipulado virtual con el Pastor*",
+            Observaciones: OBSERVACION_ASISTENCIA_VIRTUAL,
             OrigenVirtual: true,
             RegistroADNAnterior: anterior
           });
@@ -2727,11 +2697,6 @@ function configurarUsuariosIglesia() {
     function configurarRestriccionesResumen(tipo) {
       const campoDesde = document.getElementById("resumenDesde");
       const campoHasta = document.getElementById("resumenHasta");
-      const fechaMaxima = tipo === "Todas"
-        ? formatearFechaISO(new Date())
-        : obtenerFechaReunion(tipo);
-      campoDesde.max = fechaMaxima;
-      campoHasta.max = fechaMaxima;
 
       if (tipo === "Todas") {
         campoDesde.min = "1970-01-01";
@@ -2756,15 +2721,10 @@ function configurarUsuariosIglesia() {
       }
 
       const fecha = new Date(`${campo.value}T00:00:00`);
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-      if (fecha > hoy) {
-        fecha.setTime(hoy.getTime());
-      }
       const diasValidos = [0, 1, 3, 4];
 
       while (!diasValidos.includes(fecha.getDay())) {
-        fecha.setDate(fecha.getDate() - 1);
+        fecha.setDate(fecha.getDate() + 1);
       }
 
       campo.value = formatearFechaISO(fecha);
@@ -2841,6 +2801,9 @@ function configurarUsuariosIglesia() {
     function obtenerLideresActuales(salon, tipoReunion) {
       if (tipoReunion === "Reunión con el pastor") return lideresPastor;
       if (tipoReunion === "Discipulado Virtual") {
+        lideresVirtuales.sort((a, b) =>
+          a.Nombre.localeCompare(b.Nombre, "es", { sensitivity: "base" })
+        );
         return lideresVirtuales.map(lider => lider.Nombre);
       }
       return ninos[salon] || [];
@@ -3069,7 +3032,6 @@ function configurarUsuariosIglesia() {
         ...datos
       };
 
-      document.getElementById("accionesBarra").dataset.rol = usuarioActual.rol;
       document.getElementById("pantallaLogin").classList.add("oculto");
       document.getElementById("pantallaSistema").classList.remove("oculto");
       mostrarAnunciosLogin();
@@ -3688,13 +3650,11 @@ function configurarUsuariosIglesia() {
       document.getElementById("tablaAsistencia").innerHTML = html;
     }
 
-    function mostrarCoincidenciaLider() {
+    function mostrarCoincidenciaLiderVirtual() {
       const mensaje = document.getElementById("mensajeNino");
       const nombre = document.getElementById("nombreNino").value.trim();
-      const sugerencias = document.getElementById("sugerenciasLideresRelacionados");
-      const esVirtual = esReunionVirtual();
-      const esPastor = esReunionPastor();
-      if (!esVirtual && !esPastor) {
+      const sugerencias = document.getElementById("sugerenciasLideresVirtuales");
+      if (!esReunionVirtual()) {
         mensaje.textContent = "";
         sugerencias.replaceChildren();
         return;
@@ -3705,23 +3665,10 @@ function configurarUsuariosIglesia() {
           nombres.map(nombreLider => ({ salon, nombre: nombreLider }))
         );
       const busqueda = normalizarNombreLider(nombre);
-      const lideresUnicos = new Map();
-      todosLosLideresDeZona.forEach(lider => {
-        const clave = normalizarNombreLider(lider.nombre);
-        const existente = lideresUnicos.get(clave);
-        if (existente) {
-          existente.salones.push(lider.salon);
-        } else {
-          lideresUnicos.set(clave, {
-            nombre: lider.nombre,
-            salones: [lider.salon]
-          });
-        }
-      });
-      sugerencias.innerHTML = [...lideresUnicos.values()]
+      sugerencias.innerHTML = todosLosLideresDeZona
         .filter(lider => !busqueda ||
           normalizarNombreLider(lider.nombre).includes(busqueda))
-        .map(lider => `<option value="${escaparTexto(lider.nombre)}" label="${escaparTexto(lider.salones.join(", "))}"></option>`)
+        .map(lider => `<option value="${escaparTexto(lider.nombre)}" label="${escaparTexto(lider.salon)}"></option>`)
         .join("");
       if (!nombre) {
         mensaje.textContent = "";
@@ -3729,7 +3676,7 @@ function configurarUsuariosIglesia() {
       }
 
       const coincidencias = buscarLideresPorNombre(nombre);
-      if (coincidencias.length && (esPastor || coincidencias.length === 1)) {
+      if (coincidencias.length === 1) {
         const { salon, nombre: nombreOrigen } = coincidencias[0];
         const datos = obtenerDatosLider(salon, nombreOrigen);
         document.getElementById("cumpleanosNino").value =
@@ -3741,9 +3688,8 @@ function configurarUsuariosIglesia() {
         document.getElementById("encuentroNino").checked = datos.encuentro;
         document.getElementById("doctrinaNino").value = datos.doctrina;
         mensaje.className = "mensaje";
-        mensaje.textContent = esPastor
-          ? `${nombreOrigen} ya está registrado en ${[...new Set(coincidencias.map(lider => lider.salon))].join(", ")}. Se enlazará con su asistencia de los lunes.`
-          : `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazará sin duplicar su ficha.`;
+        mensaje.textContent =
+          `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazará sin duplicar su ficha.`;
       } else if (coincidencias.length > 1) {
         mensaje.className = "mensaje";
         mensaje.textContent =
@@ -3755,14 +3701,8 @@ function configurarUsuariosIglesia() {
         );
         mensaje.textContent = coincidenciasParciales.length
           ? "Hay nombres parecidos; seleccione el líder correcto de la lista para cargar sus datos."
-          : esPastor
-            ? "No encontramos ese nombre en una zona. Al agregarlo, se creará como líder del Pastor."
-            : "No encontramos ese nombre en otra zona. Al agregarlo, se registrará como líder de Virtual.";
+          : "No encontramos ese nombre en otra zona. Al agregarlo, se registrará como líder de Virtual.";
       }
-    }
-
-    function mostrarCoincidenciaLiderVirtual() {
-      mostrarCoincidenciaLider();
     }
 
     function agregarNino() {
@@ -3854,7 +3794,7 @@ function configurarUsuariosIglesia() {
         }
         guardarVirtuales();
         document.getElementById("nombreNino").value = "";
-        document.getElementById("sugerenciasLideresRelacionados").replaceChildren();
+        document.getElementById("sugerenciasLideresVirtuales").replaceChildren();
         document.getElementById("cumpleanosNino").value = "";
         document.getElementById("sectorNino").value = "";
         document.getElementById("comiteRedNino").value = "";
@@ -3879,47 +3819,25 @@ function configurarUsuariosIglesia() {
         return;
       }
 
-      const lideresZonaCoincidentes = reunionPastor
-        ? buscarLideresPorNombre(nombre)
-        : [];
-      const liderPastorCoincidente = !reunionPastor && !reunionVirtual
-        ? lideresPastor.find(lider =>
-            normalizarNombreLider(lider) === normalizarNombreLider(nombre)
-          )
-        : null;
-      const liderRelacionado = reunionPastor
-        ? lideresZonaCoincidentes[0] || null
-        : liderPastorCoincidente
-          ? { salon: "Pastor", nombre: liderPastorCoincidente }
-          : null;
-      const nombreGuardado = liderRelacionado?.nombre ||
-        nombre.trim().replace(/\s+/g, " ");
-      grupoLideres.push(nombreGuardado);
+      grupoLideres.push(nombre);
       const grupo = reunionPastor ? "Pastor" : salonNuevo;
-      const datosLider = liderRelacionado
-        ? obtenerDatosLider(liderRelacionado.salon, liderRelacionado.nombre)
-        : {
-            cumpleanos,
-            sector,
-            comiteRed,
-            estado,
-            bautizado,
-            encuentro,
-            doctrina
-          };
-      guardarDatosLiderVinculados(grupo, nombreGuardado, datosLider);
+      lideresDatos[claveLider(grupo, nombre)] = {
+        cumpleanos,
+        sector,
+        comiteRed,
+        estado,
+        bautizado,
+        encuentro,
+        doctrina
+      };
       guardarDatosLideres();
       if (reunionPastor) {
         lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
         localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
         sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
-        if (liderRelacionado) guardarNinos();
       } else {
         ordenarNinos(salonNuevo);
         guardarNinos();
-        if (liderRelacionado) {
-          sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
-        }
       }
 
       document.getElementById("nombreNino").value = "";
@@ -3956,10 +3874,11 @@ function configurarUsuariosIglesia() {
         editarNino("Pastor", indice);
       } else if (esReunionVirtual()) {
         const liderVirtual = lideresVirtuales[indice];
-        const indiceOrigen = (ninos[liderVirtual?.SalonOrigen] || []).findIndex(nombre =>
+        const liderVirtualActual = obtenerLiderVirtual(liderVirtual?.Nombre);
+        const indiceOrigen = (ninos[liderVirtualActual?.SalonOrigen] || []).findIndex(nombre =>
           normalizarNombreLider(nombre) === normalizarNombreLider(liderVirtual?.Nombre)
         );
-        if (indiceOrigen >= 0) editarNino(liderVirtual.SalonOrigen, indiceOrigen);
+        if (indiceOrigen >= 0) editarNino(liderVirtualActual.SalonOrigen, indiceOrigen);
       } else {
         editarNino(document.getElementById("salon").value, indice);
       }
@@ -4189,7 +4108,7 @@ function configurarUsuariosIglesia() {
                 Asistencia: fila.Asistencia,
                 Participacion: "",
                 Desarrollo: "",
-                Observaciones: "*Discipulado virtual con el Pastor*",
+                Observaciones: OBSERVACION_ASISTENCIA_VIRTUAL,
                 OrigenVirtual: true
               }];
             })
@@ -4272,7 +4191,7 @@ function configurarUsuariosIglesia() {
         fecha,
         tipoReunion,
         salonOrigen: tipoReunion === "Discipulado Virtual"
-          ? lideresVirtuales[indice]?.SalonOrigen
+          ? obtenerLiderVirtual(lideresVirtuales[indice]?.Nombre)?.SalonOrigen
           : ""
       };
       document.getElementById("textoConfirmacionAsistencia").textContent =
@@ -4381,32 +4300,44 @@ function configurarUsuariosIglesia() {
 }
 
     function mostrarPanelUsuarios() {
-      const boton = document.getElementById("botonAdministrarUsuarios");
-      const botonResumen = document.getElementById("botonResumenNino");
-      const botonResumenReunion = document.getElementById("botonResumenReunion");
+  const boton = document.getElementById("botonAdministrarUsuarios");
+  const botonResumen = document.getElementById("botonResumenNino");
+  const botonResumenReunion = document.getElementById("botonResumenReunion");
       const botonHistorial = document.getElementById("botonHistorialRespaldo");
-      const esAdministrador = usuarioActual?.rol === "Administrador";
 
-      document.getElementById("accionesBarra").dataset.rol =
-        usuarioActual?.rol || "";
-      botonHistorial.classList.toggle("oculto", !esAdministrador);
-      boton.classList.toggle("oculto", !esAdministrador);
-      boton.title = "Administrar usuarios";
-      boton.setAttribute("aria-label", "Administrar usuarios");
-      boton.style.color = "#fff";
-      boton.querySelector("svg")?.style.setProperty("stroke", "#fff");
+      botonHistorial.classList.toggle(
+        "oculto",
+        !usuarioActual || usuarioActual.rol !== "Administrador"
+      );
 
-      botonResumen.classList.toggle(
-        "oculto",
-        !usuarioActual ||
-          !["Supervisor", "Administrador"].includes(usuarioActual.rol)
-      );
-      botonResumenReunion.classList.toggle(
-        "oculto",
-        !usuarioActual ||
-          !["Administrador", "Supervisor"].includes(usuarioActual.rol)
-      );
-    }
+      if (usuarioActual &&
+          ["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
+    boton.classList.remove("oculto");
+        const etiquetaBoton = usuarioActual.rol === "Supervisor"
+      ? "Ver usuarios"
+      : "Administrar usuarios";
+        boton.title = etiquetaBoton;
+        boton.setAttribute("aria-label", etiquetaBoton);
+        boton.style.color = "#fff";
+        boton.querySelector("svg")?.style.setProperty("stroke", "#fff");
+      } else {
+    boton.classList.add("oculto");
+  }
+
+  if (usuarioActual &&
+      (usuarioActual.rol === "Supervisor" ||
+       usuarioActual.rol === "Administrador")) {
+    botonResumen.classList.remove("oculto");
+  } else {
+    botonResumen.classList.add("oculto");
+  }
+
+  botonResumenReunion.classList.toggle(
+    "oculto",
+    !usuarioActual ||
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)
+  );
+}
 
     function cargarNinosResumen() {
   const salonSeleccionado = document.getElementById("resumenSalon").value;
@@ -4415,13 +4346,11 @@ function configurarUsuariosIglesia() {
     ? "Pastor"
     : salonSeleccionado;
   const selectorNino = document.getElementById("resumenNino");
-  const lideres = tipoReunion === "Reunión con el pastor" ||
-      (tipoReunion === "Todas" && salon === "Pastor")
+  const lideres = tipoReunion === "Reunión con el pastor"
     ? lideresPastor
-    : tipoReunion === "Discipulado Virtual" ||
-        (tipoReunion === "Todas" && salon === "Virtual")
-      ? lideresVirtuales.map(lider => lider.Nombre)
-      : (ninos[salon] || []);
+        : tipoReunion === "Discipulado Virtual"
+          ? lideresVirtuales.map(lider => lider.Nombre)
+          : (ninos[salon] || []);
 
   selectorNino.innerHTML = lideres
     .map(nino => `
@@ -4455,39 +4384,29 @@ function configurarUsuariosIglesia() {
 }
 
     function actualizarFechasResumen() {
-      const tipoReunion = document.getElementById("resumenTipoReunion").value;
-      configurarRestriccionesResumen(tipoReunion);
+  const tipoReunion = document.getElementById("resumenTipoReunion").value;
+  configurarRestriccionesResumen(tipoReunion);
 
-      if (tipoReunion === "Todas") {
-        const tiposReunion = [
-          "Servicio dominical",
-          "Reunión con el pastor",
-          "ADN",
-          "Discipulado Virtual"
-        ];
-        const fechaHasta = tiposReunion
-          .map(tipo => obtenerFechaReunion(tipo))
-          .sort()
-          .pop();
-        const fechaInicioMes = `${fechaHasta.slice(0, 7)}-01`;
-        const fechasDelMes = obtenerFechasDeTodasLasReuniones(
-          fechaInicioMes,
-          fechaHasta
-        );
-        document.getElementById("resumenDesde").value =
-          fechasDelMes[0]?.fecha || fechaHasta;
-        document.getElementById("resumenHasta").value = fechaHasta;
-        return;
-      }
+  if (tipoReunion === "Todas") {
+    const fechaHasta = obtenerFechaReunion("Servicio dominical");
+    const fechaDesde = new Date(`${fechaHasta}T00:00:00`);
+    fechaDesde.setDate(fechaDesde.getDate() - 12 * 7);
 
-      const fechaHasta = obtenerFechaReunion(tipoReunion);
-      const fechaDesde = obtenerPrimerDiaDelMes(
-        tipoReunion,
-        new Date(`${fechaHasta}T00:00:00`)
-      );
-      document.getElementById("resumenDesde").value = fechaDesde;
-      document.getElementById("resumenHasta").value = fechaHasta;
-    }
+    document.getElementById("resumenDesde").value = [
+      fechaDesde.getFullYear(),
+      String(fechaDesde.getMonth() + 1).padStart(2, "0"),
+      String(fechaDesde.getDate()).padStart(2, "0")
+    ].join("-");
+    document.getElementById("resumenHasta").value = fechaHasta;
+    return;
+  }
+
+  const fechaDesde = obtenerPrimerDiaDelMes(tipoReunion);
+  const fechaHasta = obtenerFechaReunion(tipoReunion);
+  document.getElementById("resumenDesde").value = fechaDesde;
+  document.getElementById("resumenHasta").value =
+    fechaHasta < fechaDesde ? fechaDesde : fechaHasta;
+}
 
 function actualizarResumenPorSalon() {
   const salon = document.getElementById("resumenSalon").value;
@@ -4526,6 +4445,23 @@ function actualizarResumenPorSalon() {
   cargarNinosResumen();
 }
 
+    function obtenerDomingosEntre(desdeTexto, hastaTexto) {
+  const domingos = [];
+  const fecha = new Date(`${desdeTexto}T00:00:00`);
+  const hasta = new Date(`${hastaTexto}T00:00:00`);
+
+  while (fecha <= hasta) {
+    domingos.push([ 
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, "0"),
+      String(fecha.getDate()).padStart(2, "0")
+    ].join("-"));
+    fecha.setDate(fecha.getDate() + 7);
+  }
+
+  return domingos;
+}
+
 function obtenerFechasEntre(desdeTexto, hastaTexto) {
   const fechas = [];
   const fecha = new Date(`${desdeTexto}T00:00:00`);
@@ -4541,12 +4477,6 @@ function obtenerFechasEntre(desdeTexto, hastaTexto) {
   }
 
   return fechas;
-}
-
-function obtenerFechasDeReunionEntre(desdeTexto, hastaTexto, tipo) {
-  return obtenerFechasEntre(desdeTexto, hastaTexto).filter(fecha =>
-    esFechaDeReunion(fecha, tipo)
-  );
 }
 
 function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
@@ -4601,13 +4531,6 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const hasta = document.getElementById("resumenHasta").value;
 
   const tipoReunion = document.getElementById("resumenTipoReunion").value;
-  const fechaMaxima = tipoReunion === "Todas"
-    ? formatearFechaISO(new Date())
-    : obtenerFechaReunion(tipoReunion);
-  if (desde > fechaMaxima || hasta > fechaMaxima) {
-    alert("No se pueden consultar fechas futuras de reuniones.");
-    return;
-  }
   if (!nino || !desde || !hasta ||
       (tipoReunion !== "Todas" &&
        (!esFechaDeReunion(desde, tipoReunion) || !esFechaDeReunion(hasta, tipoReunion)))) {
@@ -4628,7 +4551,11 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 
   let fechasPeriodo = tipoReunion === "Todas"
     ? obtenerFechasEntre(desde, hasta)
-    : obtenerFechasDeReunionEntre(desde, hasta, tipoReunion);
+  : tipoReunion === "Discipulado Virtual"
+    ? obtenerFechasEntre(desde, hasta).filter(fecha =>
+        esFechaDeReunion(fecha, "Discipulado Virtual")
+      )
+    : obtenerDomingosEntre(desde, hasta);
   if (tipoReunion === "ADN") {
     const fechasVirtuales = asistencias
       .filter(fila =>
@@ -4645,50 +4572,23 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const reunionesPeriodo = tipoReunion === "Todas"
     ? obtenerFechasDeTodasLasReuniones(desde, hasta)
     : fechasPeriodo.map(fecha => ({ fecha, tipo: tipoReunion }));
-  const salonesLider = tipoReunion === "Todas"
-    ? obtenerSalonesLiderEnTodasLasReuniones(salon, nino)
-    : [salon];
   const reunionesEsperadas = tipoReunion === "Todas"
     ? reunionesPeriodo.length
     : fechasPeriodo.length;
-  const registrosCoincidentes = asistencias.filter(fila =>
-    salonesLider.includes(String(fila.Salon)) &&
-    normalizarNombreLider(fila.Nombre) === normalizarNombreLider(nino) &&
+  const registros = asistencias.filter(fila =>
+    String(fila.Salon) === salon &&
+    String(fila.Nombre) === nino &&
     (tipoReunion === "Todas" ||
       String(fila.TipoReunion || "Servicio dominical") === tipoReunion) &&
     (tipoReunion !== "Todas" || fila.OrigenVirtual !== true) &&
-    fechasPeriodo.includes(String(fila.Fecha)) &&
-    (tipoReunion !== "Todas" || reunionesPeriodo.some(reunion =>
-      reunion.fecha === String(fila.Fecha) &&
-      reunion.tipo === String(fila.TipoReunion || "Servicio dominical")
-    ))
+    fechasPeriodo.includes(String(fila.Fecha))
   );
-  const registros = tipoReunion === "Todas"
-    ? reunionesPeriodo.map(reunion => {
-        const coincidentes = registrosCoincidentes.filter(fila =>
-          String(fila.Fecha) === reunion.fecha &&
-          String(fila.TipoReunion || "Servicio dominical") === reunion.tipo
-        );
-      const registroSeleccionado = reunion.tipo === "Reunión con el pastor"
-        ? coincidentes.find(fila => String(fila.Salon) === "Pastor")
-        : coincidentes.find(fila => String(fila.Salon) === salon);
-      return registroSeleccionado ||
-        coincidentes.find(fila => String(fila.Salon) === "Pastor") ||
-        coincidentes[0];
-      }).filter(Boolean)
-    : registrosCoincidentes;
-  const liderVirtual = tipoReunion === "Discipulado Virtual" ||
-      (tipoReunion === "Todas" && salon === "Virtual")
-    ? lideresVirtuales.find(lider =>
-        normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nino)
-      )
+  const liderVirtual = tipoReunion === "Discipulado Virtual"
+    ? obtenerLiderVirtual(nino)
     : null;
-  const salonPerfil = liderVirtual?.SalonOrigen ||
-    (tipoReunion === "Todas" && salon === "Pastor"
-      ? salonesLider.find(salonVinculado => salonVinculado !== "Pastor") || salon
-      : salon);
+  const salonPerfil = liderVirtual?.SalonOrigen || salon;
   const facilitador = maestrosSalon[salonPerfil] || "Sin asignar";
-  const nombrePerfil = liderVirtual || salonPerfil !== salon
+  const nombrePerfil = liderVirtual
     ? (ninos[salonPerfil] || []).find(nombre =>
         normalizarNombreLider(nombre) === normalizarNombreLider(nino)
       ) || nino
@@ -4708,9 +4608,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     ? reunionesPeriodo.map(reunion => {
         const registro = registros.find(fila =>
           String(fila.Fecha) === reunion.fecha &&
-          String(fila.TipoReunion || "Servicio dominical") === reunion.tipo &&
-          (reunion.tipo !== "Reunión con el pastor" ||
-            String(fila.Salon) === "Pastor")
+          String(fila.TipoReunion || "Servicio dominical") === reunion.tipo
         );
 
         return `
@@ -4785,37 +4683,6 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
       </table>
     </div>
   `;
-}
-
-function obtenerSalonesLiderEnTodasLasReuniones(salon, nombre) {
-  const claveNombre = normalizarNombreLider(nombre);
-  const salones = new Set([salon]);
-
-  if (salon === "Virtual") {
-    const liderVirtual = lideresVirtuales.find(lider =>
-      normalizarNombreLider(lider.Nombre) === claveNombre
-    );
-    if (liderVirtual?.SalonOrigen) {
-      salones.add(liderVirtual.SalonOrigen);
-    }
-  }
-
-  if (salon !== "Virtual") {
-    Object.entries(ninos)
-      .filter(([salonZona]) => salonZona !== "Virtual")
-      .filter(([, nombres]) => nombres.some(nombreZona =>
-        normalizarNombreLider(nombreZona) === claveNombre
-      ))
-      .forEach(([salonZona]) => salones.add(salonZona));
-  }
-
-  if (salon !== "Pastor" && lideresPastor.some(nombrePastor =>
-    normalizarNombreLider(nombrePastor) === claveNombre
-  )) {
-    salones.add("Pastor");
-  }
-
-  return [...salones];
 }
 
     function abrirResumenReunion() {
@@ -4941,7 +4808,7 @@ function obtenerSalonesLiderEnTodasLasReuniones(salon, nombre) {
 
     function abrirAdministrarUsuarios() {
   if (!usuarioActual ||
-          usuarioActual.rol !== "Administrador") {
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     return;
   }
 
@@ -4961,9 +4828,15 @@ function obtenerSalonesLiderEnTodasLasReuniones(salon, nombre) {
 
   document.getElementById("accionesUsuario").classList.add("oculto");
   document.getElementById("tituloAdministrarUsuarios").textContent =
-    "Administrar usuarios";
-  document.getElementById("formularioNuevoUsuario").classList.remove("oculto");
-  document.getElementById("mensajeUsuarios").textContent = "";
+    usuarioActual.rol === "Supervisor"
+      ? "Usuarios (solo lectura)"
+      : "Administrar usuarios";
+  document.getElementById("formularioNuevoUsuario").classList.toggle(
+    "oculto",
+    usuarioActual.rol !== "Administrador"
+  );
+  document.getElementById("mensajeUsuarios").textContent =
+    usuarioActual.rol === "Supervisor" ? "Vista de solo lectura." : "";
   document.getElementById("modalUsuarios").classList.remove("oculto");
 }
 
@@ -5098,20 +4971,13 @@ let ninoPendiente = null;
         ? lideresPastor
         : ninos[ninoPendiente.salon];
       const nombreAnterior = lista[ninoPendiente.indice];
-      const perfilCompartido = ninoPendiente.salon === "Pastor"
-        ? buscarLideresPorNombre(nombreAnterior).length === 1
-        : ninoPendiente.salon !== "Virtual" &&
-          lideresPastor.some(nombrePastor =>
-            normalizarNombreLider(nombrePastor) ===
-            normalizarNombreLider(nombreAnterior)
-          );
       const origenVirtual = lideresVirtuales.some(lider =>
         lider.SalonOrigen === ninoPendiente.salon &&
         normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombreAnterior)
       );
       delete lideresDatos[claveLider(ninoPendiente.salon, nombreAnterior)];
       lista[ninoPendiente.indice] = nuevoNombre;
-      guardarDatosLiderVinculados(ninoPendiente.salon, nuevoNombre, {
+      lideresDatos[claveLider(ninoPendiente.salon, nuevoNombre)] = {
         cumpleanos: nuevoCumpleanos,
         sector: nuevoSector,
         comiteRed: nuevoComiteRed,
@@ -5119,7 +4985,7 @@ let ninoPendiente = null;
         bautizado: nuevoBautizado,
         encuentro: nuevoEncuentro,
         doctrina: nuevaDoctrina
-      });
+      };
       if (origenVirtual) {
         lideresVirtuales.forEach(lider => {
           if (lider.SalonOrigen === ninoPendiente.salon &&
@@ -5134,17 +5000,9 @@ let ninoPendiente = null;
         lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
         localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
         sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
-        if (perfilCompartido &&
-            normalizarNombreLider(nombreAnterior) === normalizarNombreLider(nuevoNombre)) {
-          guardarNinos();
-        }
       } else {
         ordenarNinos(ninoPendiente.salon);
         guardarNinos();
-        if (perfilCompartido &&
-            normalizarNombreLider(nombreAnterior) === normalizarNombreLider(nuevoNombre)) {
-          sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
-        }
       }
       cerrarModal("modalNombreNino");
       ninoPendiente = null;
@@ -5429,7 +5287,6 @@ function cerrarModal(id) {
 
     function cerrarSesion() {
   usuarioActual = null;
-      document.getElementById("accionesBarra").dataset.rol = "";
 
   document.getElementById("pantallaSistema").classList.add("oculto");
   document.getElementById("pantallaLogin").classList.remove("oculto");
