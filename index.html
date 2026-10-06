@@ -1722,6 +1722,93 @@ const ZONAS = [
   "Sabana de Parra"
 ];
 
+const HOJAS_POR_ZONA = {
+  [HOJAS.ninos]: "LideresPorZona",
+  [HOJAS.asistencias]: "AsistenciasPorZona",
+  [HOJAS.maestros]: "FacilitadoresPorZona",
+  [HOJAS.lideresVirtuales]: "DiscipuladoVirtualPorZona"
+};
+
+function puedeVerTodasLasZonas() {
+  return ["Administrador", "Supervisor"].includes(usuarioActual?.rol);
+}
+
+function normalizarSalonDatos(salon) {
+  return salon === "Zona 7" ? "Virtual" : String(salon || "").trim();
+}
+
+function salonDeFilaHoja(nombreHoja, fila) {
+  if (nombreHoja === HOJAS.asistencias &&
+      fila.TipoReunion === "Discipulado Virtual") {
+    const liderVirtual = lideresVirtuales.find(lider =>
+      normalizarNombreLider(lider.Nombre) ===
+        normalizarNombreLider(fila.Nombre)
+    );
+    return normalizarSalonDatos(liderVirtual?.SalonOrigen || "Virtual");
+  }
+  const salon = nombreHoja === HOJAS.lideresVirtuales
+    ? fila.SalonOrigen || fila.Salon
+    : fila.Salon;
+  return normalizarSalonDatos(salon);
+}
+
+function filasDesdeDatosHoja(nombreHoja, datos) {
+  if (!datos || typeof datos !== "object") return [];
+  const filasDeZona = valor =>
+    Array.isArray(valor)
+      ? valor.filter(fila => fila && typeof fila === "object")
+      : Object.values(valor).filter(fila => fila && typeof fila === "object");
+
+  if (HOJAS_POR_ZONA[nombreHoja] && puedeVerTodasLasZonas()) {
+    return Object.values(datos).flatMap(filasDeZona);
+  }
+  return filasDeZona(datos);
+}
+
+function agruparFilasPorZona(nombreHoja, filas) {
+  return filas.reduce((grupos, fila) => {
+    const salon = salonDeFilaHoja(nombreHoja, fila);
+    if (!salon || (!ZONAS.includes(salon) && salon !== "Pastor")) {
+      throw new Error(`El registro de ${nombreHoja} no tiene una zona válida.`);
+    }
+    (grupos[salon] ||= []).push(fila);
+    return grupos;
+  }, {});
+}
+
+function referenciaHoja(firebase, nombreHoja) {
+  const raizPorZona = HOJAS_POR_ZONA[nombreHoja];
+  if (!raizPorZona) {
+    return firebase.ref(firebase.database, nombreHoja);
+  }
+  if (usuarioActual?.rol === "Facilitador") {
+    if (!usuarioActual.salon) {
+      throw new Error("El perfil del facilitador no tiene una zona asignada.");
+    }
+    return firebase.ref(
+      firebase.database,
+      `${raizPorZona}/${usuarioActual.salon}`
+    );
+  }
+  if (!puedeVerTodasLasZonas()) {
+    throw new Error("El perfil no tiene permiso para acceder a los datos por zona.");
+  }
+  return firebase.ref(firebase.database, raizPorZona);
+}
+
+function limpiarDatosEnCache() {
+  [
+    "lideresIglesiaRedencion",
+    "datosLideresIglesiaRedencion",
+    "lideresPastorIglesiaRedencion",
+    "lideresVirtualesIglesiaRedencion",
+    "asistenciasIglesiaRedencion",
+    "facilitadoresIglesiaRedencion",
+    "anunciosIglesiaRedencion",
+    "usuariosIglesiaRedencion"
+  ].forEach(clave => localStorage.removeItem(clave));
+}
+
 function normalizarNombreLider(nombre) {
   return String(nombre || "")
     .trim()
@@ -1804,10 +1891,12 @@ function migrarZonaSieteLocal() {
 async function leerHoja(nombreHoja) {
   const firebase = await window.firebaseReady;
   const resultado = await firebase.get(
-    firebase.ref(firebase.database, nombreHoja)
+    referenciaHoja(firebase, nombreHoja)
   );
 
-  return resultado.exists() ? Object.values(resultado.val()) : [];
+  return resultado.exists()
+    ? filasDesdeDatosHoja(nombreHoja, resultado.val())
+    : [];
 }
 
 async function reemplazarHoja(
@@ -1817,7 +1906,17 @@ async function reemplazarHoja(
   datosAnterioresFirebaseIniciales
 ) {
   const firebase = await window.firebaseReady;
-  const referenciaDatos = firebase.ref(firebase.database, nombreHoja);
+  const referenciaDatos = referenciaHoja(firebase, nombreHoja);
+  const esHojaPorZona = Boolean(HOJAS_POR_ZONA[nombreHoja]);
+  const esFacilitador = usuarioActual?.rol === "Facilitador";
+  const filasNuevas = Array.isArray(filas) ? filas : [];
+  if (esHojaPorZona && esFacilitador &&
+      filasNuevas.some(fila =>
+        salonDeFilaHoja(nombreHoja, fila) !== usuarioActual.salon
+      )) {
+    throw new Error("Se rechazó un cambio que incluye datos de otra zona.");
+  }
+
   let filasAnteriores = filasAnterioresIniciales;
   let datosAnterioresFirebase = datosAnterioresFirebaseIniciales;
   if (datosAnterioresFirebase === undefined) {
@@ -1826,15 +1925,20 @@ async function reemplazarHoja(
       ? resultadoAnterior.val()
       : null;
   }
-  if (nombreHoja === HOJAS.asistencias || !Array.isArray(filasAnteriores)) {
-    filasAnteriores = datosAnterioresFirebase
-      ? Object.values(datosAnterioresFirebase)
-      : [];
+  if (nombreHoja === HOJAS.asistencias || esHojaPorZona ||
+      !Array.isArray(filasAnteriores)) {
+    filasAnteriores = filasDesdeDatosHoja(
+      nombreHoja,
+      datosAnterioresFirebase
+    );
   }
+  const datosNuevos = esHojaPorZona && !esFacilitador
+    ? agruparFilasPorZona(nombreHoja, filasNuevas)
+    : filasNuevas;
   const esHojaAsistencias = nombreHoja === HOJAS.asistencias;
   const cambios = esHojaAsistencias
     ? []
-    : compararFilasParaBitacora(nombreHoja, filasAnteriores, filas);
+    : compararFilasParaBitacora(nombreHoja, filasAnteriores, filasNuevas);
   if (!esHojaAsistencias && !cambios.length) return;
 
   const idCambio = `${Date.now()}_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -1846,31 +1950,36 @@ async function reemplazarHoja(
     Rol: usuarioActual?.rol || "Sistema",
     Hoja: nombreHoja,
     RegistrosAntes: filasAnteriores.length,
-    RegistrosDespues: filas.length,
+    RegistrosDespues: filasNuevas.length,
     Cambios: cambios,
     Resultado: "Pendiente"
   };
+  const referenciaEvento = firebase.ref(
+    firebase.database,
+    `${HOJA_BITACORA}/${idCambio}`
+  );
 
   if (esHojaAsistencias) {
     const huboCambios = await actualizarFilasAsistenciaFirebase(
       firebase,
       referenciaDatos,
       datosAnterioresFirebase,
-      filas
+      filasNuevas,
+      esFacilitador ? usuarioActual.salon : null
     );
     if (!huboCambios) return;
     if (usuarioActual?.rol === "Administrador") {
       void completarRespaldoYBitacoraAsistencia(
         firebase,
         filasAnteriores,
-        filas,
+        filasNuevas,
         evento
       );
     } else {
       evento.Cambios = compararFilasParaBitacora(
         HOJAS.asistencias,
         filasAnteriores,
-        filas
+        filasNuevas
       );
       await firebase.set(referenciaEvento, evento);
       await firebase.set(referenciaEvento, {
@@ -1906,14 +2015,10 @@ async function reemplazarHoja(
     );
   }
 
-  const referenciaEvento = firebase.ref(
-    firebase.database,
-    `${HOJA_BITACORA}/${idCambio}`
-  );
   await firebase.set(referenciaEvento, evento);
 
   try {
-    await firebase.set(referenciaDatos, filas);
+    await firebase.set(referenciaDatos, datosNuevos);
   } catch (error) {
     await firebase.set(referenciaEvento, {
       ...evento,
@@ -1938,8 +2043,28 @@ async function actualizarFilasAsistenciaFirebase(
   firebase,
   referenciaDatos,
   datosAnteriores,
-  filasNuevas
+  filasNuevas,
+  salonFacilitador
 ) {
+  if (!salonFacilitador) {
+    const filasAnterioresGlobales = filasDesdeDatosHoja(
+      HOJAS.asistencias,
+      datosAnteriores
+    );
+    if (compararFilasParaBitacora(
+      HOJAS.asistencias,
+      filasAnterioresGlobales,
+      filasNuevas
+    ).length === 0) {
+      return false;
+    }
+    await firebase.set(
+      referenciaDatos,
+      agruparFilasPorZona(HOJAS.asistencias, filasNuevas)
+    );
+    return true;
+  }
+
   const filasAnteriores = datosAnteriores
     ? Object.entries(datosAnteriores)
     : [];
@@ -2238,6 +2363,15 @@ function formatearCumpleanosEntrada(valor) {
 
 async function cargarDatosDesdeAPI() {
   try {
+    limpiarDatosEnCache();
+    ninos = Object.fromEntries(ZONAS.map(zona => [zona, []]));
+    lideresDatos = {};
+    lideresPastor = [];
+    lideresVirtuales = [];
+    asistencias = [];
+    maestrosSalon = Object.fromEntries(ZONAS.map(zona => [zona, ""]));
+    anuncios = [];
+
     const firebase = await window.firebaseReady;
     const [filasNinos, filasLideresPastor, filasAsistencias, filasMaestros, filasAnuncios, filasVirtuales] =
       await Promise.all([
@@ -2870,16 +3004,16 @@ async function cargarDatosDesdeAPI() {
     }
 
         const maestrosIniciales = Object.fromEntries(ZONAS.map(zona => [zona, ""]));
-    
+
     let maestrosSalon = JSON.parse(
       localStorage.getItem("facilitadoresIglesiaRedencion")
     ) || maestrosIniciales;
-    
+
     function guardarMaestrosSalon() {
       if (!usuarioActual || usuarioActual.rol !== "Administrador" || esReunionPastor()) {
         return;
       }
-    
+
       const salon = document.getElementById("salon").value;
       const facilitador1 = document.getElementById("facilitadorZona1").value;
       const facilitador2 = document.getElementById("facilitadorZona2").value;
@@ -2887,7 +3021,7 @@ async function cargarDatosDesdeAPI() {
       maestrosSalon[salon] = [facilitador1, facilitador2]
         .filter(Boolean)
         .join(", ");
-    
+
       localStorage.setItem(
         "facilitadoresIglesiaRedencion",
         JSON.stringify(maestrosSalon)
@@ -2901,7 +3035,7 @@ async function cargarDatosDesdeAPI() {
         }))
       );
     }
-    
+
     function mostrarMaestroSalon() {
       const salon = document.getElementById("salon").value;
       const selector1 = document.getElementById("facilitadorZona1");
@@ -3057,7 +3191,7 @@ async function cargarDatosDesdeAPI() {
             normalizarNombreLider(usuario) &&
           (perfil.rol !== "Facilitador"
             ? perfil.salon === "todos"
-            : typeof perfil.salon === "string" && perfil.salon.length > 0);
+            : ZONAS.includes(perfil.salon) && perfil.salon !== "Virtual");
         if (!perfilValido) {
           throw new Error("El perfil no coincide con el usuario o el rol.");
         }
@@ -3104,7 +3238,9 @@ async function cargarDatosDesdeAPI() {
         usuarioActual = null;
         cargaFirebaseCompleta = false;
         mensaje.textContent =
-          "No se pudo iniciar sesión. Verifique sus credenciales y que el administrador haya creado su cuenta y perfil en Firebase.";
+          error?.message === "La cuenta no tiene un perfil autorizado."
+            ? "La cuenta existe, pero falta asignarle un perfil de usuario en Firebase. Contacte al administrador para configurar su rol y zona."
+            : "No se pudo iniciar sesión. Verifique sus credenciales y que el administrador haya creado su cuenta y perfil en Firebase.";
       } finally {
         boton.disabled = false;
       }
@@ -4312,17 +4448,18 @@ async function cargarDatosDesdeAPI() {
     async function sincronizarAsistencias(fecha, salon, tipoReunion, filasNuevas, asistenciasADN = []) {
       try {
         const firebase = await window.firebaseReady;
-        const referenciaAsistencias = firebase.ref(
-          firebase.database,
+        const referenciaAsistencias = referenciaHoja(
+          firebase,
           HOJAS.asistencias
         );
         const resultadoActual = await firebase.get(referenciaAsistencias);
         const datosAnteriores = resultadoActual.exists()
           ? resultadoActual.val()
           : null;
-        const filasActuales = datosAnteriores
-          ? Object.values(datosAnteriores)
-          : [];
+        const filasActuales = filasDesdeDatosHoja(
+          HOJAS.asistencias,
+          datosAnteriores
+        );
         let restantes = filasActuales.filter(fila =>
           String(fila.Fecha) !== fecha ||
           String(fila.Salon) !== salon ||
@@ -4505,7 +4642,7 @@ function actualizarResumenPorSalon() {
   const hasta = new Date(`${hastaTexto}T00:00:00`);
 
   while (fecha <= hasta) {
-    domingos.push([ 
+    domingos.push([
       fecha.getFullYear(),
       String(fecha.getMonth() + 1).padStart(2, "0"),
       String(fecha.getDate()).padStart(2, "0")
@@ -5594,6 +5731,14 @@ function cerrarModal(id) {
   usuarioActual = null;
   usuarios = {};
   cargaFirebaseCompleta = false;
+  limpiarDatosEnCache();
+  ninos = Object.fromEntries(ZONAS.map(zona => [zona, []]));
+  lideresDatos = {};
+  lideresPastor = [];
+  lideresVirtuales = [];
+  asistencias = [];
+  maestrosSalon = Object.fromEntries(ZONAS.map(zona => [zona, ""]));
+  anuncios = [];
 
   document.getElementById("pantallaSistema").classList.add("oculto");
   document.getElementById("pantallaLogin").classList.remove("oculto");
