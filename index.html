@@ -697,11 +697,17 @@
 }
 
 .ventana-aportes {
-  max-width: 1050px;
+  max-width: 760px;
   text-align: left;
 }
 
-.formulario-aporte,
+.formulario-aporte {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: start;
+}
+
 .filtros-aportes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -722,6 +728,40 @@
   resize: vertical;
 }
 
+.formulario-aporte input:not([type="file"]),
+.formulario-aporte textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+#comprobanteAporte {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 4px;
+  font-size: 13px;
+}
+
+.formulario-aporte label:has(> #comentarioAporte) {
+  grid-column: 2 / 4;
+}
+
+.aporte-comprobante-acciones {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#botonGuardarAporte {
+  justify-self: center;
+  width: max-content;
+  min-width: 180px;
+  margin: 2px 0 6px;
+  transform: translateY(-6px);
+}
+
 .tabla-aportes {
   overflow-x: auto;
   margin-top: 18px;
@@ -731,9 +771,31 @@
   min-width: 760px;
 }
 
-.estado-aporte {
-  font-weight: bold;
-  color: #6e1f2a;
+.resumen-aportes {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid #d6d0c6;
+  border-radius: 6px;
+  background: #f5f3ef;
+}
+
+.resumen-aportes ul {
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .formulario-aporte {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .formulario-aporte label:has(> #comentarioAporte),
+  .aporte-comprobante-acciones {
+    grid-column: 1;
+  }
+
+  #botonGuardarAporte {
+    justify-self: center;
+  }
 }
 
 .ventana-anuncios #seccionAnunciosPasados {
@@ -1289,67 +1351,67 @@
 
       <section id="contenidoAportes" class="oculto">
         <p id="informacionPerfilAportes"></p>
-        <button type="button" onclick="cerrarModalAportes()">Cerrar módulo</button>
 
         <form id="formularioAporte" class="formulario-aporte"
           onsubmit="registrarAporteLimpieza(event)">
-          <label for="semanaAporte">Semana correspondiente (seleccione el lunes)
-            <input id="semanaAporte" type="date" required>
+          <label for="fechaAporte">Fecha del aporte
+            <input id="fechaAporte" type="date" required>
           </label>
-          <label for="montoAporte">Monto aportado
+          <label for="montoAporte">Monto
             <input id="montoAporte" type="number" min="0.01" step="0.01"
               inputmode="decimal" required>
           </label>
-          <label for="comprobanteAporte">Comprobante (JPG, PNG o WebP; máximo 5 MB)
-            <input id="comprobanteAporte" type="file"
-              accept="image/jpeg,image/png,image/webp">
+          <label for="referenciaAporte">Referencia
+            <input id="referenciaAporte" type="text" inputmode="numeric"
+              pattern="[0-9]+" maxlength="40"
+              oninput="this.value=this.value.replace(/\D/g,'')" required>
           </label>
+          <div class="aporte-comprobante-acciones">
+            <label for="comprobanteAporte">Comprobante
+              <input id="comprobanteAporte" type="file"
+                accept="image/*">
+            </label>
+            <button id="botonGuardarAporte" type="submit">Registrar aporte</button>
+          </div>
           <label for="comentarioAporte">Comentario (opcional)
             <textarea id="comentarioAporte" maxlength="500"></textarea>
           </label>
-          <button id="botonGuardarAporte" type="submit">Registrar aporte</button>
         </form>
 
-        <section id="filtrosAportes" class="filtros-aportes oculto">
-          <label for="filtroZonaAportes">Zona
-            <select id="filtroZonaAportes" onchange="mostrarAportesLimpieza()">
-              <option value="">Todas las zonas</option>
-              <option value="Zona 1">Zona 1</option>
-              <option value="Zona 2">Zona 2</option>
-              <option value="Zona 3">Zona 3</option>
-              <option value="Zona 4">Zona 4</option>
-              <option value="Zona 5">Zona 5</option>
-              <option value="Zona 6">Zona 6</option>
-            </select>
-          </label>
-          <label for="filtroEstadoAportes">Estado
-            <select id="filtroEstadoAportes" onchange="mostrarAportesLimpieza()">
-              <option value="">Todos</option>
-              <option value="Pendiente">Pendiente</option>
-              <option value="Confirmado">Confirmado</option>
-              <option value="Requiere aclaración">Requiere aclaración</option>
-            </select>
-          </label>
-          <label for="filtroSemanaAportes">Semana
-            <input id="filtroSemanaAportes" type="date"
-              onchange="mostrarAportesLimpieza()">
-          </label>
-          <button type="button" onclick="cargarAportesLimpieza()">Actualizar lista</button>
+        <section id="consultaAportes" class="oculto">
+          <section id="filtrosAportes" class="filtros-aportes">
+            <label for="filtroZonaAportes">Zona
+              <select id="filtroZonaAportes" onchange="cambiarZonaFiltroAportes()">
+                <option value="">Todas las zonas</option>
+                <option value="Zona 1">Zona 1</option>
+                <option value="Zona 2">Zona 2</option>
+                <option value="Zona 3">Zona 3</option>
+                <option value="Zona 4">Zona 4</option>
+                <option value="Zona 5">Zona 5</option>
+                <option value="Zona 6">Zona 6</option>
+              </select>
+            </label>
+            <label for="filtroSabadoAportes">Fecha de cierre (sábado)
+              <input id="filtroSabadoAportes" type="date"
+                min="1970-01-03" step="7"
+                onchange="ajustarFiltroSabadoAportes()">
+            </label>
+            <label for="filtroReferenciaAportes">Referencia
+              <input id="filtroReferenciaAportes" type="text"
+                inputmode="numeric" pattern="[0-9]*" maxlength="40"
+                list="sugerenciasReferenciaAportes"
+                oninput="this.value=this.value.replace(/\D/g,''); mostrarAportesLimpieza()">
+              <datalist id="sugerenciasReferenciaAportes"></datalist>
+            </label>
+            <button type="button" onclick="cargarAportesLimpieza()">Actualizar lista</button>
+          </section>
+          <small>Al buscar por referencia se omite la fecha de cierre, pero se respeta la zona seleccionada.</small>
+          <div id="resumenAportesLimpieza"></div>
+          <div id="listaAportesLimpieza" class="tabla-aportes"></div>
         </section>
 
         <p id="mensajeRegistroAporte" role="status" aria-live="polite"></p>
-        <div id="listaAportesLimpieza" class="tabla-aportes"></div>
       </section>
-    </div>
-  </div>
-
-  <div id="modalVisorComprobante" class="modal oculto"
-    onclick="if (event.target === this) cerrarVisorComprobante()">
-    <div class="ventana-usuarios">
-      <button class="cerrar-modal" type="button"
-        onclick="cerrarVisorComprobante()" aria-label="Cerrar comprobante">×</button>
-      <img id="imagenComprobante" class="anuncio-multimedia"
-        alt="Comprobante de transferencia">
     </div>
   </div>
 
@@ -3125,6 +3187,10 @@ async function cargarDatosDesdeAPI() {
     function abrirVisorMultimedia(control) {
       const tipo = control.dataset.mediaTipo || "";
       const datos = control.dataset.mediaDatos || "";
+      mostrarEnVisorMultimedia(tipo, datos, "Archivo multimedia ampliado");
+    }
+
+    function mostrarEnVisorMultimedia(tipo, datos, textoAlternativo) {
       const elemento = tipo.startsWith("image/")
         ? document.createElement("img")
         : tipo.startsWith("video/")
@@ -3136,7 +3202,7 @@ async function cargarDatosDesdeAPI() {
 
       elemento.src = datos;
       if (elemento instanceof HTMLImageElement) {
-        elemento.alt = "Archivo multimedia ampliado";
+        elemento.alt = textoAlternativo;
       } else {
         elemento.controls = true;
         elemento.autoplay = tipo.startsWith("video/");
@@ -3155,6 +3221,10 @@ async function cargarDatosDesdeAPI() {
       if (elemento) elemento.pause();
       contenido.replaceChildren();
       document.getElementById("modalVisorMultimedia").classList.add("oculto");
+      if (urlComprobanteActual) {
+        URL.revokeObjectURL(urlComprobanteActual);
+        urlComprobanteActual = null;
+      }
     }
 
     async function iniciarSesion() {
@@ -3621,7 +3691,7 @@ async function cargarDatosDesdeAPI() {
       const mes = Number(mesTexto);
       const ano = new Date().getFullYear();
       const fechaInicioMes = new Date(ano, mes - 1, 1);
-      const primerDia = fechaInicioMes.getDay();
+      const desplazamientoPrimerDia = (fechaInicioMes.getDay() + 6) % 7;
       const diasDelMes = new Date(ano, mes, 0).getDate();
       const cumpleanos = obtenerTodosLosCumpleanos();
       const porDia = {};
@@ -3632,7 +3702,7 @@ async function cargarDatosDesdeAPI() {
         porDia[clave].push(persona);
       });
 
-      const nombresDias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+      const nombresDias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
       let html = '<div class="calendario-cumpleanos">';
 
       nombresDias.forEach(dia => {
@@ -3640,8 +3710,12 @@ async function cargarDatosDesdeAPI() {
       });
 
       const fechaInicioCalendario = new Date(fechaInicioMes);
-      fechaInicioCalendario.setDate(fechaInicioCalendario.getDate() - primerDia);
-      const totalDias = Math.ceil((primerDia + diasDelMes) / 7) * 7;
+      fechaInicioCalendario.setDate(
+        fechaInicioCalendario.getDate() - desplazamientoPrimerDia
+      );
+      const totalDias = Math.ceil(
+        (desplazamientoPrimerDia + diasDelMes) / 7
+      ) * 7;
 
       for (let indice = 0; indice < totalDias; indice++) {
         const fechaCelda = new Date(fechaInicioCalendario);
@@ -5347,12 +5421,7 @@ const ZONAS_APORTES = Array.from(
   { length: 6 },
   (_, indice) => `Zona ${indice + 1}`
 );
-const MAX_COMPROBANTE_APORTE_BYTES = 5 * 1024 * 1024;
-const TIPOS_COMPROBANTE_APORTE = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp"
-]);
+const MAX_COMPROBANTE_APORTE_ORIGINAL_BYTES = 25 * 1024 * 1024;
 let perfilAportesActual = null;
 let registrosAportesCache = [];
 let urlComprobanteActual = null;
@@ -5374,13 +5443,68 @@ function mostrarMensajeAportes(mensaje, esError = false) {
 }
 
 function establecerSemanaActualAportes() {
+  document.getElementById("fechaAporte").value = fechaActualISOAportes();
+}
+
+function fechaActualISOAportes() {
   const fecha = new Date();
-  const dia = (fecha.getDay() + 6) % 7;
-  fecha.setDate(fecha.getDate() - dia);
-  const fechaISO = new Date(
-    Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate())
-  ).toISOString().slice(0, 10);
-  document.getElementById("semanaAporte").value = fechaISO;
+  return [
+    fecha.getFullYear(),
+    String(fecha.getMonth() + 1).padStart(2, "0"),
+    String(fecha.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function obtenerLunesISOAportes(fechaBase = new Date()) {
+  const fecha = new Date(
+    fechaBase.getFullYear(),
+    fechaBase.getMonth(),
+    fechaBase.getDate()
+  );
+  fecha.setDate(fecha.getDate() - ((fecha.getDay() + 6) % 7));
+  return [
+    fecha.getFullYear(),
+    String(fecha.getMonth() + 1).padStart(2, "0"),
+    String(fecha.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function obtenerSabadoISOAportes(fechaBase = new Date()) {
+  const fecha = new Date(`${obtenerLunesISOAportes(fechaBase)}T00:00:00`);
+  fecha.setDate(fecha.getDate() + 5);
+  return [
+    fecha.getFullYear(),
+    String(fecha.getMonth() + 1).padStart(2, "0"),
+    String(fecha.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function lunesDeSabadoAportes(sabadoISO) {
+  const sabado = new Date(`${sabadoISO}T00:00:00`);
+  if (Number.isNaN(sabado.getTime()) || sabado.getDay() !== 6) {
+    return "";
+  }
+  sabado.setDate(sabado.getDate() - 5);
+  return [
+    sabado.getFullYear(),
+    String(sabado.getMonth() + 1).padStart(2, "0"),
+    String(sabado.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function ajustarFiltroSabadoAportes() {
+  const campoSabado = document.getElementById("filtroSabadoAportes");
+  if (campoSabado.value) {
+    const sabadoValido = lunesDeSabadoAportes(campoSabado.value);
+    if (!sabadoValido) {
+      campoSabado.value = obtenerSabadoISOAportes(
+        new Date(`${campoSabado.value}T00:00:00`)
+      );
+    }
+  } else {
+    campoSabado.value = obtenerSabadoISOAportes();
+  }
+  mostrarAportesLimpieza();
 }
 
 async function abrirControlAportes() {
@@ -5437,18 +5561,19 @@ async function cargarPerfilAportes(usuarioFirebase) {
       : " | Todas las zonas");
 
   const esFacilitador = perfilAportesActual.rol === "Facilitador";
-  document.getElementById("formularioAporte").classList.toggle(
-    "oculto",
-    !esFacilitador
-  );
-  document.getElementById("filtrosAportes").classList.toggle(
-    "oculto",
-    esFacilitador
-  );
+  document.getElementById("formularioAporte").classList.toggle("oculto", !esFacilitador);
+  document.getElementById("consultaAportes").classList.toggle("oculto", esFacilitador);
   document.getElementById("filtroZonaAportes").value = "";
-  document.getElementById("filtroSemanaAportes").value = "";
-  document.getElementById("filtroEstadoAportes").value = "";
+  document.getElementById("filtroSabadoAportes").value =
+    obtenerSabadoISOAportes();
+  document.getElementById("filtroReferenciaAportes").value = "";
+  document.getElementById("resumenAportesLimpieza").replaceChildren();
   establecerSemanaActualAportes();
+  if (esFacilitador) {
+    registrosAportesCache = [];
+    document.getElementById("listaAportesLimpieza").replaceChildren();
+    return;
+  }
   await cargarAportesLimpieza();
 }
 
@@ -5463,16 +5588,13 @@ async function registrarAporteLimpieza(evento) {
   if (!perfilAportesActual ||
       perfilAportesActual.rol !== "Facilitador") return;
 
-  const semana = document.getElementById("semanaAporte").value;
-  const fechaSemana = new Date(`${semana}T00:00:00`);
-  if (!semana || Number.isNaN(fechaSemana.getTime()) ||
-      fechaSemana.getDay() !== 1) {
-    mostrarMensajeAportesRegistro(
-      "Seleccione el lunes de la semana a la que corresponde el aporte.",
-      true
-    );
+  const fechaAporte = document.getElementById("fechaAporte").value;
+  const fecha = new Date(`${fechaAporte}T00:00:00`);
+  if (!fechaAporte || Number.isNaN(fecha.getTime())) {
+    mostrarMensajeAportesRegistro("Seleccione la fecha del aporte.", true);
     return;
   }
+  const semana = obtenerLunesISOAportes(fecha);
 
   const monto = Number(document.getElementById("montoAporte").value);
   if (!Number.isFinite(monto) || monto <= 0) {
@@ -5480,12 +5602,22 @@ async function registrarAporteLimpieza(evento) {
     return;
   }
 
-  const archivo = document.getElementById("comprobanteAporte").files[0] || null;
-  if (archivo &&
-      (!TIPOS_COMPROBANTE_APORTE.has(archivo.type) ||
-       archivo.size > MAX_COMPROBANTE_APORTE_BYTES)) {
+  const referencia = document.getElementById("referenciaAporte").value.trim();
+  if (!/^\d{1,40}$/.test(referencia)) {
     mostrarMensajeAportesRegistro(
-      "El comprobante debe ser JPG, PNG o WebP y no superar 5 MB.",
+      "La referencia debe contener únicamente números.",
+      true
+    );
+    return;
+  }
+
+  const archivoOriginal =
+    document.getElementById("comprobanteAporte").files[0] || null;
+  if (archivoOriginal &&
+      (!archivoOriginal.type.startsWith("image/") ||
+       archivoOriginal.size > MAX_COMPROBANTE_APORTE_ORIGINAL_BYTES)) {
+    mostrarMensajeAportesRegistro(
+      "Seleccione un archivo de imagen que no supere 25 MB.",
       true
     );
     return;
@@ -5494,6 +5626,7 @@ async function registrarAporteLimpieza(evento) {
   const boton = document.getElementById("botonGuardarAporte");
   boton.disabled = true;
   mostrarMensajeAportesRegistro("Guardando aporte...");
+  let comprobanteSubido = false;
 
   try {
     const firebase = await window.firebaseReady;
@@ -5511,14 +5644,18 @@ async function registrarAporteLimpieza(evento) {
       uid: perfilAportesActual.uid,
       usuario: perfilAportesActual.usuario,
       zona: perfilAportesActual.zona,
+      referencia,
       monto,
+      fechaAporte,
       semana,
       comentario: document.getElementById("comentarioAporte").value.trim(),
       fechaRegistro: firebase.serverTimestamp(),
-      estado: "Pendiente",
       rutaComprobante: ""
     };
 
+    const archivo = archivoOriginal
+      ? await comprimirImagenAsistencia(archivoOriginal)
+      : null;
     if (archivo) {
       const ruta = `comprobantes-limpieza/${perfilAportesActual.uid}/${id}`;
       await firebase.uploadBytes(
@@ -5526,6 +5663,7 @@ async function registrarAporteLimpieza(evento) {
         archivo,
         { contentType: archivo.type }
       );
+      comprobanteSubido = true;
       registro.rutaComprobante = ruta;
     }
 
@@ -5535,14 +5673,15 @@ async function registrarAporteLimpieza(evento) {
     );
     document.getElementById("formularioAporte").reset();
     establecerSemanaActualAportes();
-    mostrarMensajeAportesRegistro("Aporte registrado y enviado para revisión.");
-    await cargarAportesLimpieza();
+    mostrarMensajeAportesRegistro("Aporte registrado correctamente.");
   } catch (error) {
     console.error("No se pudo registrar el aporte de limpieza.", error);
     mostrarMensajeAportesRegistro(
-      archivo
-        ? "No se pudo completar el registro. Si adjuntó un comprobante, contacte al administrador antes de volver a subirlo."
-        : "No se pudo registrar el aporte. Revise la conexión y la configuración de Firebase.",
+      comprobanteSubido
+        ? "El comprobante se subió, pero el aporte no quedó registrado. Contacte al administrador antes de volver a intentarlo."
+        : archivoOriginal
+          ? "No se pudo comprimir o subir el comprobante. Verifique la imagen y la conexión, e inténtelo de nuevo."
+          : "No se pudo registrar el aporte. Revise la conexión y la configuración de Firebase.",
       true
     );
   } finally {
@@ -5557,57 +5696,109 @@ function mostrarMensajeAportesRegistro(mensaje, esError = false) {
 }
 
 async function cargarAportesLimpieza() {
-  if (!perfilAportesActual) return;
+  if (!perfilAportesActual ||
+      !["Administrador", "Supervisor"].includes(perfilAportesActual.rol)) {
+    return;
+  }
   const lista = document.getElementById("listaAportesLimpieza");
+  document.getElementById("resumenAportesLimpieza").replaceChildren();
   lista.textContent = "Cargando aportes...";
   try {
     const firebase = await window.firebaseReady;
     const referencia = firebase.ref(firebase.database, "AportesLimpieza");
-    const consulta = perfilAportesActual.rol === "Facilitador"
-      ? firebase.query(
-          referencia,
-          firebase.orderByChild("uid"),
-          firebase.equalTo(perfilAportesActual.uid)
-        )
-      : referencia;
-    const resultado = await firebase.get(consulta);
+    const resultado = await firebase.get(referencia);
     registrosAportesCache = resultado.exists()
       ? Object.entries(resultado.val()).map(([id, registro]) => ({
           id,
           ...registro
         }))
       : [];
+    actualizarSugerenciasReferenciaAportes();
     mostrarAportesLimpieza();
   } catch (error) {
     console.error("No se pudieron cargar los aportes de limpieza.", error);
+    document.getElementById("resumenAportesLimpieza").replaceChildren();
+    document.getElementById("sugerenciasReferenciaAportes").replaceChildren();
     lista.textContent =
       "No se pudieron cargar los aportes. Verifique los permisos y la conexión a Firebase.";
   }
 }
 
+function actualizarSugerenciasReferenciaAportes() {
+  const zona = document.getElementById("filtroZonaAportes").value;
+  const referencias = [...new Set(registrosAportesCache
+    .filter(registro => !zona || registro.zona === zona)
+    .map(registro => String(registro.referencia || ""))
+    .filter(referencia => /^\d+$/.test(referencia)))]
+    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+  document.getElementById("sugerenciasReferenciaAportes").innerHTML =
+    referencias.map(referencia =>
+      `<option value="${escaparTexto(referencia)}"></option>`
+    ).join("");
+}
+
+function cambiarZonaFiltroAportes() {
+  actualizarSugerenciasReferenciaAportes();
+  mostrarAportesLimpieza();
+}
+
 function mostrarAportesLimpieza() {
   const lista = document.getElementById("listaAportesLimpieza");
-  const esRevisor = perfilAportesActual &&
-    ["Administrador", "Supervisor"].includes(perfilAportesActual.rol);
-  const zona = esRevisor
-    ? document.getElementById("filtroZonaAportes").value
-    : perfilAportesActual?.zona;
-  const semana = esRevisor
-    ? document.getElementById("filtroSemanaAportes").value
-    : "";
-  const estado = esRevisor
-    ? document.getElementById("filtroEstadoAportes").value
-    : "";
+  const resumen = document.getElementById("resumenAportesLimpieza");
+  if (!perfilAportesActual ||
+      !["Administrador", "Supervisor"].includes(perfilAportesActual.rol)) {
+    return;
+  }
+  const zona = document.getElementById("filtroZonaAportes").value;
+  const sabado = document.getElementById("filtroSabadoAportes").value;
+  const semana = lunesDeSabadoAportes(sabado);
+  const referencia = document.getElementById("filtroReferenciaAportes")
+    .value.trim();
   const filas = registrosAportesCache
     .filter(registro =>
       (!zona || registro.zona === zona) &&
-      (!semana || registro.semana === semana) &&
-      (!estado || registro.estado === estado)
+      (referencia
+        ? String(registro.referencia || "").startsWith(referencia)
+        : registro.semana === semana)
     )
     .sort((a, b) =>
-      String(b.semana).localeCompare(String(a.semana)) ||
+      String(a.referencia || "").localeCompare(
+        String(b.referencia || ""),
+        "en",
+        { numeric: true }
+      ) ||
       Number(b.fechaRegistro || 0) - Number(a.fechaRegistro || 0)
     );
+
+  const total = filas.reduce(
+    (suma, registro) => suma + Number(registro.monto || 0),
+    0
+  );
+  const totalesPorZona = new Map();
+  filas.forEach(registro => {
+    const nombreZona = String(registro.zona || "Sin zona");
+    totalesPorZona.set(
+      nombreZona,
+      (totalesPorZona.get(nombreZona) || 0) + Number(registro.monto || 0)
+    );
+  });
+  const textoSemana = !referencia && sabado
+    ? ` · Cierre del sábado ${escaparTexto(sabado)}`
+    : "";
+  const desgloseZonas = [...totalesPorZona.entries()]
+    .sort(([zonaA], [zonaB]) => zonaA.localeCompare(zonaB, "es"))
+    .map(([nombreZona, totalZona]) =>
+      `<li>${escaparTexto(nombreZona)}: ${totalZona.toFixed(2)}</li>`
+    ).join("");
+  resumen.innerHTML = `
+    <section class="resumen-aportes" aria-live="polite">
+      <strong>Total de aportes según los filtros: ${total.toFixed(2)}</strong>
+      <span> · ${filas.length} transacción(es)${textoSemana}</span>
+      ${!zona && !referencia
+        ? `<p><strong>Desglose por zona:</strong></p>
+           <ul>${desgloseZonas || "<li>Sin aportes por zona</li>"}</ul>`
+        : ""}
+    </section>`;
 
   if (!filas.length) {
     lista.textContent = "No hay aportes que coincidan con los filtros.";
@@ -5615,74 +5806,31 @@ function mostrarAportesLimpieza() {
   }
 
   const cuerpo = filas.map(registro => {
-    const semanaVisible = escaparTexto(registro.semana || "");
-    const fechaVisible = Number(registro.fechaRegistro)
-      ? new Date(Number(registro.fechaRegistro)).toLocaleString("es")
-      : "—";
-    const recibo = registro.rutaComprobante
+    const fechaVisible = registro.fechaAporte
+      ? new Date(`${escaparTexto(registro.fechaAporte)}T00:00:00`)
+          .toLocaleDateString("es")
+      : Number(registro.fechaRegistro)
+        ? new Date(Number(registro.fechaRegistro)).toLocaleDateString("es")
+        : "—";
+    const comprobante = registro.rutaComprobante
       ? `<button type="button" onclick="verComprobanteAporte('${escaparTexto(registro.uid)}','${escaparTexto(registro.id)}')">Ver comprobante</button>`
-      : "Sin comprobante";
-    const revision = esRevisor && registro.estado === "Pendiente"
-      ? `<button type="button" onclick="actualizarEstadoAporte('${escaparTexto(registro.id)}','Confirmado')">Confirmar</button>
-         <button type="button" onclick="actualizarEstadoAporte('${escaparTexto(registro.id)}','Requiere aclaración')">Pedir aclaración</button>`
-      : "";
-    const comentarioRevision = registro.comentarioRevision
-      ? `<small>Revisión: ${escaparTexto(registro.comentarioRevision)}</small>`
       : "";
     return `<tr>
       <td>${escaparTexto(registro.zona || "")}</td>
-      <td>${semanaVisible}</td>
-      <td>${Number(registro.monto).toFixed(2)}</td>
+      <td>${escaparTexto(registro.referencia || "")}</td>
+      <td>${Number(registro.monto).toFixed(2)} ${comprobante}</td>
       <td>${escaparTexto(registro.usuario || "")}</td>
-      <td>${escaparTexto(registro.comentario || "—")}${comentarioRevision}</td>
+      <td>${escaparTexto(registro.comentario || "—")}</td>
       <td>${escaparTexto(fechaVisible)}</td>
-      <td><span class="estado-aporte">${escaparTexto(registro.estado || "Pendiente")}</span></td>
-      <td>${recibo}</td>
-      ${esRevisor ? `<td>${revision}</td>` : ""}
     </tr>`;
   }).join("");
   lista.innerHTML = `<table>
     <thead><tr>
-      <th>Zona</th><th>Semana</th><th>Monto</th><th>Facilitador</th>
-      <th>Comentario</th><th>Registrado</th><th>Estado</th><th>Comprobante</th>
-      ${esRevisor ? "<th>Revisión</th>" : ""}
+      <th>Zona</th><th>Referencia</th><th>Monto</th><th>Facilitador</th>
+      <th>Comentario</th><th>Fecha del aporte</th>
     </tr></thead>
     <tbody>${cuerpo}</tbody>
   </table>`;
-}
-
-async function actualizarEstadoAporte(id, estado) {
-  if (!perfilAportesActual ||
-      !["Administrador", "Supervisor"].includes(perfilAportesActual.rol) ||
-      !["Confirmado", "Requiere aclaración"].includes(estado)) return;
-  const comentarioRevision = prompt(
-    estado === "Confirmado"
-      ? "Comentario de revisión (opcional):"
-      : "Indique qué aclaración se necesita:"
-  );
-  if (comentarioRevision === null) return;
-  if (estado === "Requiere aclaración" && !comentarioRevision.trim()) {
-    alert("Escriba qué aclaración se necesita.");
-    return;
-  }
-
-  try {
-    const firebase = await window.firebaseReady;
-    await firebase.update(
-      firebase.ref(firebase.database, `AportesLimpieza/${id}`),
-      {
-        estado,
-        comentarioRevision: comentarioRevision.trim(),
-        revisadoPor: perfilAportesActual.usuario,
-        uidRevisor: perfilAportesActual.uid,
-        fechaRevision: firebase.serverTimestamp()
-      }
-    );
-    await cargarAportesLimpieza();
-  } catch (error) {
-    console.error("No se pudo actualizar el estado del aporte.", error);
-    alert("No se pudo guardar la revisión. Verifique que su perfil tenga permisos de Supervisor o Administrador.");
-  }
 }
 
 async function verComprobanteAporte(uid, id) {
@@ -5697,22 +5845,19 @@ async function verComprobanteAporte(uid, id) {
       firebase.storage,
       `comprobantes-limpieza/${uid}/${id}`
     ));
-    cerrarVisorComprobante();
+    if (!archivo.type.startsWith("image/")) {
+      throw new Error("El archivo guardado no es una imagen.");
+    }
+    cerrarVisorMultimedia();
     urlComprobanteActual = URL.createObjectURL(archivo);
-    document.getElementById("imagenComprobante").src = urlComprobanteActual;
-    document.getElementById("modalVisorComprobante").classList.remove("oculto");
+    mostrarEnVisorMultimedia(
+      archivo.type,
+      urlComprobanteActual,
+      "Comprobante de aporte de limpieza"
+    );
   } catch (error) {
     console.error("No se pudo abrir el comprobante de transferencia.", error);
     alert("No se pudo abrir el comprobante. Verifique que el archivo exista y que su perfil tenga permiso para verlo.");
-  }
-}
-
-function cerrarVisorComprobante() {
-  document.getElementById("modalVisorComprobante").classList.add("oculto");
-  document.getElementById("imagenComprobante").removeAttribute("src");
-  if (urlComprobanteActual) {
-    URL.revokeObjectURL(urlComprobanteActual);
-    urlComprobanteActual = null;
   }
 }
 
@@ -5756,7 +5901,7 @@ function cerrarModal(id) {
   document.getElementById("modalHistorialRespaldo").classList.add("oculto");
   document.getElementById("modalAportesLimpieza").classList.add("oculto");
   document.getElementById("contenidoAportes").classList.add("oculto");
-  cerrarVisorComprobante();
+  cerrarVisorMultimedia();
   document.getElementById("modalConfirmacionAnuncio").classList.add("oculto");
   document.getElementById("cintaCumpleanosSistema").classList.remove("visible");
   document.getElementById("anunciosInicio").replaceChildren();

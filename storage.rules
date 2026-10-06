@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function esRevisor() {
+      return request.auth != null &&
+        (request.auth.uid == 'TP6ZSkibpCfCK8c6GkPeMM3pCIq1' ||
+          request.auth.uid == 'ifWCmqLa7Wcf3drL9X61wIR25lc2' ||
+          request.auth.uid == 'whjHPVMrj2fXg69YBVjU0zqbvv32');
+    }
+
+    function esFacilitador(uid) {
+      return request.auth != null &&
+        request.auth.uid == uid &&
+        (uid == 'G9AfJoA8gsS2yM5zCOYw8R9CJ5l2' ||
+          uid == '0UFJDOskMLfX9oEUutRsWDvGKTB3' ||
+          uid == '2Bn1xoolldgK1W3eZoVnujg4dOU2' ||
+          uid == 'L0YCxPWpJSTdtUBTryiiy55tpdA3' ||
+          uid == 'BFyyW5wqfAa7mXxU0g1y5FC2aSS2' ||
+          uid == 'pwZhMYtwObZL0GKm7P0fEHtiKyt1' ||
+          uid == 'jgYGa84DcHTBbPH6No8wxeJQj6E3');
+    }
+
+    match /comprobantes-limpieza/{uid}/{id} {
+      allow create: if esFacilitador(uid) &&
+        request.resource.size <= 5242880 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow get: if esRevisor();
+    }
+  }
+}
