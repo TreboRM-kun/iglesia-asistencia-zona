@@ -203,6 +203,16 @@
       font-weight: bold;
     }
 
+    .casilla-asistencia {
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      margin: 4px;
+      accent-color: #6e1f2a;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
     .casilla-sin-asistencia {
       background: #f5f3ef;
     }
@@ -1313,7 +1323,7 @@
           data-tooltip="Aporte de limpieza"
           onclick="abrirControlAportes()">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m14 3-7 12M6 13l7 4-3 4-7-4zM4 17l-1 2M7 18l-1 3M10 19l-1 3"></path>
+            <path d="m15 3-7 13M8 15l-5 5h13l-5-5zM5 20v1M8 20v1M11 20v1M14 20v1"></path>
           </svg>
         </button>
 
@@ -1569,11 +1579,6 @@
         </div>
 
         <div>
-          <label for="resumenNino">Líder:</label>
-          <select id="resumenNino"></select>
-        </div>
-
-        <div>
           <label for="resumenTipoReunion">Reunión:</label>
           <select id="resumenTipoReunion" onchange="actualizarTipoResumen()">
             <option value="ADN">Discipulado ADN</option>
@@ -1582,6 +1587,11 @@
             <option value="Discipulado Virtual">Discipulado Virtual</option>
             <option value="Todas">Todas las reuniones</option>
           </select>
+        </div>
+
+        <div>
+          <label for="resumenNino">Líder:</label>
+          <select id="resumenNino"></select>
         </div>
 
         <div>
@@ -3416,20 +3426,10 @@ async function cargarDatosDesdeAPI() {
     function configurarRestriccionesResumen(tipo) {
       const campoDesde = document.getElementById("resumenDesde");
       const campoHasta = document.getElementById("resumenHasta");
-
-      if (tipo === "Todas") {
-        campoDesde.min = "1970-01-01";
-        campoHasta.min = "1970-01-01";
-        campoDesde.step = "1";
-        campoHasta.step = "1";
-        return;
-      }
-
-      const primerDia = obtenerPrimerDiaValido(tipo);
-      campoDesde.min = primerDia;
-      campoHasta.min = primerDia;
-      campoDesde.step = "7";
-      campoHasta.step = "7";
+      campoDesde.min = "2026-09-23";
+      campoHasta.min = "2026-09-23";
+      campoDesde.step = "1";
+      campoHasta.step = "1";
     }
 
     function validarFechaResumenTodas(campo) {
@@ -3440,12 +3440,6 @@ async function cargarDatosDesdeAPI() {
       }
 
       const fecha = new Date(`${campo.value}T00:00:00`);
-      const diasValidos = [0, 1, 3, 4];
-
-      while (!diasValidos.includes(fecha.getDay())) {
-        fecha.setDate(fecha.getDate() + 1);
-      }
-
       campo.value = formatearFechaISO(fecha);
     }
 
@@ -4399,6 +4393,7 @@ async function cargarDatosDesdeAPI() {
 
             <td>
               <input id="asistencia-${id}" type="checkbox"
+                class="casilla-asistencia"
                 ${asistenciaGuardada?.Asistencia === "Sí" ? "checked" : ""}
                 ${puedeModificar ? "" : "disabled"}>
             </td>
@@ -5307,23 +5302,14 @@ async function cargarDatosDesdeAPI() {
 
   if (tipoReunion === "Todas") {
     const fechaHasta = obtenerFechaReunion("Servicio dominical");
-    const fechaDesde = new Date(`${fechaHasta}T00:00:00`);
-    fechaDesde.setDate(fechaDesde.getDate() - 12 * 7);
-
-    document.getElementById("resumenDesde").value = [
-      fechaDesde.getFullYear(),
-      String(fechaDesde.getMonth() + 1).padStart(2, "0"),
-      String(fechaDesde.getDate()).padStart(2, "0")
-    ].join("-");
+    document.getElementById("resumenDesde").value = "2026-09-23";
     document.getElementById("resumenHasta").value = fechaHasta;
     return;
   }
 
-  const fechaDesde = obtenerPrimerDiaDelMes(tipoReunion);
   const fechaHasta = obtenerFechaReunion(tipoReunion);
-  document.getElementById("resumenDesde").value = fechaDesde;
-  document.getElementById("resumenHasta").value =
-    fechaHasta < fechaDesde ? fechaDesde : fechaHasta;
+  document.getElementById("resumenDesde").value = "2026-09-23";
+  document.getElementById("resumenHasta").value = fechaHasta;
 }
 
 function actualizarResumenPorSalon() {
@@ -5450,9 +5436,8 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 
   const tipoReunion = document.getElementById("resumenTipoReunion").value;
   if (!nino || !desde || !hasta ||
-      (tipoReunion !== "Todas" &&
-       (!esFechaDeReunion(desde, tipoReunion) || !esFechaDeReunion(hasta, tipoReunion)))) {
-    alert("Seleccione fechas que correspondan al día de la reunión.");
+      desde < "2026-09-23") {
+    alert("Seleccione un periodo a partir del 23/09/2026.");
     return;
   }
 
