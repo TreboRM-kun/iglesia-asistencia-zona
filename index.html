@@ -270,6 +270,53 @@
       margin: 20px 0;
     }
 
+    .sugerencias-lideres-contenedor {
+      position: relative;
+      width: 100%;
+    }
+
+    .sugerencias-lideres-contenedor > input {
+      width: 100%;
+    }
+
+    .sugerencias-lideres {
+      position: absolute;
+      z-index: 30;
+      top: calc(100% + 2px);
+      right: 0;
+      left: 0;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #bdb8af;
+      border-radius: 4px;
+      background: white;
+      box-shadow: 0 4px 12px #0003;
+    }
+
+    .sugerencias-lideres button {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      margin: 0;
+      border-radius: 0;
+      background: white;
+      color: #171717;
+      text-align: left;
+    }
+
+    .sugerencias-lideres button:hover,
+    .sugerencias-lideres button:focus-visible {
+      background: #f5f3ef;
+      color: #6e1f2a;
+    }
+
+    .sugerencias-lideres small {
+      flex-shrink: 0;
+      color: #6e1f2a;
+    }
+
     .seguimiento-lider {
       display: flex;
       align-items: center;
@@ -617,6 +664,7 @@
     }
 
     .boton-icono-barra {
+      position: relative;
       display: inline-flex;
       width: 42px;
       min-width: 42px;
@@ -624,6 +672,33 @@
       align-items: center;
       justify-content: center;
       padding: 8px;
+    }
+
+    .boton-icono-barra::after {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 7px);
+      right: 0;
+      width: max-content;
+      max-width: min(240px, 80vw);
+      padding: 6px 9px;
+      border-radius: 4px;
+      background: #171717;
+      color: white;
+      content: attr(data-tooltip);
+      font-size: 12px;
+      font-weight: normal;
+      line-height: 1.3;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-3px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .boton-icono-barra:hover::after,
+    .boton-icono-barra:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     #botonAdministrarUsuarios {
@@ -711,8 +786,14 @@
 .filtros-aportes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 10px;
+  gap: 14px 10px;
   align-items: end;
+}
+
+#consultaAportes {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #d6d0c6;
 }
 
 .formulario-aporte label,
@@ -785,16 +866,24 @@
 
 @media (max-width: 600px) {
   .formulario-aporte {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .formulario-aporte label:has(> #comentarioAporte),
   .aporte-comprobante-acciones {
-    grid-column: 1;
+    display: contents;
+  }
+
+  .formulario-aporte label:has(> #comentarioAporte) {
+    grid-column: 1 / -1;
+    order: 1;
   }
 
   #botonGuardarAporte {
+    grid-column: 1 / -1;
     justify-self: center;
+    margin: 6px auto 0;
+    transform: none;
+    order: 2;
   }
 }
 
@@ -1175,28 +1264,57 @@
 
       <div class="acciones-barra">
         <button id="botonResumenNino"
-          class="oculto"
+          class="boton-icono-barra oculto"
+          type="button"
+          title="Resumen de líder"
+          aria-label="Resumen de líder"
+          data-tooltip="Resumen de líder"
           onclick="abrirResumenNino()">
-          Resumen de líder
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="9" cy="8" r="3.5"></circle>
+            <path d="M3 20v-1.5a6 6 0 0 1 12 0V20"></path>
+            <path d="M18 8v6M15 11h6M17 20h4"></path>
+          </svg>
         </button>
 
         <button id="botonResumenReunion"
-          class="oculto"
+          class="boton-icono-barra oculto"
+          type="button"
+          title="Resumen de la reunión"
+          aria-label="Resumen de la reunión"
+          data-tooltip="Resumen de la reunión"
           onclick="abrirResumenReunion()">
-          Resumen de la reunión
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+            <path d="M7 3v4M17 3v4M3 10h18M7 14h3M14 14h3M7 18h3"></path>
+          </svg>
         </button>
 
-        <button onclick="abrirCalendarioCumpleanos()">
-          Cumpleaños
+        <button class="boton-icono-barra" type="button"
+          title="Cumpleaños" aria-label="Cumpleaños" data-tooltip="Cumpleaños"
+          onclick="abrirCalendarioCumpleanos()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 13h14v7H5zM4 10h16v3H4zM8 10V6M12 10V5M16 10V6"></path>
+            <path d="M7 6c-.8-.8-.5-1.8.4-2.4M11 5c-.8-.8-.5-1.8.4-2.4M15 6c-.8-.8-.5-1.8.4-2.4M5 16h14"></path>
+          </svg>
         </button>
 
-        <button onclick="abrirAnuncios()">
-          Anuncios
+        <button class="boton-icono-barra" type="button"
+          title="Anuncios" aria-label="Anuncios" data-tooltip="Anuncios"
+          onclick="abrirAnuncios()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 14V9a2 2 0 0 1 2-2h3l9-4v17l-9-4H6a2 2 0 0 1-2-2ZM9 16l1.5 5H7l-1.5-5M18 9a4 4 0 0 1 0 5"></path>
+          </svg>
         </button>
 
         <button id="botonAportesLimpieza" type="button"
+          class="boton-icono-barra"
+          title="Aporte de limpieza" aria-label="Aporte de limpieza"
+          data-tooltip="Aporte de limpieza"
           onclick="abrirControlAportes()">
-          Aporte de limpieza
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m14 3-7 12M6 13l7 4-3 4-7-4zM4 17l-1 2M7 18l-1 3M10 19l-1 3"></path>
+          </svg>
         </button>
 
         <button id="botonAdministrarUsuarios"
@@ -1204,6 +1322,7 @@
           type="button"
           title="Administrar usuarios"
           aria-label="Administrar usuarios"
+          data-tooltip="Administrar usuarios"
           onclick="abrirAdministrarUsuarios()">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -1217,6 +1336,7 @@
           type="button"
           title="Historial y respaldo"
           aria-label="Historial y respaldo"
+          data-tooltip="Historial y respaldo"
           onclick="abrirHistorialRespaldo()">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"></path>
@@ -1225,7 +1345,13 @@
           </svg>
         </button>
 
-        <button onclick="cerrarSesion()">Cerrar sesión</button>
+        <button class="boton-icono-barra" type="button"
+          title="Cerrar sesión" aria-label="Cerrar sesión"
+          data-tooltip="Cerrar sesión" onclick="cerrarSesion()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M16 16l5-4-5-4M21 12H9"></path>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -1278,9 +1404,14 @@
     <div id="formularioNino" class="formulario-nino oculto">
       <h3>Agregar líder</h3>
 
-      <input id="nombreNino" type="text" list="sugerenciasLideresVirtuales" placeholder="Nombre completo del líder"
+      <div class="sugerencias-lideres-contenedor">
+      <input id="nombreNino" type="text" autocomplete="off" role="combobox"
+        aria-autocomplete="list" aria-controls="sugerenciasLideresRelacionados"
+        aria-expanded="false" placeholder="Nombre completo del líder"
         oninput="mostrarCoincidenciaLiderVirtual()">
-      <datalist id="sugerenciasLideresVirtuales"></datalist>
+      <div id="sugerenciasLideresRelacionados" class="sugerencias-lideres oculto"
+        role="listbox" aria-label="Líderes de las zonas"></div>
+      </div>
 
       <label for="cumpleanosNino">Cumpleaños:</label>
       <input id="cumpleanosNino" type="text" inputmode="numeric"
@@ -1895,6 +2026,324 @@ function buscarLiderPorNombre(nombre, incluirVirtual = false) {
   return buscarLideresPorNombre(nombre, incluirVirtual)[0];
 }
 
+function obtenerNombresRelacionadosLider(salon, nombre) {
+  const datos = lideresDatos[claveLider(salon, nombre)] || {};
+  const anteriores = Array.isArray(datos.nombresAnteriores)
+    ? datos.nombresAnteriores
+    : [];
+  return new Set([nombre, ...anteriores]
+    .map(normalizarNombreLider)
+    .filter(Boolean));
+}
+
+function nombresLiderRelacionadosCoinciden(salon, nombreUno, nombreDos) {
+  const nombresUno = obtenerNombresRelacionadosLider(salon, nombreUno);
+  return [...obtenerNombresRelacionadosLider(salon, nombreDos)]
+    .some(nombre => nombresUno.has(nombre));
+}
+
+function obtenerLiderRelacionadoPastor(nombre) {
+  const salonGuardado = lideresDatos[claveLider("Pastor", nombre)]?.salonOrigen;
+  if (ZONAS.includes(salonGuardado)) {
+    const coincidenciaZona = (ninos[salonGuardado] || []).find(nombreZona =>
+      nombresLiderRelacionadosCoinciden(salonGuardado, nombreZona, nombre)
+    );
+    if (coincidenciaZona) {
+      return { salon: salonGuardado, nombre: coincidenciaZona };
+    }
+  }
+  const coincidencias = Object.entries(ninos)
+    .filter(([salon]) => salon !== "Virtual")
+    .flatMap(([salon, nombres]) => nombres
+      .filter(nombreZona =>
+        nombresLiderRelacionadosCoinciden(salon, nombreZona, nombre)
+      )
+      .map(nombreZona => ({ salon, nombre: nombreZona })));
+  return coincidencias.length === 1 ? coincidencias[0] : null;
+}
+
+function separarRegistroLider(registro) {
+  const separador = String(registro || "").indexOf("|");
+  if (separador < 0) return null;
+  return {
+    salon: String(registro).slice(0, separador),
+    nombre: String(registro).slice(separador + 1)
+  };
+}
+
+function obtenerRenombresDeBitacora(eventos) {
+  const renombresPorZona = new Map();
+  eventos
+    .filter(evento =>
+      evento.Hoja === HOJAS.ninos &&
+      evento.Resultado === "Completado" &&
+      Array.isArray(evento.Cambios) &&
+      evento.Cambios.length === 2
+    )
+    .forEach(evento => {
+      const eliminado = evento.Cambios.find(cambio => cambio.Accion === "Eliminado");
+      const agregado = evento.Cambios.find(cambio => cambio.Accion === "Agregado");
+      if (!eliminado || !agregado) return;
+      const origen = separarRegistroLider(eliminado.Registro);
+      const destino = separarRegistroLider(agregado.Registro);
+      if (!origen || !destino || origen.salon !== destino.salon ||
+          !ZONAS.includes(origen.salon) ||
+          origen.nombre === destino.nombre) {
+        return;
+      }
+      if (!renombresPorZona.has(origen.salon)) {
+        renombresPorZona.set(origen.salon, new Map());
+      }
+      const renombres = renombresPorZona.get(origen.salon);
+      const claveOrigen = normalizarNombreLider(origen.nombre);
+      if (!renombres.has(claveOrigen)) {
+        renombres.set(claveOrigen, { origen: origen.nombre, destinos: new Set() });
+      }
+      renombres.get(claveOrigen).destinos.add(destino.nombre);
+    });
+
+  const renombresFinales = [];
+  renombresPorZona.forEach((renombres, salon) => {
+    renombres.forEach(({ origen, destinos }) => {
+      if (destinos.size !== 1) return;
+      let nombreActual = [...destinos][0];
+      const visitados = new Set([normalizarNombreLider(origen)]);
+      while (renombres.has(normalizarNombreLider(nombreActual))) {
+        const claveActual = normalizarNombreLider(nombreActual);
+        const siguiente = renombres.get(claveActual);
+        if (siguiente.destinos.size !== 1 || visitados.has(claveActual)) {
+          nombreActual = "";
+          break;
+        }
+        visitados.add(claveActual);
+        nombreActual = [...siguiente.destinos][0];
+      }
+      if (nombreActual) {
+        renombresFinales.push({ salon, nombreAnterior: origen, nombreActual });
+      }
+    });
+  });
+  return renombresFinales;
+}
+
+function combinarRegistrosAsistenciaLider(principal, secundario) {
+  const combinado = { ...secundario, ...principal };
+  combinado.Asistencia =
+    principal.Asistencia === "Sí" || secundario.Asistencia === "Sí" ? "Sí" :
+      principal.Asistencia || secundario.Asistencia || "";
+  const observaciones = [...new Set([principal.Observaciones, secundario.Observaciones]
+    .map(texto => String(texto || "").trim())
+    .filter(Boolean))];
+  ["Comentario"].forEach(campo => {
+    const textos = [...new Set([principal[campo], secundario[campo]]
+      .map(texto => String(texto || "").trim())
+      .filter(Boolean))];
+    combinado[campo] = textos.join("\n");
+  });
+  const valoresEnConflicto = ["Participacion", "Desarrollo"].flatMap(campo => {
+    const valores = [...new Set([principal[campo], secundario[campo]]
+      .map(valor => String(valor || "").trim())
+      .filter(Boolean))];
+    if (valores.length < 2) return [];
+    return [`${campo}: ${valores.join(" / ")}`];
+  });
+  if (valoresEnConflicto.length) {
+    observaciones.push(`Datos combinados: ${valoresEnConflicto.join("; ")}`);
+  }
+  combinado.Observaciones = observaciones.join("\n");
+  ["Participacion", "Desarrollo", "MediaTipo", "MediaData"].forEach(campo => {
+    combinado[campo] = principal[campo] || secundario[campo] || "";
+  });
+  return combinado;
+}
+
+function migrarAsistenciasDeLider(salon, nombresAnteriores, nombreActual) {
+  const nombresNormalizados = new Set(
+    nombresAnteriores.map(normalizarNombreLider)
+  );
+  const nombreActualNormalizado = normalizarNombreLider(nombreActual);
+  if (!nombresNormalizados.size || !nombreActualNormalizado) return false;
+
+  const filasRelacionadas = [];
+  const filasRestantes = [];
+  asistencias.forEach(fila => {
+    const nombreNormalizado = normalizarNombreLider(fila.Nombre);
+    if (String(fila.Salon) === salon &&
+        (nombreNormalizado === nombreActualNormalizado ||
+          nombresNormalizados.has(nombreNormalizado))) {
+      filasRelacionadas.push({
+        ...fila,
+        NombreOriginal: fila.Nombre,
+        Nombre: nombreActual
+      });
+    } else {
+      filasRestantes.push(fila);
+    }
+  });
+
+  const reuniones = new Map();
+  filasRelacionadas.forEach(fila => {
+    const clave = [
+      fila.Fecha,
+      fila.TipoReunion || "Servicio dominical",
+      normalizarNombreLider(fila.Nombre)
+    ].join("|");
+    if (!reuniones.has(clave)) {
+      reuniones.set(clave, fila);
+    } else {
+      const actual = reuniones.get(clave);
+      const principal = normalizarNombreLider(actual.NombreOriginal) === nombreActualNormalizado
+        ? actual
+        : fila;
+      const secundario = principal === actual ? fila : actual;
+      reuniones.set(clave, combinarRegistrosAsistenciaLider(principal, secundario));
+    }
+  });
+
+  const resultado = filasRestantes.concat([...reuniones.values()].map(fila => {
+    const { NombreOriginal, ...asistencia } = fila;
+    return asistencia;
+  }));
+  const cambio = JSON.stringify(resultado) !== JSON.stringify(asistencias);
+  if (cambio) {
+    asistencias = resultado;
+    localStorage.setItem("asistenciasIglesiaRedencion", JSON.stringify(asistencias));
+  }
+  return cambio;
+}
+
+function aplicarAliasesLideresYAsistencias(eventosRenombres = []) {
+  const aliasesHistoricosPorZona = {
+    "Zona 6": {
+      "frannys de hurtado": ["Frannys alvarado"]
+    }
+  };
+  let rosterModificado = false;
+  let asistenciasModificadas = false;
+  let facilitadoresModificados = false;
+  const renombres = new Map();
+  eventosRenombres.forEach(({ salon, nombreAnterior, nombreActual }) => {
+    if (!renombres.has(salon)) renombres.set(salon, new Map());
+    const porNombre = renombres.get(salon);
+    const claveOrigen = normalizarNombreLider(nombreAnterior);
+    if (!porNombre.has(claveOrigen)) porNombre.set(claveOrigen, new Set());
+    porNombre.get(claveOrigen).add(nombreActual);
+  });
+
+  ZONAS.forEach(salon => {
+    (ninos[salon] || []).forEach(nombreActual => {
+      const datos = lideresDatos[claveLider(salon, nombreActual)] || {};
+      const nombresAnteriores = Array.isArray(datos.nombresAnteriores)
+        ? [...datos.nombresAnteriores]
+        : [];
+      const aliases = new Map(nombresAnteriores.map(nombre => [
+        normalizarNombreLider(nombre),
+        nombre
+      ]));
+      (aliasesHistoricosPorZona[salon]?.[normalizarNombreLider(nombreActual)] || [])
+        .forEach(nombreAnterior => {
+          const nombreSigueEnZona = (ninos[salon] || []).some(nombreZona =>
+            normalizarNombreLider(nombreZona) ===
+              normalizarNombreLider(nombreAnterior)
+          );
+          if (!nombreSigueEnZona &&
+              normalizarNombreLider(nombreAnterior) !==
+                normalizarNombreLider(nombreActual)) {
+            aliases.set(normalizarNombreLider(nombreAnterior), nombreAnterior);
+          }
+        });
+      const renombresZona = renombres.get(salon) || new Map();
+      renombresZona.forEach((destinos, claveAnterior) => {
+        if (destinos.size !== 1 ||
+            normalizarNombreLider(destinos.values().next().value) !==
+              normalizarNombreLider(nombreActual) ||
+            claveAnterior === normalizarNombreLider(nombreActual)) return;
+        const sigueEnZona = (ninos[salon] || []).some(nombre =>
+          normalizarNombreLider(nombre) === claveAnterior
+        );
+        if (sigueEnZona) return;
+        const cambios = eventosRenombres.filter(renombre =>
+          renombre.salon === salon &&
+          normalizarNombreLider(renombre.nombreActual) ===
+            normalizarNombreLider(nombreActual) &&
+          normalizarNombreLider(renombre.nombreAnterior) === claveAnterior
+        );
+        cambios.forEach(({ nombreAnterior }) =>
+          aliases.set(claveAnterior, nombreAnterior)
+        );
+      });
+      const aliasesFinales = [...aliases.values()].filter(nombre =>
+        nombre !== nombreActual &&
+        !(ninos[salon] || []).some(nombreZona =>
+          normalizarNombreLider(nombreZona) === normalizarNombreLider(nombre) &&
+          normalizarNombreLider(nombreZona) !== normalizarNombreLider(nombreActual)
+        )
+      );
+      if (JSON.stringify(nombresAnteriores) !== JSON.stringify(aliasesFinales)) {
+        lideresDatos[claveLider(salon, nombreActual)] = {
+          ...datos,
+          nombresAnteriores: aliasesFinales
+        };
+        rosterModificado = true;
+      }
+      if (aliasesFinales.length) {
+        asistenciasModificadas =
+          migrarAsistenciasDeLider(salon, aliasesFinales, nombreActual) ||
+          asistenciasModificadas;
+        const aliasesNormalizados = new Set(
+          aliasesFinales.map(normalizarNombreLider)
+        );
+        const facilitadores = String(maestrosSalon[salon] || "")
+          .split(",")
+          .map(nombre => nombre.trim())
+          .filter(Boolean)
+          .map(nombre => aliasesNormalizados.has(normalizarNombreLider(nombre))
+            ? nombreActual
+            : nombre);
+        const maestrosActualizados = [...new Set(facilitadores)].join(", ");
+        if (maestrosSalon[salon] !== maestrosActualizados) {
+          maestrosSalon[salon] = maestrosActualizados;
+          facilitadoresModificados = true;
+        }
+      }
+    });
+  });
+
+  if (rosterModificado) {
+    guardarDatosLideres();
+    localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
+    if (usuarioActual?.rol === "Administrador") guardarNinos();
+  }
+  if (asistenciasModificadas) {
+    sincronizarHoja(HOJAS.asistencias, asistencias);
+  }
+  if (facilitadoresModificados) {
+    localStorage.setItem(
+      "facilitadoresIglesiaRedencion",
+      JSON.stringify(maestrosSalon)
+    );
+    if (["Administrador", "Facilitador"].includes(usuarioActual?.rol)) {
+      const filasMaestros = usuarioActual.rol === "Facilitador"
+        ? [{ Salon: usuarioActual.salon, Maestros: maestrosSalon[usuarioActual.salon] || "" }]
+        : Object.entries(maestrosSalon).map(([salon, maestros]) => ({
+            Salon: salon,
+            Maestros: maestros
+          }));
+      sincronizarHoja(HOJAS.maestros, filasMaestros);
+    }
+  }
+}
+
+async function cargarAnunciosPublicos() {
+  try {
+    anuncios = await leerHoja(HOJAS.anuncios);
+    localStorage.setItem("anunciosIglesiaRedencion", JSON.stringify(anuncios));
+    mostrarAnunciosLogin();
+  } catch (error) {
+    console.error("No se pudieron cargar los anuncios de la pantalla de inicio.", error);
+  }
+}
+
 function migrarZonaSieteLocal() {
   if (!Array.isArray(ninos["Zona 7"])) return;
   ninos.Virtual = ninos.Virtual || [];
@@ -2332,7 +2781,10 @@ function filasDeNinos() {
         Estado: datos.estado,
         Bautizado: datos.bautizado,
         EncuentroCaraACara: datos.encuentro,
-        Doctrina: datos.doctrina
+        Doctrina: datos.doctrina,
+        ...(datos.nombresAnteriores.length
+          ? { NombresAnteriores: datos.nombresAnteriores }
+          : {})
       };
     })
   );
@@ -2341,8 +2793,10 @@ function filasDeNinos() {
 function filasDeLideresPastor() {
   return lideresPastor.map(nombre => {
     const datos = obtenerDatosLider("Pastor", nombre);
+    const liderRelacionado = obtenerLiderRelacionadoPastor(nombre);
     return {
       Nombre: nombre,
+      ...(liderRelacionado ? { SalonOrigen: liderRelacionado.salon } : {}),
       Cumpleanos: datos.cumpleanos,
       Sector: datos.sector,
       ComiteRed: datos.comiteRed,
@@ -2424,7 +2878,18 @@ async function cargarDatosDesdeAPI() {
     anuncios = [];
 
     const firebase = await window.firebaseReady;
-    const [filasNinos, filasLideresPastor, filasAsistencias, filasMaestros, filasAnuncios, filasVirtuales] =
+    const puedeRevisarRenombres = ["Administrador", "Supervisor"].includes(
+      usuarioActual?.rol
+    );
+    const [
+      filasNinos,
+      filasLideresPastor,
+      filasAsistencias,
+      filasMaestros,
+      filasAnuncios,
+      filasVirtuales,
+      resultadoBitacoraRenombres
+    ] =
       await Promise.all([
         leerHoja(HOJAS.ninos),
         puedeVerTodasLasZonas()
@@ -2433,8 +2898,35 @@ async function cargarDatosDesdeAPI() {
         leerHoja(HOJAS.asistencias),
         leerHoja(HOJAS.maestros),
         leerHoja(HOJAS.anuncios),
-        leerHoja(HOJAS.lideresVirtuales)
+        leerHoja(HOJAS.lideresVirtuales),
+        puedeRevisarRenombres
+          ? (async () => {
+              try {
+                return await firebase.get(firebase.query(
+                  firebase.ref(firebase.database, HOJA_BITACORA),
+                  firebase.orderByChild("Hoja"),
+                  firebase.equalTo(HOJAS.ninos)
+                ));
+              } catch (error) {
+                if (!/index not defined/i.test(error?.message || "")) {
+                  throw error;
+                }
+                console.warn(
+                  "La Bitácora no tiene el índice Hoja publicado; se leerá completa para continuar.",
+                  error
+                );
+                return firebase.get(
+                  firebase.ref(firebase.database, HOJA_BITACORA)
+                );
+              }
+            })()
+          : Promise.resolve(null)
       ]);
+    const eventosRenombres = resultadoBitacoraRenombres?.exists()
+      ? Object.values(resultadoBitacoraRenombres.val()).filter(evento =>
+          evento?.Hoja === HOJAS.ninos
+        )
+      : [];
 
     const puedeListarPerfiles = ["Administrador", "Supervisor"].includes(
       usuarioActual?.rol
@@ -2481,7 +2973,10 @@ async function cargarDatosDesdeAPI() {
             estado: fila.Estado || fila.estado || "Inactivo",
             bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
             encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
-            doctrina: fila.Doctrina || ""
+            doctrina: fila.Doctrina || "",
+            nombresAnteriores: Array.isArray(fila.NombresAnteriores)
+              ? fila.NombresAnteriores.filter(nombre => typeof nombre === "string")
+              : []
           };
         }
       });
@@ -2590,7 +3085,10 @@ async function cargarDatosDesdeAPI() {
           estado: fila.Estado || fila.estado || "Inactivo",
           bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
           encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
-          doctrina: fila.Doctrina || ""
+          doctrina: fila.Doctrina || "",
+          salonOrigen: ZONAS.includes(fila.SalonOrigen)
+            ? fila.SalonOrigen
+            : ""
         };
       });
       guardarDatosLideres();
@@ -2633,6 +3131,9 @@ async function cargarDatosDesdeAPI() {
         JSON.stringify(maestrosSalon)
       );
     }
+    aplicarAliasesLideresYAsistencias(
+      obtenerRenombresDeBitacora(eventosRenombres)
+    );
   } catch (error) {
     cargaFirebaseCompleta = false;
     console.error("No se pudieron cargar los datos protegidos desde Firebase.", error);
@@ -2661,6 +3162,7 @@ async function cargarDatosDesdeAPI() {
     let lideresDatos = JSON.parse(
       localStorage.getItem("datosLideresIglesiaRedencion")
     ) || {};
+    let liderRelacionadoSeleccionado = null;
 
     function claveLider(salon, nombre) {
       return `${salon}::${nombre}`;
@@ -2671,6 +3173,12 @@ async function cargarDatosDesdeAPI() {
     }
 
     function obtenerDatosLider(salon, nombre) {
+      const liderRelacionado = salon === "Pastor"
+        ? obtenerLiderRelacionadoPastor(nombre)
+        : null;
+      if (liderRelacionado) {
+        return obtenerDatosLider(liderRelacionado.salon, liderRelacionado.nombre);
+      }
       return {
         cumpleanos: normalizarCumpleanos(lideresDatos[claveLider(salon, nombre)]?.cumpleanos),
         sector: lideresDatos[claveLider(salon, nombre)]?.sector || "",
@@ -2678,7 +3186,12 @@ async function cargarDatosDesdeAPI() {
         estado: lideresDatos[claveLider(salon, nombre)]?.estado || "Inactivo",
         bautizado: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.bautizado),
         encuentro: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.encuentro),
-        doctrina: lideresDatos[claveLider(salon, nombre)]?.doctrina || ""
+        doctrina: lideresDatos[claveLider(salon, nombre)]?.doctrina || "",
+        nombresAnteriores: Array.isArray(
+          lideresDatos[claveLider(salon, nombre)]?.nombresAnteriores
+        )
+          ? lideresDatos[claveLider(salon, nombre)].nombresAnteriores
+          : []
       };
     }
 
@@ -2782,7 +3295,16 @@ async function cargarDatosDesdeAPI() {
         }
       });
 
+      document.getElementById("sugerenciasLideresRelacionados")
+        .addEventListener("click", evento => {
+          const opcion = evento.target.closest("button[data-nombre][data-salon]");
+          if (!opcion) return;
+          seleccionarLiderRelacionado(opcion.dataset.nombre, opcion.dataset.salon);
+        });
+
       document.getElementById("fechaAnuncio").value = formatearFechaISO(new Date());
+      mostrarAnunciosLogin();
+      cargarAnunciosPublicos();
     });
 
     function obtenerFechaReunion(tipo = document.getElementById("tipoReunion")?.value, fechaTexto) {
@@ -3030,6 +3552,13 @@ async function cargarDatosDesdeAPI() {
       selectorFacilitadores.classList.toggle("oculto", reunionPastor || reunionVirtual);
       selectorZona.classList.toggle("oculto", reunionPastor || reunionVirtual);
       formulario.classList.toggle("oculto", !puedeAgregar);
+      if (!reunionPastor && !reunionVirtual) {
+        liderRelacionadoSeleccionado = null;
+        const sugerencias = document.getElementById("sugerenciasLideresRelacionados");
+        sugerencias.replaceChildren();
+        sugerencias.classList.add("oculto");
+        document.getElementById("nombreNino").setAttribute("aria-expanded", "false");
+      }
       mostrarMaestroSalon();
       mostrarAsistencia();
     }
@@ -3131,7 +3660,7 @@ async function cargarDatosDesdeAPI() {
       return asistencias.find(fila =>
         String(fila.Salon) === salon &&
         String(fila.Fecha) === fecha &&
-        String(fila.Nombre) === nombre &&
+        normalizarNombreLider(fila.Nombre) === normalizarNombreLider(nombre) &&
         String(fila.TipoReunion || "Servicio dominical") === tipoReunion
       );
     }
@@ -3298,10 +3827,38 @@ async function cargarDatosDesdeAPI() {
         }
         usuarioActual = null;
         cargaFirebaseCompleta = false;
-        mensaje.textContent =
-          error?.message === "La cuenta no tiene un perfil autorizado."
-            ? "La cuenta existe, pero falta asignarle un perfil de usuario en Firebase. Contacte al administrador para configurar su rol y zona."
-            : "No se pudo iniciar sesión. Verifique sus credenciales y que el administrador haya creado su cuenta y perfil en Firebase.";
+        const codigoError = error?.code || "";
+        const mensajeError = error?.message || "";
+        if (mensajeError === "La cuenta no tiene un perfil autorizado.") {
+          mensaje.textContent =
+            "La cuenta existe, pero falta asignarle un perfil de usuario en Firebase. Contacte al administrador para configurar su rol y zona.";
+        } else if (mensajeError === "El perfil no coincide con el usuario o el rol.") {
+          mensaje.textContent =
+            "El usuario o rol de su perfil no coincide con la cuenta. Contacte al administrador para revisar su perfil en Firebase.";
+        } else if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"]
+          .includes(codigoError)) {
+          mensaje.textContent =
+            "Firebase no reconoció el usuario o la contraseña. Escriba su nombre de usuario asignado (sin correo) y vuelva a intentarlo. Si antes funcionaba, contacte al administrador para verificar la cuenta en Firebase Authentication.";
+        } else if (codigoError === "auth/too-many-requests") {
+          mensaje.textContent =
+            "Firebase bloqueó temporalmente los intentos de acceso. Espere un momento y vuelva a intentarlo.";
+        } else if (codigoError === "auth/network-request-failed") {
+          mensaje.textContent =
+            "No se pudo conectar con Firebase. Revise su conexión a Internet e inténtelo de nuevo.";
+        } else if (codigoError === "auth/unauthorized-domain") {
+          mensaje.textContent =
+            "Firebase no autoriza el dominio de esta página. Contacte al administrador para agregar el dominio en Authentication > Configuración > Dominios autorizados.";
+        } else if (codigoError === "PERMISSION_DENIED" ||
+                   /permission denied/i.test(mensajeError)) {
+          mensaje.textContent =
+            "Firebase rechazó la lectura del perfil o los datos. Contacte al administrador para revisar las reglas de Realtime Database.";
+        } else if (/index not defined/i.test(mensajeError)) {
+          mensaje.textContent =
+            "Firebase solicita un índice que aún no está publicado en sus reglas. Actualice las reglas o contacte al administrador.";
+        } else {
+          mensaje.textContent =
+            "No se pudo completar el acceso. Revise el usuario y contacte al administrador si el problema continúa.";
+        }
       } finally {
         boton.disabled = false;
       }
@@ -3351,6 +3908,7 @@ async function cargarDatosDesdeAPI() {
       );
       const cumpleanosPastor = todasLasZonas
         ? lideresPastor
+            .filter(nombre => !obtenerLiderRelacionadoPastor(nombre))
             .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos("Pastor", nombre)))
             .map(nombre => ({
               nombre,
@@ -3664,7 +4222,10 @@ async function cargarDatosDesdeAPI() {
         nombre,
         salon: "Líderes",
         datos: obtenerDatosLider("Pastor", nombre)
-      })).filter(persona => persona.datos.cumpleanos);
+      })).filter(persona =>
+        persona.datos.cumpleanos &&
+        !obtenerLiderRelacionadoPastor(persona.nombre)
+      );
       return porZonas.concat(delPastor);
     }
 
@@ -3905,11 +4466,22 @@ async function cargarDatosDesdeAPI() {
     function mostrarCoincidenciaLiderVirtual() {
       const mensaje = document.getElementById("mensajeNino");
       const nombre = document.getElementById("nombreNino").value.trim();
-      const sugerencias = document.getElementById("sugerenciasLideresVirtuales");
-      if (!esReunionVirtual()) {
+      const reunionVirtual = esReunionVirtual();
+      const reunionPastor = esReunionPastor();
+      const campoNombre = document.getElementById("nombreNino");
+      const sugerencias = document.getElementById("sugerenciasLideresRelacionados");
+      if (!reunionVirtual && !reunionPastor) {
         mensaje.textContent = "";
         sugerencias.replaceChildren();
+        sugerencias.classList.add("oculto");
+        campoNombre.setAttribute("aria-expanded", "false");
+        liderRelacionadoSeleccionado = null;
         return;
+      }
+      if (liderRelacionadoSeleccionado &&
+          normalizarNombreLider(liderRelacionadoSeleccionado.nombre) !==
+            normalizarNombreLider(nombre)) {
+        liderRelacionadoSeleccionado = null;
       }
       const todosLosLideresDeZona = Object.entries(ninos)
         .filter(([salon]) => salon !== "Virtual")
@@ -3917,19 +4489,32 @@ async function cargarDatosDesdeAPI() {
           nombres.map(nombreLider => ({ salon, nombre: nombreLider }))
         );
       const busqueda = normalizarNombreLider(nombre);
-      sugerencias.innerHTML = todosLosLideresDeZona
+      const coincidenciasParciales = todosLosLideresDeZona
         .filter(lider => !busqueda ||
-          normalizarNombreLider(lider.nombre).includes(busqueda))
-        .map(lider => `<option value="${escaparTexto(lider.nombre)}" label="${escaparTexto(lider.salon)}"></option>`)
+          normalizarNombreLider(lider.nombre).includes(busqueda));
+      sugerencias.innerHTML = coincidenciasParciales
+        .map(lider => `<button type="button" role="option" aria-selected="false" data-nombre="${escaparTexto(lider.nombre)}" data-salon="${escaparTexto(lider.salon)}"><span>${escaparTexto(lider.nombre)}</span><small>${escaparTexto(lider.salon)}</small></button>`)
         .join("");
+      const mostrarSugerencias = Boolean(nombre) &&
+        coincidenciasParciales.length > 0 &&
+        !liderRelacionadoSeleccionado;
+      sugerencias.classList.toggle("oculto", !mostrarSugerencias);
+      campoNombre.setAttribute("aria-expanded", String(mostrarSugerencias));
       if (!nombre) {
         mensaje.textContent = "";
         return;
       }
 
       const coincidencias = buscarLideresPorNombre(nombre);
-      if (coincidencias.length === 1) {
-        const { salon, nombre: nombreOrigen } = coincidencias[0];
+      const liderSeleccionado = liderRelacionadoSeleccionado
+        ? coincidencias.find(lider =>
+            lider.salon === liderRelacionadoSeleccionado.salon
+          )
+        : coincidencias.length === 1
+          ? coincidencias[0]
+          : null;
+      if (liderSeleccionado) {
+        const { salon, nombre: nombreOrigen } = liderSeleccionado;
         const datos = obtenerDatosLider(salon, nombreOrigen);
         document.getElementById("cumpleanosNino").value =
           formatearCumpleanosEntrada(datos.cumpleanos);
@@ -3940,25 +4525,34 @@ async function cargarDatosDesdeAPI() {
         document.getElementById("encuentroNino").checked = datos.encuentro;
         document.getElementById("doctrinaNino").value = datos.doctrina;
         mensaje.className = "mensaje";
-        mensaje.textContent =
-          `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazará sin duplicar su ficha.`;
-      } else if (coincidencias.length > 1) {
+        mensaje.textContent = reunionPastor
+          ? `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se vinculará su asistencia con el resumen del líder.`
+          : `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se enlazará sin duplicar su ficha.`;
+      } else if (coincidencias.length > 1 && !liderRelacionadoSeleccionado) {
         mensaje.className = "mensaje";
         mensaje.textContent =
-          `Ese nombre está duplicado en ${[...new Set(coincidencias.map(lider => lider.salon))].join(", ")}.`;
+          `Hay personas con ese nombre en varias zonas. Seleccione la zona correcta en las sugerencias.`;
       } else {
         mensaje.className = "mensaje";
-        const coincidenciasParciales = todosLosLideresDeZona.filter(lider =>
-          normalizarNombreLider(lider.nombre).includes(busqueda)
-        );
         mensaje.textContent = coincidenciasParciales.length
-          ? "Hay nombres parecidos; seleccione el líder correcto de la lista para cargar sus datos."
-          : "No encontramos ese nombre en otra zona. Al agregarlo, se registrará como líder de Virtual.";
+          ? "Seleccione el líder correcto para cargar sus datos."
+          : reunionVirtual
+            ? "No encontramos ese nombre en otra zona. Al agregarlo, se registrará como líder de Virtual."
+            : "No encontramos ese nombre en otra zona. Al agregarlo, se creará un perfil propio para la reunión con el pastor.";
       }
     }
 
+    function seleccionarLiderRelacionado(nombre, salon) {
+      liderRelacionadoSeleccionado = { nombre, salon };
+      document.getElementById("nombreNino").value = nombre;
+      const sugerencias = document.getElementById("sugerenciasLideresRelacionados");
+      sugerencias.classList.add("oculto");
+      document.getElementById("nombreNino").setAttribute("aria-expanded", "false");
+      mostrarCoincidenciaLiderVirtual();
+    }
+
     function agregarNino() {
-      const nombre = document.getElementById("nombreNino").value.trim();
+      let nombre = document.getElementById("nombreNino").value.trim();
       const cumpleanos = normalizarCumpleanos(
         document.getElementById("cumpleanosNino").value
       );
@@ -3995,6 +4589,13 @@ async function cargarDatosDesdeAPI() {
         mensaje.textContent = "Escriba el nombre del líder.";
         return;
       }
+      const liderSeleccionado = liderRelacionadoSeleccionado &&
+          normalizarNombreLider(liderRelacionadoSeleccionado.nombre) ===
+            normalizarNombreLider(nombre)
+        ? buscarLideresPorNombre(nombre).find(lider =>
+            lider.salon === liderRelacionadoSeleccionado.salon
+          )
+        : null;
 
       if (reunionVirtual) {
         if (nombre.trim().split(/\s+/).length < 2) {
@@ -4018,7 +4619,13 @@ async function cargarDatosDesdeAPI() {
           mensaje.textContent = `Ese nombre aparece en varias zonas (${zonasCoincidentes.join(", ")}). Corrija primero el registro duplicado.`;
           return;
         }
-        const liderExistente = lideresExistentes[0];
+        const liderExistente = liderSeleccionado || lideresExistentes[0];
+        if (lideresExistentes.length > 1 && !liderSeleccionado) {
+          mensaje.className = "mensaje";
+          mensaje.textContent =
+            "Hay personas con ese nombre en varias zonas. Seleccione la zona correcta en las sugerencias.";
+          return;
+        }
         const nombreVirtual = liderExistente?.nombre || nombre.trim().replace(/\s+/g, " ");
         const salonOrigen = liderExistente?.salon || "Virtual";
 
@@ -4046,7 +4653,10 @@ async function cargarDatosDesdeAPI() {
         }
         guardarVirtuales();
         document.getElementById("nombreNino").value = "";
-        document.getElementById("sugerenciasLideresVirtuales").replaceChildren();
+        document.getElementById("sugerenciasLideresRelacionados").replaceChildren();
+        document.getElementById("sugerenciasLideresRelacionados").classList.add("oculto");
+        document.getElementById("nombreNino").setAttribute("aria-expanded", "false");
+        liderRelacionadoSeleccionado = null;
         document.getElementById("cumpleanosNino").value = "";
         document.getElementById("sectorNino").value = "";
         document.getElementById("comiteRedNino").value = "";
@@ -4062,10 +4672,36 @@ async function cargarDatosDesdeAPI() {
         return;
       }
 
+      const lideresZonaCoincidentes = reunionPastor
+        ? buscarLideresPorNombre(nombre)
+        : [];
+      if (lideresZonaCoincidentes.length > 1 && !liderSeleccionado) {
+        mensaje.className = "mensaje";
+        mensaje.textContent =
+          "Hay personas con ese nombre en varias zonas. Seleccione la zona correcta en las sugerencias.";
+        return;
+      }
+      const liderZonaVinculado = liderSeleccionado ||
+        (lideresZonaCoincidentes.length === 1 ? lideresZonaCoincidentes[0] : null);
+      if (liderZonaVinculado) {
+        nombre = liderZonaVinculado.nombre;
+      }
+
       const grupoLideres = reunionPastor ? lideresPastor : ninos[salonNuevo];
       if (grupoLideres.some(lider =>
         normalizarNombreLider(lider) === normalizarNombreLider(nombre)
       )) {
+        if (reunionPastor && liderZonaVinculado) {
+          const perfilPastor = lideresDatos[claveLider("Pastor", nombre)] || {};
+          perfilPastor.salonOrigen = liderZonaVinculado.salon;
+          lideresDatos[claveLider("Pastor", nombre)] = perfilPastor;
+          guardarDatosLideres();
+          sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+          mensaje.className = "exito";
+          mensaje.textContent =
+            `${nombre} ya estaba en la reunión; ahora quedó vinculado a ${liderZonaVinculado.salon} sin duplicarlo.`;
+          return;
+        }
         mensaje.className = "mensaje";
         mensaje.textContent = "Ese líder ya existe en esta zona.";
         return;
@@ -4073,26 +4709,35 @@ async function cargarDatosDesdeAPI() {
 
       grupoLideres.push(nombre);
       const grupo = reunionPastor ? "Pastor" : salonNuevo;
-      lideresDatos[claveLider(grupo, nombre)] = {
-        cumpleanos,
-        sector,
-        comiteRed,
-        estado,
-        bautizado,
-        encuentro,
-        doctrina
-      };
-      guardarDatosLideres();
       if (reunionPastor) {
+        const perfilPastor = lideresDatos[claveLider(grupo, nombre)] || {};
+        lideresDatos[claveLider(grupo, nombre)] = {
+          ...perfilPastor,
+          salonOrigen: liderZonaVinculado?.salon || ""
+        };
+        guardarDatosLideres();
         lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
         localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
         sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
       } else {
+        lideresDatos[claveLider(grupo, nombre)] = {
+          cumpleanos,
+          sector,
+          comiteRed,
+          estado,
+          bautizado,
+          encuentro,
+          doctrina
+        };
+        guardarDatosLideres();
         ordenarNinos(salonNuevo);
         guardarNinos();
       }
 
       document.getElementById("nombreNino").value = "";
+      document.getElementById("sugerenciasLideresRelacionados").replaceChildren();
+      document.getElementById("sugerenciasLideresRelacionados").classList.add("oculto");
+      document.getElementById("nombreNino").setAttribute("aria-expanded", "false");
       document.getElementById("cumpleanosNino").value = "";
       document.getElementById("sectorNino").value = "";
       document.getElementById("comiteRedNino").value = "";
@@ -4101,7 +4746,10 @@ async function cargarDatosDesdeAPI() {
       document.getElementById("encuentroNino").checked = false;
       document.getElementById("doctrinaNino").value = "";
       mensaje.className = "exito";
-      mensaje.textContent = "Líder agregado correctamente.";
+      mensaje.textContent = liderZonaVinculado
+        ? `${nombre} quedó vinculado a su ficha zonal y sus asistencias aparecerán en el resumen del líder.`
+        : "Líder agregado correctamente.";
+      liderRelacionadoSeleccionado = null;
 
       if (reunionPastor || document.getElementById("salon").value === salonNuevo) {
         mostrarAsistencia();
@@ -4338,11 +4986,15 @@ async function cargarDatosDesdeAPI() {
         const filasAsistencia = lideres.map((nombre, indice) => {
           const id = `${salon}-${indice}-${fecha}-${tipoReunion}`;
           const presente = document.getElementById(`asistencia-${id}`).checked;
+          const liderRelacionado = tipoReunion === "Reunión con el pastor"
+            ? obtenerLiderRelacionadoPastor(nombre)
+            : null;
 
           return {
             Fecha: fecha,
             Salon: salonDatos,
             Nombre: nombre,
+            ...(liderRelacionado ? { SalonOrigen: liderRelacionado.salon } : {}),
             TipoReunion: tipoReunion,
             Asistencia: presente ? "Sí" : "No",
             Participacion: presente
@@ -4583,6 +5235,7 @@ async function cargarDatosDesdeAPI() {
       : "Administrar usuarios";
         boton.title = etiquetaBoton;
         boton.setAttribute("aria-label", etiquetaBoton);
+        boton.dataset.tooltip = etiquetaBoton;
         boton.style.color = "#fff";
         boton.querySelector("svg")?.style.setProperty("stroke", "#fff");
       } else {
@@ -4813,6 +5466,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const hastaIncluido = tipoReunion === "ADN"
     ? formatearFechaISO(fechaLimiteVirtual)
     : hasta;
+  const nombresRelacionados = obtenerNombresRelacionadosLider(salon, nino);
 
   let fechasPeriodo = tipoReunion === "Todas"
     ? obtenerFechasEntre(desde, hasta)
@@ -4841,8 +5495,20 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     ? reunionesPeriodo.length
     : fechasPeriodo.length;
   const registros = asistencias.filter(fila =>
-    String(fila.Salon) === salon &&
-    String(fila.Nombre) === nino &&
+    nombresRelacionados.has(normalizarNombreLider(fila.Nombre)) &&
+    (
+      String(fila.Salon) === salon ||
+      (
+        tipoReunion === "Todas" &&
+        String(fila.Salon) === "Pastor" &&
+        String(fila.TipoReunion) === "Reunión con el pastor" &&
+        (
+          (ZONAS.includes(fila.SalonOrigen) && fila.SalonOrigen === salon) ||
+          (!ZONAS.includes(fila.SalonOrigen) &&
+            obtenerLiderRelacionadoPastor(fila.Nombre)?.salon === salon)
+        )
+      )
+    ) &&
     (tipoReunion === "Todas" ||
       String(fila.TipoReunion || "Servicio dominical") === tipoReunion) &&
     (tipoReunion !== "Todas" || fila.OrigenVirtual !== true) &&
@@ -5165,17 +5831,40 @@ let ninoPendiente = null;
         return;
       }
 
-      const lista = ninoPendiente.salon === "Pastor"
-        ? lideresPastor
-        : ninos[ninoPendiente.salon];
+      const salon = ninoPendiente.salon;
+      const lista = salon === "Pastor" ? lideresPastor : ninos[salon];
       const nombreAnterior = lista[ninoPendiente.indice];
-      const origenVirtual = lideresVirtuales.some(lider =>
-        lider.SalonOrigen === ninoPendiente.salon &&
-        normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombreAnterior)
-      );
-      delete lideresDatos[claveLider(ninoPendiente.salon, nombreAnterior)];
-      lista[ninoPendiente.indice] = nuevoNombre;
-      lideresDatos[claveLider(ninoPendiente.salon, nuevoNombre)] = {
+      const claveAnterior = claveLider(salon, nombreAnterior);
+      const datosAnteriores = lideresDatos[claveAnterior] || {};
+      const indiceDestino = salon === "Pastor"
+        ? -1
+        : lista.findIndex((nombre, indice) =>
+            indice !== ninoPendiente.indice &&
+            normalizarNombreLider(nombre) === normalizarNombreLider(nuevoNombre)
+          );
+      const nombreDestino = indiceDestino >= 0 ? lista[indiceDestino] : nuevoNombre;
+      const datosDestino = indiceDestino >= 0
+        ? lideresDatos[claveLider(salon, nombreDestino)] || {}
+        : {};
+      const antesDe = {
+        cumpleanos: normalizarCumpleanos(datosAnteriores.cumpleanos),
+        sector: datosAnteriores.sector || "",
+        comiteRed: datosAnteriores.comiteRed || "",
+        estado: datosAnteriores.estado || "Inactivo",
+        bautizado: leerBooleanoLider(datosAnteriores.bautizado),
+        encuentro: leerBooleanoLider(datosAnteriores.encuentro),
+        doctrina: datosAnteriores.doctrina || ""
+      };
+      const destinoAntes = {
+        cumpleanos: normalizarCumpleanos(datosDestino.cumpleanos),
+        sector: datosDestino.sector || "",
+        comiteRed: datosDestino.comiteRed || "",
+        estado: datosDestino.estado || "Inactivo",
+        bautizado: leerBooleanoLider(datosDestino.bautizado),
+        encuentro: leerBooleanoLider(datosDestino.encuentro),
+        doctrina: datosDestino.doctrina || ""
+      };
+      const camposEditados = {
         cumpleanos: nuevoCumpleanos,
         sector: nuevoSector,
         comiteRed: nuevoComiteRed,
@@ -5184,27 +5873,95 @@ let ninoPendiente = null;
         encuentro: nuevoEncuentro,
         doctrina: nuevaDoctrina
       };
-      if (origenVirtual) {
+      const datosCombinados = Object.fromEntries(
+        Object.keys(camposEditados).map(campo => [
+          campo,
+          camposEditados[campo] !== antesDe[campo]
+            ? camposEditados[campo]
+            : typeof destinoAntes[campo] === "boolean"
+              ? destinoAntes[campo]
+              : destinoAntes[campo] || antesDe[campo]
+        ])
+      );
+      const nombresAnteriores = [...new Map([
+        ...(datosAnteriores.nombresAnteriores || []),
+        ...(datosDestino.nombresAnteriores || []),
+        ...(nombreAnterior === nombreDestino ? [] : [nombreAnterior])
+      ].map(nombre => [normalizarNombreLider(nombre), nombre])).values()];
+
+      if (indiceDestino >= 0) {
+        lista.splice(ninoPendiente.indice, 1);
+      } else {
+        lista[ninoPendiente.indice] = nombreDestino;
+      }
+      delete lideresDatos[claveAnterior];
+      lideresDatos[claveLider(salon, nombreDestino)] = {
+        ...datosDestino,
+        ...datosCombinados,
+        nombresAnteriores,
+        ...(salon === "Pastor" && datosAnteriores.salonOrigen
+          ? { salonOrigen: datosAnteriores.salonOrigen }
+          : {})
+      };
+
+      if (salon !== "Pastor") {
+        const asistenciasFusionadas = migrarAsistenciasDeLider(
+          salon,
+          nombresAnteriores,
+          nombreDestino
+        );
+        const nombresAlias = new Set(nombresAnteriores.map(normalizarNombreLider));
+        const facilitadores = String(maestrosSalon[salon] || "")
+          .split(",")
+          .map(nombre => nombre.trim())
+          .filter(Boolean)
+          .map(nombre => nombresAlias.has(normalizarNombreLider(nombre))
+            ? nombreDestino
+            : nombre);
+        maestrosSalon[salon] = [...new Set(facilitadores)].join(", ");
+        localStorage.setItem(
+          "facilitadoresIglesiaRedencion",
+          JSON.stringify(maestrosSalon)
+        );
+        const filasMaestros = usuarioActual.rol === "Facilitador"
+          ? [{ Salon: salon, Maestros: maestrosSalon[salon] }]
+          : Object.entries(maestrosSalon).map(([nombreSalon, maestros]) => ({
+              Salon: nombreSalon,
+              Maestros: maestros
+            }));
+        sincronizarHoja(HOJAS.maestros, filasMaestros);
+
+        let virtualesModificados = false;
         lideresVirtuales.forEach(lider => {
-          if (lider.SalonOrigen === ninoPendiente.salon &&
-              normalizarNombreLider(lider.Nombre) === normalizarNombreLider(nombreAnterior)) {
-            lider.Nombre = nuevoNombre;
+          if (lider.SalonOrigen === salon &&
+              nombresAlias.has(normalizarNombreLider(lider.Nombre))) {
+            lider.Nombre = nombreDestino;
+            virtualesModificados = true;
           }
         });
-        guardarVirtuales();
+        if (virtualesModificados) guardarVirtuales();
+        if (asistenciasFusionadas) {
+          sincronizarHoja(HOJAS.asistencias, asistencias);
+        }
       }
+
       guardarDatosLideres();
-      if (ninoPendiente.salon === "Pastor") {
+      if (salon === "Pastor") {
         lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
         localStorage.setItem("lideresPastorIglesiaRedencion", JSON.stringify(lideresPastor));
         sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
       } else {
-        ordenarNinos(ninoPendiente.salon);
+        ordenarNinos(salon);
         guardarNinos();
       }
       cerrarModal("modalNombreNino");
       ninoPendiente = null;
       mostrarAsistencia();
+      if (indiceDestino >= 0) {
+        mostrarExito(
+          `${nombreAnterior} se unió al perfil existente de ${nombreDestino} en ${salon}. Las asistencias y los datos de esta misma zona se conservaron.`
+        );
+      }
     }
 
 let ninoEliminacionPendiente = null;
