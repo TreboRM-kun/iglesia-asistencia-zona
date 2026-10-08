@@ -256,7 +256,7 @@
     }
 
     .oculto {
-      display: none;
+      display: none !important;
     }
 
     .barra {
@@ -945,10 +945,172 @@
 
 .dia-cumpleanos {
   background: #f5f3ef;
+  transition: background-color 160ms ease, opacity 160ms ease, transform 160ms ease;
 }
 
 .dia-cumpleanos.vacio {
   background: white;
+}
+
+.dia-cumpleanos.semana-actual {
+  background: #f2e8cc;
+  border-color: #b89a58;
+}
+
+.dia-cumpleanos.dia-hoy {
+  box-shadow: inset 0 0 0 2px #6e1f2a;
+}
+
+.dia-cumpleanos.seleccionado {
+  opacity: 0.62;
+  transform: scale(0.97);
+}
+
+.dia-cumpleanos[data-fecha] {
+  cursor: pointer;
+}
+
+.cumpleanero {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.avatar-cumpleanos {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.avatar-cumpleanos-placeholder,
+.avatar-perfil-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e4e1dc;
+  color: #6e1f2a;
+}
+
+.avatar-cumpleanos-placeholder {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+}
+
+.avatar-cumpleanos-placeholder svg,
+.avatar-perfil-placeholder svg {
+  width: 62%;
+  height: 62%;
+  fill: currentColor;
+}
+
+.detalle-dia-cumpleanos {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #b89a58;
+  border-radius: 8px;
+  background: #fffdf8;
+  animation: aparecer-detalle-cumpleanos 180ms ease-out;
+}
+
+.detalle-dia-cumpleanos h3 {
+  margin: 0 0 12px;
+  color: #6e1f2a;
+}
+
+.lista-detalle-cumpleanos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.persona-detalle-cumpleanos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 7px;
+  background: #f5f3ef;
+}
+
+.avatar-detalle-cumpleanos {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.avatar-detalle-cumpleanos.avatar-cumpleanos-placeholder {
+  width: 64px;
+  height: 64px;
+  flex-basis: 64px;
+  cursor: default;
+}
+
+.foto-perfil-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.foto-perfil-editor label {
+  font-weight: bold;
+}
+
+.foto-perfil-recorte {
+  width: 132px;
+  height: 132px;
+  overflow: hidden;
+  border: 3px solid #b89a58;
+  border-radius: 50%;
+  background: #e4e1dc;
+  cursor: grab;
+  touch-action: none;
+}
+
+.foto-perfil-recorte:active {
+  cursor: grabbing;
+}
+
+.foto-perfil-recorte img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.foto-perfil-recorte .avatar-perfil-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.foto-perfil-recorte > .avatar-perfil-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.foto-perfil-editor input[type="file"] {
+  max-width: 100%;
+  font-size: 13px;
+}
+
+.foto-perfil-editor small {
+  color: #605c56;
+  text-align: center;
+}
+
+@keyframes aparecer-detalle-cumpleanos {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dia-cumpleanos.fuera-mes {
@@ -972,12 +1134,15 @@
 }
 
 .cumpleanero {
-  display: block;
   margin-top: 4px;
   padding: 4px;
   background: white;
   border-left: 3px solid #9a7734;
   font-size: 12px;
+}
+
+.cumpleanero span {
+  min-width: 0;
 }
 
 @media (max-width: 600px) {
@@ -1423,6 +1588,16 @@
         role="listbox" aria-label="Líderes de las zonas"></div>
       </div>
 
+      <div class="foto-perfil-editor">
+        <label for="fotoPerfilNino">Foto de perfil (opcional)</label>
+        <div id="recorteFotoPerfilNino" class="foto-perfil-recorte"
+          role="img" aria-label="Vista previa de la foto; arrastre para centrarla">
+          <span class="avatar-perfil-placeholder"></span>
+        </div>
+        <input id="fotoPerfilNino" type="file" accept="image/jpeg,image/png,image/webp">
+        <small>Arrastre la imagen para centrarla. Se recortará en círculo y se comprimirá al guardar.</small>
+      </div>
+
       <label for="cumpleanosNino">Cumpleaños:</label>
       <input id="cumpleanosNino" type="text" inputmode="numeric"
         placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
@@ -1653,7 +1828,7 @@
       <div class="cabecera-cumpleanos">
         <h2>Cumpleaños de los líderes</h2>
         <div class="controles-cumpleanos">
-          <select id="mesCumpleanos" aria-label="Seleccionar mes" onchange="mostrarCalendarioCumpleanos()">
+          <select id="mesCumpleanos" aria-label="Seleccionar mes" onchange="cambiarMesCalendarioCumpleanos()">
             <option value="01">Enero</option>
             <option value="02">Febrero</option>
             <option value="03">Marzo</option>
@@ -1672,6 +1847,7 @@
       </div>
 
       <div id="calendarioCumpleanos"></div>
+      <div id="detalleDiaCumpleanos"></div>
     </div>
   </div>
 
@@ -1723,6 +1899,18 @@
 
     <h2>Modificar datos del líder</h2>
     <p id="nombreNinoCambioTexto"></p>
+
+    <div class="foto-perfil-editor">
+      <label for="fotoPerfilNinoModal">Foto de perfil</label>
+      <div id="recorteFotoPerfilNinoModal" class="foto-perfil-recorte"
+        role="img" aria-label="Vista previa de la foto; arrastre para centrarla">
+        <span class="avatar-perfil-placeholder"></span>
+      </div>
+      <input id="fotoPerfilNinoModal" type="file" accept="image/jpeg,image/png,image/webp">
+      <button id="quitarFotoPerfilNinoModal" type="button"
+        onclick="quitarFotoPerfilEditor('Modal')">Quitar foto</button>
+      <small>Arrastre la imagen para centrarla. Se recortará en círculo y se comprimirá al guardar.</small>
+    </div>
 
     <input id="nombreNinoModal"
       type="text"
@@ -1897,6 +2085,7 @@ const HOJAS = {
 
 const HOJA_BITACORA = "BitacoraIglesiaRedencionV1";
 const HOJA_RESPALDOS = "RespaldosIglesiaRedencionV1";
+const HOJA_CUMPLEANOS = "CumpleanosPorZona";
 const OBSERVACION_ASISTENCIA_VIRTUAL = "Discipulado virtual con el pastor";
 const MAX_RESPALDOS_POR_HOJA = 5;
 const HOJAS_CON_RESPALDO = new Set([
@@ -2001,7 +2190,29 @@ function limpiarDatosEnCache() {
   ].forEach(clave => localStorage.removeItem(clave));
 }
 
-function guardarAsistenciasEnCacheLocal() {   try {     localStorage.setItem(       "asistenciasIglesiaRedencion",       JSON.stringify(asistencias)     );   } catch (error) {     const esLimiteDeAlmacenamiento =       error?.name === "QuotaExceededError" ||       error?.name === "NS_ERROR_DOM_QUOTA_REACHED" ||       error?.code === 22 ||       error?.code === 1014;     if (!esLimiteDeAlmacenamiento) throw error;      console.warn(       "El historial excede el espacio local disponible; se omitirá su caché local y se conservará en memoria.",       error     );     localStorage.removeItem("asistenciasIglesiaRedencion");   } }  function normalizarNombreLider(nombre) {
+function guardarAsistenciasEnCacheLocal() {
+  try {
+    localStorage.setItem(
+      "asistenciasIglesiaRedencion",
+      JSON.stringify(asistencias)
+    );
+  } catch (error) {
+    const esLimiteDeAlmacenamiento =
+      error?.name === "QuotaExceededError" ||
+      error?.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error?.code === 22 ||
+      error?.code === 1014;
+    if (!esLimiteDeAlmacenamiento) throw error;
+
+    console.warn(
+      "El historial excede el espacio local disponible; se omitirá su caché local y se conservará en memoria.",
+      error
+    );
+    localStorage.removeItem("asistenciasIglesiaRedencion");
+  }
+}
+
+function normalizarNombreLider(nombre) {
   return String(nombre || "")
     .trim()
     .normalize("NFD")
@@ -2538,6 +2749,30 @@ async function reemplazarHoja(
     throw error;
   }
 
+  if (nombreHoja === HOJAS.ninos ||
+      nombreHoja === HOJAS.lideresPastor) {
+    try {
+      await sincronizarIndiceCumpleanos(
+        firebase,
+        nombreHoja === HOJAS.lideresPastor
+          ? {
+              Pastor: filasNuevas.filter(fila =>
+                !obtenerLiderRelacionadoPastor(fila.Nombre)
+              )
+            }
+          : esFacilitador
+            ? { [usuarioActual.salon]: filasNuevas }
+            : Object.fromEntries(ZONAS.map(zona => [
+                zona,
+                datosNuevos[zona] || []
+              ]))
+      );
+    } catch (error) {
+      console.error("Los líderes se guardaron, pero no se actualizó el índice compartido de cumpleaños.", error);
+      alert("Los líderes se guardaron, pero no se pudo actualizar el calendario compartido de cumpleaños. Revise las reglas de Firebase para CumpleanosPorZona.");
+    }
+  }
+
   try {
     await firebase.set(referenciaEvento, {
       ...evento,
@@ -2792,6 +3027,9 @@ function filasDeNinos() {
         Bautizado: datos.bautizado,
         EncuentroCaraACara: datos.encuentro,
         Doctrina: datos.doctrina,
+        FotoPerfil: datos.fotoPerfil || "",
+        FechaReactivacion: datos.fechaReactivacion || "",
+        InactivoPorFaltas: datos.inactivoPorFaltas === true,
         ...(datos.nombresAnteriores.length
           ? { NombresAnteriores: datos.nombresAnteriores }
           : {})
@@ -2813,7 +3051,10 @@ function filasDeLideresPastor() {
       Estado: datos.estado,
       Bautizado: datos.bautizado,
       EncuentroCaraACara: datos.encuentro,
-      Doctrina: datos.doctrina
+      Doctrina: datos.doctrina,
+      FotoPerfil: datos.fotoPerfil || "",
+      FechaReactivacion: datos.fechaReactivacion || "",
+      InactivoPorFaltas: datos.inactivoPorFaltas === true
     };
   });
 }
@@ -2874,6 +3115,107 @@ function formatearCumpleanosEntrada(valor) {
   const normalizado = normalizarCumpleanos(valor);
   if (!normalizado) return "";
   return normalizado.split("-").reverse().join("/");
+}
+
+function normalizarFilasCumpleanos(filas) {
+  return Object.values(filas || {})
+    .filter(fila => fila && typeof fila.Nombre === "string")
+    .map(fila => ({
+      Nombre: fila.Nombre,
+      Cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos),
+      FotoPerfil: typeof (fila.FotoPerfil || fila.fotoPerfil) === "string"
+        ? fila.FotoPerfil || fila.fotoPerfil
+        : ""
+    }))
+    .filter(fila => fila.Cumpleanos)
+    .sort((a, b) => a.Nombre.localeCompare(b.Nombre, "es"));
+}
+
+async function sincronizarIndiceCumpleanos(firebase, filasPorZona) {
+  const referenciaIndice = firebase.ref(
+    firebase.database,
+    HOJA_CUMPLEANOS
+  );
+  const resultadoIndice = await firebase.get(referenciaIndice);
+  const indiceActual = resultadoIndice.exists() ? resultadoIndice.val() : {};
+
+  await Promise.all(Object.entries(filasPorZona).map(async ([zona, filas]) => {
+    const personas = normalizarFilasCumpleanos(filas);
+    const personasActuales = normalizarFilasCumpleanos(
+      indiceActual[zona]?.personas
+    );
+    if (
+      indiceActual[zona]?.actualizado === true &&
+      JSON.stringify(personasActuales) === JSON.stringify(personas)
+    ) {
+      return;
+    }
+
+    const personasPorIndice = Object.fromEntries(
+      personas.map((persona, indice) => [String(indice), persona])
+    );
+    await firebase.set(
+      firebase.ref(firebase.database, `${HOJA_CUMPLEANOS}/${zona}`),
+      { actualizado: true, personas: personasPorIndice }
+    );
+  }));
+
+  if (cumpleanosCompartidosCargados) {
+    const zonasActualizadas = new Set(Object.keys(filasPorZona).map(zona =>
+      zona === "Pastor" ? "Líderes" : zona
+    ));
+    cumpleanosCompartidos = cumpleanosCompartidos
+      .filter(persona => !zonasActualizadas.has(persona.salon))
+      .concat(Object.entries(filasPorZona).flatMap(([zona, filas]) =>
+        normalizarFilasCumpleanos(filas).map(persona => ({
+          nombre: persona.Nombre,
+          salon: zona === "Pastor" ? "Líderes" : zona,
+        fecha: persona.Cumpleanos,
+        fotoPerfil: persona.FotoPerfil
+      }))
+      ));
+  }
+}
+
+async function cargarIndiceCumpleanos(firebase) {
+  errorCargaCumpleanos = null;
+  cumpleanosCompartidosCargados = false;
+
+  try {
+    if (usuarioActual?.rol === "Administrador") {
+      const filas = filasDeNinos();
+      const filasPorZona = Object.fromEntries(
+        ZONAS.map(zona => [
+          zona,
+          filas.filter(fila => fila.Salon === zona)
+        ])
+      );
+      filasPorZona.Pastor = filasDeLideresPastor().filter(fila =>
+        !obtenerLiderRelacionadoPastor(fila.Nombre)
+      );
+      await sincronizarIndiceCumpleanos(firebase, filasPorZona);
+    }
+
+    const resultado = await firebase.get(
+      firebase.ref(firebase.database, HOJA_CUMPLEANOS)
+    );
+    const indice = resultado.exists() ? resultado.val() : {};
+    cumpleanosCompartidos = Object.entries(indice).flatMap(([salon, grupo]) =>
+      grupo?.actualizado === true
+        ? normalizarFilasCumpleanos(grupo.personas).map(persona => ({
+            nombre: persona.Nombre,
+            salon: salon === "Pastor" ? "Líderes" : salon,
+            fecha: persona.Cumpleanos,
+            fotoPerfil: persona.FotoPerfil
+          }))
+        : []
+    );
+    cumpleanosCompartidosCargados = true;
+  } catch (error) {
+    cumpleanosCompartidos = [];
+    errorCargaCumpleanos = error;
+    console.error("No se pudieron cargar los cumpleaños compartidos.", error);
+  }
 }
 
 async function cargarDatosDesdeAPI() {
@@ -2984,6 +3326,9 @@ async function cargarDatosDesdeAPI() {
             bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
             encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
             doctrina: fila.Doctrina || "",
+            fotoPerfil: fila.FotoPerfil || "",
+            fechaReactivacion: fila.FechaReactivacion || "",
+            inactivoPorFaltas: fila.InactivoPorFaltas === true,
             nombresAnteriores: Array.isArray(fila.NombresAnteriores)
               ? fila.NombresAnteriores.filter(nombre => typeof nombre === "string")
               : []
@@ -3025,7 +3370,10 @@ async function cargarDatosDesdeAPI() {
             estado: fila.Estado || fila.estado || "Inactivo",
             bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
             encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
-            doctrina: fila.Doctrina || ""
+            doctrina: fila.Doctrina || "",
+            fotoPerfil: fila.FotoPerfil || "",
+            fechaReactivacion: fila.FechaReactivacion || "",
+            inactivoPorFaltas: fila.InactivoPorFaltas === true
           };
           const nombreExistente = existente[1].find(nombre =>
             normalizarNombreLider(nombre) === nombreNormalizado
@@ -3043,7 +3391,10 @@ async function cargarDatosDesdeAPI() {
             estado: fila.Estado || fila.estado || "Inactivo",
             bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
             encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
-            doctrina: fila.Doctrina || ""
+            doctrina: fila.Doctrina || "",
+            fotoPerfil: fila.FotoPerfil || "",
+            fechaReactivacion: fila.FechaReactivacion || "",
+            inactivoPorFaltas: fila.InactivoPorFaltas === true
           };
         }
       });
@@ -3096,6 +3447,9 @@ async function cargarDatosDesdeAPI() {
           bautizado: leerBooleanoLider(fila.Bautizado || fila.bautizado),
           encuentro: leerBooleanoLider(fila.EncuentroCaraACara || fila.encuentro),
           doctrina: fila.Doctrina || "",
+          fotoPerfil: fila.FotoPerfil || "",
+          fechaReactivacion: fila.FechaReactivacion || "",
+          inactivoPorFaltas: fila.InactivoPorFaltas === true,
           salonOrigen: ZONAS.includes(fila.SalonOrigen)
             ? fila.SalonOrigen
             : ""
@@ -3107,7 +3461,6 @@ async function cargarDatosDesdeAPI() {
 
     if (filasAsistencias.length) {
       asistencias = filasAsistencias;
-      guardarAsistenciasEnCacheLocal();
       asistencias = asistencias.map(fila => ({
         ...fila,
         Salon: fila.Salon === "Zona 7" ? "Virtual" : fila.Salon
@@ -3141,6 +3494,13 @@ async function cargarDatosDesdeAPI() {
     aplicarAliasesLideresYAsistencias(
       obtenerRenombresDeBitacora(eventosRenombres)
     );
+    await cargarIndiceCumpleanos(firebase);
+    try {
+      await actualizarEstadosAutomaticosInactividad();
+    } catch (error) {
+      console.error("No se pudieron guardar los estados automáticos por faltas.", error);
+      alert("Se cargaron las asistencias, pero no se pudieron guardar los estados automáticos por faltas. Revise los permisos de escritura del perfil.");
+    }
   } catch (error) {
     cargaFirebaseCompleta = false;
     console.error("No se pudieron cargar los datos protegidos desde Firebase.", error);
@@ -3194,6 +3554,10 @@ async function cargarDatosDesdeAPI() {
         bautizado: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.bautizado),
         encuentro: leerBooleanoLider(lideresDatos[claveLider(salon, nombre)]?.encuentro),
         doctrina: lideresDatos[claveLider(salon, nombre)]?.doctrina || "",
+        fotoPerfil: lideresDatos[claveLider(salon, nombre)]?.fotoPerfil || "",
+        fechaReactivacion:
+          lideresDatos[claveLider(salon, nombre)]?.fechaReactivacion || "",
+        inactivoPorFaltas: lideresDatos[claveLider(salon, nombre)]?.inactivoPorFaltas === true,
         nombresAnteriores: Array.isArray(
           lideresDatos[claveLider(salon, nombre)]?.nombresAnteriores
         )
@@ -3234,6 +3598,9 @@ async function cargarDatosDesdeAPI() {
     }));
 
     let usuarioActual = null;
+    let cumpleanosCompartidos = [];
+    let cumpleanosCompartidosCargados = false;
+    let errorCargaCumpleanos = null;
     let eventoInstalacionPendiente = null;
 
     window.addEventListener("beforeinstallprompt", evento => {
@@ -3570,6 +3937,112 @@ async function cargarDatosDesdeAPI() {
       sincronizarHoja(HOJAS.ninos, filasDeNinos());
     }
 
+    function registrosGuardadosDeLider(salon, nombre, datos) {
+      const nombres = new Set([
+        nombre,
+        ...(Array.isArray(datos.nombresAnteriores)
+          ? datos.nombresAnteriores
+          : [])
+      ].map(normalizarNombreLider));
+      return asistencias
+        .filter(fila => {
+          if (fila.OrigenVirtual === true ||
+              !["Sí", "No"].includes(fila.Asistencia)) return false;
+          if ((fila.SalonOrigen || fila.Salon) !== salon) return false;
+          return nombres.has(normalizarNombreLider(fila.Nombre));
+        })
+        .sort((a, b) =>
+          String(a.Fecha).localeCompare(String(b.Fecha)) ||
+          String(a.TipoReunion || "").localeCompare(String(b.TipoReunion || ""))
+        );
+    }
+
+    function obtenerUltimaFechaAsistenciaLider(salon, nombre, datos) {
+      return registrosGuardadosDeLider(salon, nombre, datos)
+        .reduce((ultima, fila) =>
+          String(fila.Fecha) > ultima ? String(fila.Fecha) : ultima,
+        "");
+    }
+
+    async function actualizarEstadosAutomaticosInactividad() {
+      let cambiosZonas = false;
+      let cambiosPastor = false;
+
+      const perfiles = Object.entries(ninos).flatMap(([salon, nombres]) =>
+        nombres.map(nombre => ({ salon, nombre }))
+      );
+      lideresPastor.forEach(nombre => {
+        if (!obtenerLiderRelacionadoPastor(nombre)) {
+          perfiles.push({ salon: "Pastor", nombre });
+        }
+      });
+
+      perfiles.forEach(({ salon, nombre }) => {
+        const clave = claveLider(salon, nombre);
+        const datos = lideresDatos[clave] || {};
+        const registros = registrosGuardadosDeLider(salon, nombre, datos);
+        const ultimaReactivacion = String(datos.fechaReactivacion || "");
+        const registrosPosteriores = registros.filter(fila =>
+          String(fila.Fecha) > ultimaReactivacion
+        );
+        const ultimoRegistroPosterior =
+          registrosPosteriores[registrosPosteriores.length - 1];
+
+        if (datos.inactivoPorFaltas === true &&
+            ultimoRegistroPosterior?.Asistencia === "Sí") {
+          datos.estado = "Activo";
+          datos.inactivoPorFaltas = false;
+          datos.fechaReactivacion = String(ultimoRegistroPosterior.Fecha);
+          lideresDatos[clave] = datos;
+          if (salon === "Pastor") cambiosPastor = true;
+          else cambiosZonas = true;
+          return;
+        }
+
+        let faltasConsecutivas = 0;
+        registros.forEach(fila => {
+          if (String(fila.Fecha) <= ultimaReactivacion) return;
+          if (fila.Asistencia === "Sí") {
+            faltasConsecutivas = 0;
+          } else if (fila.Asistencia === "No") {
+            faltasConsecutivas++;
+          }
+        });
+
+        if (faltasConsecutivas >= 3 &&
+            (datos.estado !== "Inactivo" ||
+             datos.inactivoPorFaltas !== true)) {
+          datos.estado = "Inactivo";
+          datos.inactivoPorFaltas = true;
+          lideresDatos[clave] = datos;
+          if (salon === "Pastor") cambiosPastor = true;
+          else cambiosZonas = true;
+        }
+      });
+
+      if (!cambiosZonas && !cambiosPastor) return false;
+      guardarDatosLideres();
+      localStorage.setItem("lideresIglesiaRedencion", JSON.stringify(ninos));
+      if (usuarioActual?.rol === "Administrador") {
+        if (cambiosZonas) {
+          await reemplazarHoja(HOJAS.ninos, filasDeNinos());
+        }
+        if (cambiosPastor) {
+          await reemplazarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+        }
+      } else if (usuarioActual?.rol === "Facilitador" && cambiosZonas) {
+        await reemplazarHoja(
+          HOJAS.ninos,
+          filasDeNinos().filter(fila => fila.Salon === usuarioActual.salon)
+        );
+      } else if (usuarioActual?.rol === "Supervisor") {
+        console.warn(
+          "El estado automático se calculó para esta sesión, pero el perfil Supervisor no puede guardar cambios en el registro de líderes."
+        );
+      }
+      return true;
+    }
+
     function ordenarNinos(salon) {
       ninos[salon].sort((a, b) =>
         a.localeCompare(b, "es", { sensitivity: "base" })
@@ -3808,6 +4281,9 @@ async function cargarDatosDesdeAPI() {
         mostrarAsistencia();
         mostrarPanelUsuarios();
         mostrarCintaCumpleanos();
+        if (errorCargaCumpleanos) {
+          alert("No se pudieron cargar los cumpleaños de todas las zonas. Publique las reglas actualizadas de Firebase y verifique el índice CumpleanosPorZona.");
+        }
       } catch (error) {
         console.error("No se pudo iniciar sesión en la aplicación.", error);
         try {
@@ -3884,6 +4360,15 @@ async function cargarDatosDesdeAPI() {
     }
 
     function obtenerCumpleanosDeLaSemana() {
+      if (cumpleanosCompartidosCargados) {
+        return cumpleanosCompartidos
+          .filter(persona => cumpleanosEstaSemana(persona.fecha))
+          .sort((a, b) =>
+            a.fecha.localeCompare(b.fecha) ||
+            a.nombre.localeCompare(b.nombre, "es")
+          );
+      }
+
       const todasLasZonas = usuarioActual && (
         usuarioActual.rol === "Administrador" || usuarioActual.rol === "Supervisor"
       );
@@ -4009,18 +4494,9 @@ async function cargarDatosDesdeAPI() {
     }
 
     function obtenerCumpleanosVisibles() {
-      const todasLasZonas = usuarioActual && (
-        usuarioActual.rol === "Administrador" || usuarioActual.rol === "Supervisor"
-      );
-      const zonas = todasLasZonas
-        ? Object.entries(ninos)
-        : Object.entries(ninos).filter(([zona]) => zona === usuarioActual?.salon);
-      const cumpleanos = zonas.flatMap(([salon, nombres]) =>
-        nombres
-          .filter(nombre => cumpleanosEstaSemana(obtenerCumpleanos(salon, nombre)))
-          .map(nombre => `${nombre} (${salon})`)
-      );
-      return [...new Set(cumpleanos)];
+      return [...new Set(obtenerCumpleanosDeLaSemana().map(persona =>
+        `${persona.nombre} (${persona.salon})`
+      ))];
     }
 
     function mostrarCintaCumpleanos() {
@@ -4199,7 +4675,39 @@ async function cargarDatosDesdeAPI() {
       mostrarExito("El anuncio fue eliminado correctamente.");
     }
 
+    function avatarLiderHtml(fotoPerfil, nombre, clase, ampliable = true) {
+      if (!esFotoPerfilValida(fotoPerfil)) {
+        return `<span class="avatar-perfil-placeholder ${escaparTexto(clase)}" role="img" aria-label="Sin foto de ${escaparTexto(nombre)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.1 0-7.5 2.2-7.5 5v2h15v-2c0-2.8-3.4-5-7.5-5Z"/></svg></span>`;
+      }
+      return `<img class="${escaparTexto(clase)}" src="${fotoPerfil}" alt="Foto de ${escaparTexto(nombre)}"${ampliable ? ' onclick="abrirFotoPerfilLider(this)"' : ""}>`;
+    }
+
+    function esFotoPerfilValida(fotoPerfil) {
+      return typeof fotoPerfil === "string" &&
+        /^data:image\/webp;base64,[A-Za-z0-9+/]+=*$/.test(fotoPerfil);
+    }
+
+    function abrirFotoPerfilLider(imagen) {
+      if (!(imagen instanceof HTMLImageElement) ||
+          !esFotoPerfilValida(imagen.src)) {
+        return;
+      }
+      mostrarEnVisorMultimedia("image/webp", imagen.src, imagen.alt);
+    }
+
     function obtenerTodosLosCumpleanos() {
+      if (cumpleanosCompartidosCargados) {
+        return cumpleanosCompartidos.map(persona => ({
+          nombre: persona.nombre,
+          salon: persona.salon,
+          datos: {
+            cumpleanos: persona.fecha,
+            sector: "",
+            fotoPerfil: persona.fotoPerfil || ""
+          }
+        }));
+      }
+
       const porZonas = Object.entries(ninos).flatMap(([salon, nombres]) =>
         nombres
           .map(nombre => ({
@@ -4220,12 +4728,27 @@ async function cargarDatosDesdeAPI() {
       return porZonas.concat(delPastor);
     }
 
+    let diaCumpleanosSeleccionado = "";
+
+    function cambiarMesCalendarioCumpleanos() {
+      diaCumpleanosSeleccionado = "";
+      mostrarCalendarioCumpleanos();
+    }
+
+    function seleccionarDiaCumpleanos(fecha) {
+      diaCumpleanosSeleccionado =
+        diaCumpleanosSeleccionado === fecha ? "" : fecha;
+      mostrarCalendarioCumpleanos();
+    }
+
     function mostrarCalendarioCumpleanos() {
       const mesTexto = document.getElementById("mesCumpleanos").value;
       const calendario = document.getElementById("calendarioCumpleanos");
+      const detalleDia = document.getElementById("detalleDiaCumpleanos");
 
       if (!mesTexto) {
         calendario.innerHTML = "";
+        detalleDia.innerHTML = "";
         return;
       }
 
@@ -4234,6 +4757,18 @@ async function cargarDatosDesdeAPI() {
       const fechaInicioMes = new Date(ano, mes - 1, 1);
       const desplazamientoPrimerDia = (fechaInicioMes.getDay() + 6) % 7;
       const diasDelMes = new Date(ano, mes, 0).getDate();
+      const hoy = new Date();
+      const fechaHoy = formatearFechaISO(hoy);
+      const inicioSemana = new Date(hoy);
+      inicioSemana.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+      const finSemana = new Date(inicioSemana);
+      finSemana.setDate(inicioSemana.getDate() + 6);
+      const fechaInicioSemana = formatearFechaISO(inicioSemana);
+      const fechaFinSemana = formatearFechaISO(finSemana);
+      if (diaCumpleanosSeleccionado &&
+          Number(diaCumpleanosSeleccionado.slice(5, 7)) !== mes) {
+        diaCumpleanosSeleccionado = "";
+      }
       const cumpleanos = obtenerTodosLosCumpleanos();
       const porDia = {};
 
@@ -4263,22 +4798,65 @@ async function cargarDatosDesdeAPI() {
         fechaCelda.setDate(fechaCelda.getDate() + indice);
         const esMesActual = fechaCelda.getMonth() === mes - 1;
         const fechaCumpleanos = `${String(fechaCelda.getMonth() + 1).padStart(2, "0")}-${String(fechaCelda.getDate()).padStart(2, "0")}`;
+        const fechaISO = formatearFechaISO(fechaCelda);
         const personas = porDia[fechaCumpleanos] || [];
+        const clases = [
+          "dia-cumpleanos",
+          esMesActual ? "" : "fuera-mes",
+          fechaISO >= fechaInicioSemana && fechaISO <= fechaFinSemana
+            ? "semana-actual"
+            : "",
+          fechaISO === fechaHoy ? "dia-hoy" : "",
+          fechaISO === diaCumpleanosSeleccionado ? "seleccionado" : ""
+        ].filter(Boolean).join(" ");
         html += `
-          <div class="dia-cumpleanos${esMesActual ? "" : " fuera-mes"}">
+          <div class="${clases}" data-fecha="${fechaISO}"
+            role="button" tabindex="0" aria-pressed="${fechaISO === diaCumpleanosSeleccionado}"
+            aria-label="Seleccionar ${fechaCelda.getDate()} ${personas.length ? `, ${personas.length} cumpleaños` : ""}"
+            onclick="seleccionarDiaCumpleanos('${fechaISO}')"
+            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); seleccionarDiaCumpleanos('${fechaISO}'); }">
             <span class="numero-dia">${fechaCelda.getDate()}</span>
-            ${personas.map(persona => `
+            ${personas.slice(0, 3).map(persona => `
               <span class="cumpleanero">
-                <strong>${escaparTexto(persona.nombre)}</strong><br>
-                ${escaparTexto(persona.salon)}${persona.datos.sector ? ` · ${escaparTexto(persona.datos.sector)}` : ""}
+                ${avatarLiderHtml(persona.datos.fotoPerfil, persona.nombre, "avatar-cumpleanos", false)}
+                <span><strong>${escaparTexto(persona.nombre)}</strong><br>${escaparTexto(persona.salon)}</span>
               </span>
             `).join("")}
+            ${personas.length > 3 ? `<small>+${personas.length - 3} más</small>` : ""}
           </div>
         `;
       }
 
       html += "</div>";
       calendario.innerHTML = html;
+      const personaFecha = diaCumpleanosSeleccionado
+        ? new Date(`${diaCumpleanosSeleccionado}T00:00:00`)
+        : null;
+      const fechaTexto = personaFecha
+        ? personaFecha.toLocaleDateString("es", {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+          })
+        : "";
+      const cumpleanosDelDia = diaCumpleanosSeleccionado
+        ? porDia[diaCumpleanosSeleccionado.slice(5)] || []
+        : [];
+      detalleDia.innerHTML = diaCumpleanosSeleccionado ? `
+        <section class="detalle-dia-cumpleanos" aria-live="polite">
+          <h3>Cumpleaños del ${escaparTexto(fechaTexto)}</h3>
+          ${cumpleanosDelDia.length ? `
+            <div class="lista-detalle-cumpleanos">
+              ${cumpleanosDelDia.map(persona => `
+                <article class="persona-detalle-cumpleanos">
+                  ${avatarLiderHtml(persona.datos.fotoPerfil, persona.nombre, "avatar-detalle-cumpleanos")}
+                  <span><strong>${escaparTexto(persona.nombre)}</strong><br>${escaparTexto(persona.salon)}</span>
+                </article>
+              `).join("")}
+            </div>
+          ` : "<p>No hay cumpleaños registrados para este día.</p>"}
+        </section>
+      ` : "";
     }
 
     function abrirCalendarioCumpleanos() {
@@ -4286,6 +4864,7 @@ async function cargarDatosDesdeAPI() {
       const hoy = new Date();
       campoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
 
+      diaCumpleanosSeleccionado = "";
       mostrarCalendarioCumpleanos();
       document.getElementById("modalCumpleanos").classList.remove("oculto");
     }
@@ -4516,6 +5095,7 @@ async function cargarDatosDesdeAPI() {
         document.getElementById("bautizadoNino").checked = datos.bautizado;
         document.getElementById("encuentroNino").checked = datos.encuentro;
         document.getElementById("doctrinaNino").value = datos.doctrina;
+        mostrarFotoPerfilEditor("Nino", datos.fotoPerfil);
         mensaje.className = "mensaje";
         mensaje.textContent = reunionPastor
           ? `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se vinculará su asistencia con el resumen del líder.`
@@ -4543,7 +5123,7 @@ async function cargarDatosDesdeAPI() {
       mostrarCoincidenciaLiderVirtual();
     }
 
-    function agregarNino() {
+    async function agregarNino() {
       let nombre = document.getElementById("nombreNino").value.trim();
       const cumpleanos = normalizarCumpleanos(
         document.getElementById("cumpleanosNino").value
@@ -4580,6 +5160,19 @@ async function cargarDatosDesdeAPI() {
         mensaje.className = "mensaje";
         mensaje.textContent = "Escriba el nombre del líder.";
         return;
+      }
+      const archivoFotoPerfil = document.getElementById("fotoPerfilNino").files[0];
+      let fotoPerfil = "";
+      if (archivoFotoPerfil) {
+        try {
+          mensaje.textContent = "Comprimiendo la foto de perfil...";
+          fotoPerfil = await obtenerFotoPerfilEditor("Nino");
+        } catch (error) {
+          console.error("No se pudo preparar la foto de perfil.", error);
+          mensaje.className = "mensaje";
+          mensaje.textContent = error.message || "No se pudo preparar la foto.";
+          return;
+        }
       }
       const liderSeleccionado = liderRelacionadoSeleccionado &&
           normalizarNombreLider(liderRelacionadoSeleccionado.nombre) ===
@@ -4621,6 +5214,29 @@ async function cargarDatosDesdeAPI() {
         const nombreVirtual = liderExistente?.nombre || nombre.trim().replace(/\s+/g, " ");
         const salonOrigen = liderExistente?.salon || "Virtual";
 
+        if (fotoPerfil && liderExistente) {
+          const puedeEditarFoto = usuarioActual.rol === "Administrador" ||
+            (usuarioActual.rol === "Facilitador" &&
+             usuarioActual.salon === salonOrigen);
+          if (!puedeEditarFoto) {
+            mensaje.className = "mensaje";
+            mensaje.textContent =
+              "Para cambiar la foto de un líder ya registrado, edite su ficha desde su zona.";
+            return;
+          }
+          const claveOrigen = claveLider(salonOrigen, nombreVirtual);
+          lideresDatos[claveOrigen] = {
+            ...(lideresDatos[claveOrigen] || {}),
+            fotoPerfil
+          };
+          guardarDatosLideres();
+          if (salonOrigen === "Pastor") {
+            sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
+          } else {
+            guardarNinos();
+          }
+        }
+
         lideresVirtuales.push({
           Nombre: nombreVirtual,
           Salon: "Virtual",
@@ -4638,7 +5254,8 @@ async function cargarDatosDesdeAPI() {
             estado,
             bautizado,
             encuentro,
-            doctrina
+            doctrina,
+            fotoPerfil
           };
           guardarDatosLideres();
           guardarNinos();
@@ -4656,6 +5273,7 @@ async function cargarDatosDesdeAPI() {
         document.getElementById("bautizadoNino").checked = false;
         document.getElementById("encuentroNino").checked = false;
         document.getElementById("doctrinaNino").value = "";
+        reiniciarFotoPerfilEditor("Nino");
         mensaje.className = "exito";
         mensaje.textContent = salonOrigen === "Virtual"
           ? `${nombreVirtual} fue agregado a Discipulado Virtual.`
@@ -4687,6 +5305,17 @@ async function cargarDatosDesdeAPI() {
           const perfilPastor = lideresDatos[claveLider("Pastor", nombre)] || {};
           perfilPastor.salonOrigen = liderZonaVinculado.salon;
           lideresDatos[claveLider("Pastor", nombre)] = perfilPastor;
+          if (fotoPerfil && usuarioActual.rol === "Administrador") {
+            const claveOrigen = claveLider(
+              liderZonaVinculado.salon,
+              liderZonaVinculado.nombre
+            );
+            lideresDatos[claveOrigen] = {
+              ...(lideresDatos[claveOrigen] || {}),
+              fotoPerfil
+            };
+            guardarNinos();
+          }
           guardarDatosLideres();
           sincronizarHoja(HOJAS.lideresPastor, filasDeLideresPastor());
           mensaje.className = "exito";
@@ -4705,7 +5334,13 @@ async function cargarDatosDesdeAPI() {
         const perfilPastor = lideresDatos[claveLider(grupo, nombre)] || {};
         lideresDatos[claveLider(grupo, nombre)] = {
           ...perfilPastor,
-          salonOrigen: liderZonaVinculado?.salon || ""
+          salonOrigen: liderZonaVinculado?.salon || "",
+          fotoPerfil: liderZonaVinculado
+            ? lideresDatos[claveLider(
+                liderZonaVinculado.salon,
+                liderZonaVinculado.nombre
+              )]?.fotoPerfil || ""
+            : fotoPerfil
         };
         guardarDatosLideres();
         lideresPastor.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
@@ -4719,7 +5354,8 @@ async function cargarDatosDesdeAPI() {
           estado,
           bautizado,
           encuentro,
-          doctrina
+          doctrina,
+          fotoPerfil
         };
         guardarDatosLideres();
         ordenarNinos(salonNuevo);
@@ -4737,6 +5373,7 @@ async function cargarDatosDesdeAPI() {
       document.getElementById("bautizadoNino").checked = false;
       document.getElementById("encuentroNino").checked = false;
       document.getElementById("doctrinaNino").value = "";
+      reiniciarFotoPerfilEditor("Nino");
       mensaje.className = "exito";
       mensaje.textContent = liderZonaVinculado
         ? `${nombre} quedó vinculado a su ficha zonal y sus asistencias aparecerán en el resumen del líder.`
@@ -4933,6 +5570,230 @@ async function cargarDatosDesdeAPI() {
       });
     }
 
+    const TAMANO_MAXIMO_FOTO_PERFIL = 120 * 1024;
+    const TAMANO_MAXIMO_ORIGINAL_FOTO_PERFIL = 25 * 1024 * 1024;
+    const estadoFotoPerfil = {
+      Nino: { imagen: null, url: "", original: "", eliminada: false, x: 0.5, y: 0.5 },
+      Modal: { imagen: null, url: "", original: "", eliminada: false, x: 0.5, y: 0.5 }
+    };
+
+    function placeholderFotoPerfilHtml() {
+      return `<span class="avatar-perfil-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.1 0-7.5 2.2-7.5 5v2h15v-2c0-2.8-3.4-5-7.5-5Z"/></svg></span>`;
+    }
+
+    function mostrarFotoPerfilEditor(tipo, foto = "") {
+      const estado = estadoFotoPerfil[tipo];
+      const contenedor = document.getElementById(`recorteFotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`);
+      if (!contenedor) return;
+      if (estado.url) URL.revokeObjectURL(estado.url);
+      estado.original = esFotoPerfilValida(foto) ? foto : "";
+      estado.eliminada = false;
+      estado.x = 0.5;
+      estado.y = 0.5;
+      estado.imagen = null;
+      estado.url = "";
+      if (estado.original) {
+        const imagen = document.createElement("img");
+        imagen.src = estado.original;
+        imagen.alt = "Foto de perfil del líder";
+        contenedor.replaceChildren(imagen);
+      } else {
+        contenedor.innerHTML = placeholderFotoPerfilHtml();
+      }
+    }
+
+    function reiniciarFotoPerfilEditor(tipo) {
+      const estado = estadoFotoPerfil[tipo];
+      if (estado.url) URL.revokeObjectURL(estado.url);
+      estado.imagen = null;
+      estado.url = "";
+      estado.original = "";
+      estado.eliminada = false;
+      estado.x = 0.5;
+      estado.y = 0.5;
+      document.getElementById(
+        `fotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`
+      ).value = "";
+      mostrarFotoPerfilEditor(tipo);
+    }
+
+    function quitarFotoPerfilEditor(tipo) {
+      const estado = estadoFotoPerfil[tipo];
+      if (estado.url) URL.revokeObjectURL(estado.url);
+      estado.imagen = null;
+      estado.url = "";
+      estado.original = "";
+      estado.eliminada = true;
+      estado.x = 0.5;
+      estado.y = 0.5;
+      document.getElementById(
+        `fotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`
+      ).value = "";
+      mostrarFotoPerfilEditor(tipo);
+      estadoFotoPerfil[tipo].eliminada = true;
+    }
+
+    function cargarFotoPerfilEditor(tipo, archivo) {
+      const estado = estadoFotoPerfil[tipo];
+      if (estado.url) URL.revokeObjectURL(estado.url);
+      estado.imagen = null;
+      estado.url = "";
+      estado.eliminada = false;
+      estado.x = 0.5;
+      estado.y = 0.5;
+
+      if (!archivo) {
+        mostrarFotoPerfilEditor(tipo, estado.original);
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(archivo.type) ||
+          archivo.size > TAMANO_MAXIMO_ORIGINAL_FOTO_PERFIL) {
+        document.getElementById(
+          `fotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`
+        ).value = "";
+        mostrarFotoPerfilEditor(tipo, estado.original);
+        alert("Seleccione una imagen JPEG, PNG o WebP de hasta 25 MB.");
+        return;
+      }
+
+      const url = URL.createObjectURL(archivo);
+      const imagen = new Image();
+      imagen.onload = () => {
+        estado.url = url;
+        estado.imagen = imagen;
+        const contenedor = document.getElementById(
+          `recorteFotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`
+        );
+        contenedor.innerHTML = `<img src="${url}" alt="Vista previa de la foto de perfil">`;
+        contenedor.querySelector("img").style.objectPosition = "50% 50%";
+      };
+      imagen.onerror = () => {
+        URL.revokeObjectURL(url);
+        mostrarFotoPerfilEditor(tipo, estado.original);
+        alert("No se pudo abrir la imagen seleccionada.");
+      };
+      imagen.src = url;
+    }
+
+    function conectarArrastreFotoPerfil(tipo) {
+      const contenedor = document.getElementById(
+        `recorteFotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`
+      );
+      let puntero = null;
+      contenedor.addEventListener("pointerdown", evento => {
+        const estado = estadoFotoPerfil[tipo];
+        if (!estado.imagen || !estado.url) return;
+        puntero = { id: evento.pointerId, x: evento.clientX, y: evento.clientY };
+        contenedor.setPointerCapture(evento.pointerId);
+        evento.preventDefault();
+      });
+      contenedor.addEventListener("pointermove", evento => {
+        if (!puntero || evento.pointerId !== puntero.id) return;
+        const estado = estadoFotoPerfil[tipo];
+        const borde = contenedor.getBoundingClientRect();
+        const escala = Math.max(
+          borde.width / estado.imagen.naturalWidth,
+          borde.height / estado.imagen.naturalHeight
+        );
+        const sobraX = estado.imagen.naturalWidth * escala - borde.width;
+        const sobraY = estado.imagen.naturalHeight * escala - borde.height;
+        if (sobraX > 0) {
+          estado.x = Math.max(0, Math.min(1,
+            estado.x - (evento.clientX - puntero.x) / sobraX));
+        }
+        if (sobraY > 0) {
+          estado.y = Math.max(0, Math.min(1,
+            estado.y - (evento.clientY - puntero.y) / sobraY));
+        }
+        puntero.x = evento.clientX;
+        puntero.y = evento.clientY;
+        const imagen = contenedor.querySelector("img");
+        if (imagen) {
+          imagen.style.objectPosition =
+            `${estado.x * 100}% ${estado.y * 100}%`;
+        }
+      });
+      ["pointerup", "pointercancel"].forEach(tipoEvento =>
+        contenedor.addEventListener(tipoEvento, () => { puntero = null; })
+      );
+    }
+
+    function inicializarEditoresFotoPerfil() {
+      ["Nino", "Modal"].forEach(tipo => {
+        const idEntrada = `fotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`;
+        document.getElementById(idEntrada).addEventListener("change", evento =>
+          cargarFotoPerfilEditor(tipo, evento.target.files?.[0])
+        );
+        conectarArrastreFotoPerfil(tipo);
+      });
+    }
+
+    async function comprimirFotoPerfil(archivo, posicion) {
+      if (archivo.size > TAMANO_MAXIMO_ORIGINAL_FOTO_PERFIL) {
+        throw new Error("La foto seleccionada supera el máximo de 25 MB.");
+      }
+      const url = URL.createObjectURL(archivo);
+      const imagen = new Image();
+      try {
+        await new Promise((resolver, rechazar) => {
+          imagen.onload = resolver;
+          imagen.onerror = () => rechazar(
+            new Error("No se pudo abrir la foto seleccionada.")
+          );
+          imagen.src = url;
+        });
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+
+      const ladoOrigen = Math.min(imagen.naturalWidth, imagen.naturalHeight);
+      const inicioX = (imagen.naturalWidth - ladoOrigen) * posicion.x;
+      const inicioY = (imagen.naturalHeight - ladoOrigen) * posicion.y;
+      for (const lado of [384, 320, 256]) {
+        const lienzo = document.createElement("canvas");
+        lienzo.width = lado;
+        lienzo.height = lado;
+        const contexto = lienzo.getContext("2d");
+        if (!contexto) {
+          throw new Error("El navegador no pudo preparar la foto de perfil.");
+        }
+        contexto.drawImage(
+          imagen,
+          inicioX,
+          inicioY,
+          ladoOrigen,
+          ladoOrigen,
+          0,
+          0,
+          lado,
+          lado
+        );
+        for (const calidad of [0.82, 0.72, 0.62, 0.52]) {
+          const blob = await new Promise(resolver =>
+            lienzo.toBlob(resolver, "image/webp", calidad)
+          );
+          if (blob && blob.size <= TAMANO_MAXIMO_FOTO_PERFIL) {
+            return leerArchivoComoDataUrl(blob);
+          }
+        }
+      }
+      throw new Error("No se pudo comprimir la foto de perfil a menos de 120 KB.");
+    }
+
+    async function obtenerFotoPerfilEditor(tipo) {
+      const estado = estadoFotoPerfil[tipo];
+      if (estado.eliminada) return "";
+      const entrada = document.getElementById(
+        `fotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`
+      );
+      const archivo = entrada.files?.[0];
+      return archivo
+        ? comprimirFotoPerfil(archivo, estado)
+        : estado.original;
+    }
+
+    inicializarEditoresFotoPerfil();
+
     async function guardarAsistencia() {
       const salon = document.getElementById("salon").value;
       const fecha = document.getElementById("fecha").value;
@@ -4980,7 +5841,9 @@ async function cargarDatosDesdeAPI() {
           const presente = document.getElementById(`asistencia-${id}`).checked;
           const liderRelacionado = tipoReunion === "Reunión con el pastor"
             ? obtenerLiderRelacionadoPastor(nombre)
-            : null;
+            : tipoReunion === "Discipulado Virtual"
+              ? obtenerLiderVirtual(nombre)
+              : null;
 
           return {
             Fecha: fecha,
@@ -5039,11 +5902,25 @@ async function cargarDatosDesdeAPI() {
         );
 
         if (sincronizada) {
-          actualizarEstado("");
+          let errorEstadoLideres = null;
+          try {
+            await actualizarEstadosAutomaticosInactividad();
+          } catch (error) {
+            errorEstadoLideres = error;
+            console.error(
+              "La asistencia se guardó, pero no se pudieron actualizar los estados automáticos por faltas.",
+              error
+            );
+          }
+          actualizarEstado(errorEstadoLideres
+            ? "La asistencia se guardó, pero no se pudo guardar el cambio de estado por faltas."
+            : "");
           mostrarExito(
-            archivo
-              ? `La asistencia y el archivo multimedia "${archivo.name}" se guardaron correctamente en Firebase.`
-              : "Asistencia guardada correctamente.",
+            errorEstadoLideres
+              ? "La asistencia se guardó, pero no se pudo actualizar el estado del líder. Revise sus permisos de escritura en Firebase."
+              : archivo
+                ? `La asistencia y el archivo multimedia "${archivo.name}" se guardaron correctamente en Firebase.`
+                : "Asistencia guardada correctamente.",
             true
           );
         } else {
@@ -5774,10 +6651,12 @@ let ninoPendiente = null;
       document.getElementById("bautizadoNinoModal").checked = datosLider.bautizado;
       document.getElementById("encuentroNinoModal").checked = datosLider.encuentro;
       document.getElementById("doctrinaNinoModal").value = datosLider.doctrina;
+      document.getElementById("fotoPerfilNinoModal").value = "";
+      mostrarFotoPerfilEditor("Modal", datosLider.fotoPerfil);
       document.getElementById("modalNombreNino").classList.remove("oculto");
     }
 
-    function guardarNombreNino() {
+    async function guardarNombreNino() {
       if (!ninoPendiente) {
         return;
       }
@@ -5812,6 +6691,14 @@ let ninoPendiente = null;
       const nombreAnterior = lista[ninoPendiente.indice];
       const claveAnterior = claveLider(salon, nombreAnterior);
       const datosAnteriores = lideresDatos[claveAnterior] || {};
+      let nuevaFotoPerfil;
+      try {
+        nuevaFotoPerfil = await obtenerFotoPerfilEditor("Modal");
+      } catch (error) {
+        console.error("No se pudo preparar la foto de perfil.", error);
+        alert(error.message || "No se pudo preparar la foto de perfil.");
+        return;
+      }
       const indiceDestino = salon === "Pastor"
         ? -1
         : lista.findIndex((nombre, indice) =>
@@ -5829,7 +6716,8 @@ let ninoPendiente = null;
         estado: datosAnteriores.estado || "Inactivo",
         bautizado: leerBooleanoLider(datosAnteriores.bautizado),
         encuentro: leerBooleanoLider(datosAnteriores.encuentro),
-        doctrina: datosAnteriores.doctrina || ""
+        doctrina: datosAnteriores.doctrina || "",
+        fotoPerfil: datosAnteriores.fotoPerfil || ""
       };
       const destinoAntes = {
         cumpleanos: normalizarCumpleanos(datosDestino.cumpleanos),
@@ -5838,7 +6726,8 @@ let ninoPendiente = null;
         estado: datosDestino.estado || "Inactivo",
         bautizado: leerBooleanoLider(datosDestino.bautizado),
         encuentro: leerBooleanoLider(datosDestino.encuentro),
-        doctrina: datosDestino.doctrina || ""
+        doctrina: datosDestino.doctrina || "",
+        fotoPerfil: datosDestino.fotoPerfil || ""
       };
       const camposEditados = {
         cumpleanos: nuevoCumpleanos,
@@ -5847,7 +6736,8 @@ let ninoPendiente = null;
         estado: nuevoEstado,
         bautizado: nuevoBautizado,
         encuentro: nuevoEncuentro,
-        doctrina: nuevaDoctrina
+        doctrina: nuevaDoctrina,
+        fotoPerfil: nuevaFotoPerfil
       };
       const datosCombinados = Object.fromEntries(
         Object.keys(camposEditados).map(campo => [
@@ -5864,6 +6754,17 @@ let ninoPendiente = null;
         ...(datosDestino.nombresAnteriores || []),
         ...(nombreAnterior === nombreDestino ? [] : [nombreAnterior])
       ].map(nombre => [normalizarNombreLider(nombre), nombre])).values()];
+      const reactivadoManualmente =
+        nuevoEstado === "Activo" && datosAnteriores.estado !== "Activo";
+      const fechaReactivacion = reactivadoManualmente
+        ? obtenerUltimaFechaAsistenciaLider(
+            salon,
+            nombreAnterior,
+            datosAnteriores
+          )
+        : datosAnteriores.fechaReactivacion ||
+          datosDestino.fechaReactivacion ||
+          "";
 
       if (indiceDestino >= 0) {
         lista.splice(ninoPendiente.indice, 1);
@@ -5874,6 +6775,11 @@ let ninoPendiente = null;
       lideresDatos[claveLider(salon, nombreDestino)] = {
         ...datosDestino,
         ...datosCombinados,
+        fechaReactivacion,
+        inactivoPorFaltas: reactivadoManualmente
+          ? false
+          : datosAnteriores.inactivoPorFaltas === true ||
+            datosDestino.inactivoPorFaltas === true,
         nombresAnteriores,
         ...(salon === "Pastor" && datosAnteriores.salonOrigen
           ? { salonOrigen: datosAnteriores.salonOrigen }
@@ -5932,6 +6838,7 @@ let ninoPendiente = null;
       }
       cerrarModal("modalNombreNino");
       ninoPendiente = null;
+      reiniciarFotoPerfilEditor("Modal");
       mostrarAsistencia();
       if (indiceDestino >= 0) {
         mostrarExito(
@@ -6644,6 +7551,9 @@ function cerrarModal(id) {
   }
   perfilAportesActual = null;
   usuarioActual = null;
+  cumpleanosCompartidos = [];
+  cumpleanosCompartidosCargados = false;
+  errorCargaCumpleanos = null;
   usuarios = {};
   cargaFirebaseCompleta = false;
   limpiarDatosEnCache();
@@ -6682,132 +7592,5 @@ function cerrarModal(id) {
 }
   </script>
 
-
-<style>
-  .boton-icono-barra.oculto { display: none !important; }
-</style>
-<script>
-const HOJA_CUMPLEANOS = "CumpleanosPorZona";
-let cumpleanosCompartidos = [];
-let cumpleanosCompartidosCargados = false;
-
-function normalizarFilasCumpleanosCompartidos(filas) {
-  return Object.values(filas || {})
-    .filter(fila => fila && typeof fila.Nombre === "string")
-    .map(fila => ({
-      Nombre: fila.Nombre,
-      Cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos)
-    }))
-    .filter(fila => fila.Cumpleanos)
-    .sort((a, b) => a.Nombre.localeCompare(b.Nombre, "es"));
-}
-
-async function sincronizarIndiceCumpleanosCompartidos(firebase, filasPorZona) {
-  const ruta = HOJA_CUMPLEANOS;
-  const resultado = await firebase.get(firebase.ref(firebase.database, ruta));
-  const indiceActual = resultado.exists() ? resultado.val() : {};
-  await Promise.all(Object.entries(filasPorZona).map(async ([zona, filas]) => {
-    const personas = normalizarFilasCumpleanosCompartidos(filas);
-    const anteriores = normalizarFilasCumpleanosCompartidos(indiceActual[zona]?.personas);
-    if (indiceActual[zona]?.actualizado === true &&
-        JSON.stringify(anteriores) === JSON.stringify(personas)) return;
-    const personasPorIndice = Object.fromEntries(personas.map((persona, indice) =>
-      [String(indice), persona]
-    ));
-    await firebase.set(
-      firebase.ref(firebase.database, ruta + "/" + zona),
-      { actualizado: true, personas: personasPorIndice }
-    );
-  }));
-}
-
-async function cargarIndiceCumpleanosCompartidos(firebase) {
-  if (usuarioActual?.rol === "Administrador") {
-    const filas = filasDeNinos();
-    const filasPorZona = Object.fromEntries(ZONAS.map(zona => [
-      zona,
-      filas.filter(fila => fila.Salon === zona)
-    ]));
-    filasPorZona.Pastor = filasDeLideresPastor().filter(fila =>
-      !obtenerLiderRelacionadoPastor(fila.Nombre)
-    );
-    await sincronizarIndiceCumpleanosCompartidos(firebase, filasPorZona);
-  }
-
-  const resultado = await firebase.get(
-    firebase.ref(firebase.database, HOJA_CUMPLEANOS)
-  );
-  const indice = resultado.exists() ? resultado.val() : {};
-  cumpleanosCompartidos = Object.entries(indice).flatMap(([salon, grupo]) =>
-    grupo?.actualizado === true
-      ? normalizarFilasCumpleanosCompartidos(grupo.personas).map(persona => ({
-          nombre: persona.Nombre,
-          salon: salon === "Pastor" ? "Líderes" : salon,
-          fecha: persona.Cumpleanos
-        }))
-      : []
-  );
-  cumpleanosCompartidosCargados = true;
-}
-
-const cargarDatosDesdeAPICumpleanosOriginal = cargarDatosDesdeAPI;
-cargarDatosDesdeAPI = async function(...args) {
-  await cargarDatosDesdeAPICumpleanosOriginal(...args);
-  try {
-    const firebase = await window.firebaseReady;
-    await cargarIndiceCumpleanosCompartidos(firebase);
-    mostrarCintaCumpleanos();
-  } catch (error) {
-    cumpleanosCompartidos = [];
-    cumpleanosCompartidosCargados = false;
-    console.error("No se pudieron cargar los cumpleaños compartidos.", error);
-    alert("No se pudieron cargar los cumpleaños de todas las zonas. Verifique las reglas de Firebase para CumpleanosPorZona.");
-  }
-};
-
-const reemplazarHojaCumpleanosOriginal = reemplazarHoja;
-reemplazarHoja = async function(nombreHoja, filas, ...args) {
-  const resultado = await reemplazarHojaCumpleanosOriginal(nombreHoja, filas, ...args);
-  if (nombreHoja !== HOJAS.ninos && nombreHoja !== HOJAS.lideresPastor) return resultado;
-  try {
-    const filasPorZona = nombreHoja === HOJAS.lideresPastor
-      ? { Pastor: filas.filter(fila => !obtenerLiderRelacionadoPastor(fila.Nombre)) }
-      : usuarioActual?.rol === "Facilitador"
-        ? { [usuarioActual.salon]: filas }
-        : Object.fromEntries(ZONAS.map(zona => [
-            zona,
-            filas.filter(fila => fila.Salon === zona)
-          ]));
-    const firebase = await window.firebaseReady;
-    await sincronizarIndiceCumpleanosCompartidos(firebase, filasPorZona);
-    if (cumpleanosCompartidosCargados) {
-      await cargarIndiceCumpleanosCompartidos(firebase);
-      mostrarCintaCumpleanos();
-    }
-  } catch (error) {
-    console.error("Los líderes se guardaron, pero no se actualizó el índice compartido de cumpleaños.", error);
-    alert("Los líderes se guardaron, pero no se pudo actualizar el calendario compartido. Verifique las reglas de Firebase para CumpleanosPorZona.");
-  }
-  return resultado;
-};
-
-const obtenerCumpleanosSemanaOriginal = obtenerCumpleanosDeLaSemana;
-obtenerCumpleanosDeLaSemana = function() {
-  if (!cumpleanosCompartidosCargados) return obtenerCumpleanosSemanaOriginal();
-  return cumpleanosCompartidos
-    .filter(persona => cumpleanosEstaSemana(persona.fecha))
-    .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.nombre.localeCompare(b.nombre, "es"));
-};
-
-const obtenerTodosCumpleanosOriginal = obtenerTodosLosCumpleanos;
-obtenerTodosLosCumpleanos = function() {
-  if (!cumpleanosCompartidosCargados) return obtenerTodosCumpleanosOriginal();
-  return cumpleanosCompartidos.map(persona => ({
-    nombre: persona.nombre,
-    salon: persona.salon,
-    datos: { cumpleanos: persona.fecha, sector: "" }
-  }));
-};
-</script>
 </body>
 </html>
