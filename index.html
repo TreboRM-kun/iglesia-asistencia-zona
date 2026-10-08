@@ -2001,7 +2001,7 @@ function limpiarDatosEnCache() {
   ].forEach(clave => localStorage.removeItem(clave));
 }
 
-function normalizarNombreLider(nombre) {
+function guardarAsistenciasEnCacheLocal() {   try {     localStorage.setItem(       "asistenciasIglesiaRedencion",       JSON.stringify(asistencias)     );   } catch (error) {     const esLimiteDeAlmacenamiento =       error?.name === "QuotaExceededError" ||       error?.name === "NS_ERROR_DOM_QUOTA_REACHED" ||       error?.code === 22 ||       error?.code === 1014;     if (!esLimiteDeAlmacenamiento) throw error;      console.warn(       "El historial excede el espacio local disponible; se omitirá su caché local y se conservará en memoria.",       error     );     localStorage.removeItem("asistenciasIglesiaRedencion");   } }  function normalizarNombreLider(nombre) {
   return String(nombre || "")
     .trim()
     .normalize("NFD")
@@ -2217,7 +2217,7 @@ function migrarAsistenciasDeLider(salon, nombresAnteriores, nombreActual) {
   const cambio = JSON.stringify(resultado) !== JSON.stringify(asistencias);
   if (cambio) {
     asistencias = resultado;
-    localStorage.setItem("asistenciasIglesiaRedencion", JSON.stringify(asistencias));
+    guardarAsistenciasEnCacheLocal();
   }
   return cambio;
 }
@@ -3107,15 +3107,12 @@ async function cargarDatosDesdeAPI() {
 
     if (filasAsistencias.length) {
       asistencias = filasAsistencias;
-      localStorage.setItem(
-        "asistenciasIglesiaRedencion",
-        JSON.stringify(asistencias)
-      );
+      guardarAsistenciasEnCacheLocal();
       asistencias = asistencias.map(fila => ({
         ...fila,
         Salon: fila.Salon === "Zona 7" ? "Virtual" : fila.Salon
       }));
-      localStorage.setItem("asistenciasIglesiaRedencion", JSON.stringify(asistencias));
+      guardarAsistenciasEnCacheLocal();
     }
 
     if (!filasNinos.length && filasVirtuales.length) {
@@ -5030,10 +5027,7 @@ async function cargarDatosDesdeAPI() {
         asistencias = aplicarAsistenciasVirtualesADN(asistencias, asistenciasADN);
         asistencias.push(...filasAsistencia);
         asistencias = compactarMediaAsistencias(asistencias);
-        localStorage.setItem(
-          "asistenciasIglesiaRedencion",
-          JSON.stringify(asistencias)
-        );
+        guardarAsistenciasEnCacheLocal();
 
         actualizarEstado("Asistencia guardada en este navegador. Sincronizando con Firebase...");
         const sincronizada = await sincronizarAsistencias(
@@ -5133,10 +5127,7 @@ async function cargarDatosDesdeAPI() {
         }]);
       }
 
-      localStorage.setItem(
-        "asistenciasIglesiaRedencion",
-        JSON.stringify(asistencias)
-      );
+      guardarAsistenciasEnCacheLocal();
 
       try {
         const filasActuales = await leerHoja(HOJAS.asistencias);
