@@ -1,4 +1,4 @@
-const CACHE_NAME = "iglesia-redencion-v25";
+const CACHE_NAME = "iglesia-redencion-v27";
 const APP_FILES = [
   "./",
   "./index.html",

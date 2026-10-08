@@ -1915,7 +1915,6 @@
         accept="image/jpeg,image/png,image/webp" aria-label="Elegir foto de perfil">
       <button id="quitarFotoPerfilNinoModal" type="button"
         onclick="quitarFotoPerfilEditor('Modal')">Quitar foto</button>
-      <small>Haz clic en el círculo para elegir la foto. Arrástrala para centrarla; se recortará en círculo y se comprimirá al guardar.</small>
     </div>
 
     <input id="nombreNinoModal"
@@ -5563,7 +5562,7 @@ async function cargarDatosDesdeAPI() {
       });
     }
 
-    const TAMANO_MAXIMO_FOTO_PERFIL = 120 * 1024;
+    const TAMANO_MAXIMO_FOTO_PERFIL = 512 * 1024;
     const TAMANO_MAXIMO_ORIGINAL_FOTO_PERFIL = 25 * 1024 * 1024;
     const estadoFotoPerfil = {
       Modal: { imagen: null, url: "", original: "", eliminada: false, x: 0.5, y: 0.5 }
@@ -5771,7 +5770,7 @@ async function cargarDatosDesdeAPI() {
       const ladoOrigen = Math.min(imagen.naturalWidth, imagen.naturalHeight);
       const inicioX = (imagen.naturalWidth - ladoOrigen) * posicion.x;
       const inicioY = (imagen.naturalHeight - ladoOrigen) * posicion.y;
-      for (const lado of [384, 320, 256]) {
+      for (const lado of [1024, 896, 768]) {
         const lienzo = document.createElement("canvas");
         lienzo.width = lado;
         lienzo.height = lado;
@@ -5790,7 +5789,7 @@ async function cargarDatosDesdeAPI() {
           lado,
           lado
         );
-        for (const calidad of [0.82, 0.72, 0.62, 0.52]) {
+        for (const calidad of [0.9, 0.82, 0.74, 0.66, 0.58]) {
           const blob = await new Promise(resolver =>
             lienzo.toBlob(resolver, "image/webp", calidad)
           );
@@ -5799,7 +5798,7 @@ async function cargarDatosDesdeAPI() {
           }
         }
       }
-      throw new Error("No se pudo comprimir la foto de perfil a menos de 120 KB.");
+      throw new Error("No se pudo comprimir la foto de perfil a menos de 512 KB.");
     }
 
     async function obtenerFotoPerfilEditor(tipo) {
