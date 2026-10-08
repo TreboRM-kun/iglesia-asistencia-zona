@@ -6691,5 +6691,132 @@ function cerrarModal(id) {
 }
   </script>
 
+
+<style>
+  .boton-icono-barra.oculto { display: none !important; }
+</style>
+<script>
+const HOJA_CUMPLEANOS = "CumpleanosPorZona";
+let cumpleanosCompartidos = [];
+let cumpleanosCompartidosCargados = false;
+
+function normalizarFilasCumpleanosCompartidos(filas) {
+  return Object.values(filas || {})
+    .filter(fila => fila && typeof fila.Nombre === "string")
+    .map(fila => ({
+      Nombre: fila.Nombre,
+      Cumpleanos: normalizarCumpleanos(fila.Cumpleanos || fila.cumpleanos)
+    }))
+    .filter(fila => fila.Cumpleanos)
+    .sort((a, b) => a.Nombre.localeCompare(b.Nombre, "es"));
+}
+
+async function sincronizarIndiceCumpleanosCompartidos(firebase, filasPorZona) {
+  const ruta = HOJA_CUMPLEANOS;
+  const resultado = await firebase.get(firebase.ref(firebase.database, ruta));
+  const indiceActual = resultado.exists() ? resultado.val() : {};
+  await Promise.all(Object.entries(filasPorZona).map(async ([zona, filas]) => {
+    const personas = normalizarFilasCumpleanosCompartidos(filas);
+    const anteriores = normalizarFilasCumpleanosCompartidos(indiceActual[zona]?.personas);
+    if (indiceActual[zona]?.actualizado === true &&
+        JSON.stringify(anteriores) === JSON.stringify(personas)) return;
+    const personasPorIndice = Object.fromEntries(personas.map((persona, indice) =>
+      [String(indice), persona]
+    ));
+    await firebase.set(
+      firebase.ref(firebase.database, ruta + "/" + zona),
+      { actualizado: true, personas: personasPorIndice }
+    );
+  }));
+}
+
+async function cargarIndiceCumpleanosCompartidos(firebase) {
+  if (usuarioActual?.rol === "Administrador") {
+    const filas = filasDeNinos();
+    const filasPorZona = Object.fromEntries(ZONAS.map(zona => [
+      zona,
+      filas.filter(fila => fila.Salon === zona)
+    ]));
+    filasPorZona.Pastor = filasDeLideresPastor().filter(fila =>
+      !obtenerLiderRelacionadoPastor(fila.Nombre)
+    );
+    await sincronizarIndiceCumpleanosCompartidos(firebase, filasPorZona);
+  }
+
+  const resultado = await firebase.get(
+    firebase.ref(firebase.database, HOJA_CUMPLEANOS)
+  );
+  const indice = resultado.exists() ? resultado.val() : {};
+  cumpleanosCompartidos = Object.entries(indice).flatMap(([salon, grupo]) =>
+    grupo?.actualizado === true
+      ? normalizarFilasCumpleanosCompartidos(grupo.personas).map(persona => ({
+          nombre: persona.Nombre,
+          salon: salon === "Pastor" ? "Líderes" : salon,
+          fecha: persona.Cumpleanos
+        }))
+      : []
+  );
+  cumpleanosCompartidosCargados = true;
+}
+
+const cargarDatosDesdeAPICumpleanosOriginal = cargarDatosDesdeAPI;
+cargarDatosDesdeAPI = async function(...args) {
+  await cargarDatosDesdeAPICumpleanosOriginal(...args);
+  try {
+    const firebase = await window.firebaseReady;
+    await cargarIndiceCumpleanosCompartidos(firebase);
+    mostrarCintaCumpleanos();
+  } catch (error) {
+    cumpleanosCompartidos = [];
+    cumpleanosCompartidosCargados = false;
+    console.error("No se pudieron cargar los cumpleaños compartidos.", error);
+    alert("No se pudieron cargar los cumpleaños de todas las zonas. Verifique las reglas de Firebase para CumpleanosPorZona.");
+  }
+};
+
+const reemplazarHojaCumpleanosOriginal = reemplazarHoja;
+reemplazarHoja = async function(nombreHoja, filas, ...args) {
+  const resultado = await reemplazarHojaCumpleanosOriginal(nombreHoja, filas, ...args);
+  if (nombreHoja !== HOJAS.ninos && nombreHoja !== HOJAS.lideresPastor) return resultado;
+  try {
+    const filasPorZona = nombreHoja === HOJAS.lideresPastor
+      ? { Pastor: filas.filter(fila => !obtenerLiderRelacionadoPastor(fila.Nombre)) }
+      : usuarioActual?.rol === "Facilitador"
+        ? { [usuarioActual.salon]: filas }
+        : Object.fromEntries(ZONAS.map(zona => [
+            zona,
+            filas.filter(fila => fila.Salon === zona)
+          ]));
+    const firebase = await window.firebaseReady;
+    await sincronizarIndiceCumpleanosCompartidos(firebase, filasPorZona);
+    if (cumpleanosCompartidosCargados) {
+      await cargarIndiceCumpleanosCompartidos(firebase);
+      mostrarCintaCumpleanos();
+    }
+  } catch (error) {
+    console.error("Los líderes se guardaron, pero no se actualizó el índice compartido de cumpleaños.", error);
+    alert("Los líderes se guardaron, pero no se pudo actualizar el calendario compartido. Verifique las reglas de Firebase para CumpleanosPorZona.");
+  }
+  return resultado;
+};
+
+const obtenerCumpleanosSemanaOriginal = obtenerCumpleanosDeLaSemana;
+obtenerCumpleanosDeLaSemana = function() {
+  if (!cumpleanosCompartidosCargados) return obtenerCumpleanosSemanaOriginal();
+  return cumpleanosCompartidos
+    .filter(persona => cumpleanosEstaSemana(persona.fecha))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.nombre.localeCompare(b.nombre, "es"));
+};
+
+const obtenerTodosCumpleanosOriginal = obtenerTodosLosCumpleanos;
+obtenerTodosLosCumpleanos = function() {
+  if (!cumpleanosCompartidosCargados) return obtenerTodosCumpleanosOriginal();
+  return cumpleanosCompartidos.map(persona => ({
+    nombre: persona.nombre,
+    salon: persona.salon,
+    datos: { cumpleanos: persona.fecha, sector: "" }
+  }));
+};
+</script>
 </body>
 </html>
