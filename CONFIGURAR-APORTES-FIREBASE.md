@@ -25,6 +25,12 @@ Cada facilitador puede leer y actualizar únicamente el hijo correspondiente a s
 
 Los datos se migraron a las cuatro rutas nuevas y se conservó la exportación original como respaldo privado. La migración validada conservó los 174 líderes, 361 asistencias, 8 facilitadores y 8 registros de discipulado virtual. Las asistencias virtuales se repartieron según su zona de origen cuando existe; las que no tienen zona quedaron bajo `Virtual`. El script `migrar-datos-por-zona.py` queda disponible para futuras migraciones.
 
+## Cumpleaños visibles para todas las zonas
+
+El calendario y la cinta semanal leen el índice `CumpleanosPorZona`, que solo contiene nombres y fechas de cumpleaños separados por zona. Los usuarios autenticados con un perfil de la aplicación pueden consultarlo sin obtener acceso a los demás datos privados de otras zonas. Al iniciar sesión, un administrador completa el índice con los cumpleaños existentes; los cambios posteriores en líderes y cumpleaños actualizan las zonas correspondientes.
+
+Publique las reglas de `database.rules.json` en Firebase y luego inicie sesión una vez como administrador para cargar los cumpleaños existentes. Si Firebase no permite leer o actualizar el índice, la aplicación avisa en pantalla.
+
 Si se vuelve a ejecutar una migración, guarde tanto la exportación como el resultado en una ubicación privada:
 
 ```powershell
