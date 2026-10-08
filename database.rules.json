@@ -10,6 +10,14 @@
         ".write": "auth != null && ((root.child('Perfiles').child(auth.uid).child('rol').val() == 'Facilitador' && $zona != 'Virtual' && $zona != 'Pastor' && root.child('Perfiles').child(auth.uid).child('salon').val() == $zona) || root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador')"
       }
     },
+    "CumpleanosPorZona": {
+      ".read": "auth != null && root.child('Perfiles').child(auth.uid).exists()",
+      ".write": false,
+      "$zona": {
+        ".read": "auth != null && root.child('Perfiles').child(auth.uid).exists()",
+        ".write": "auth != null && (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador' || ($zona != 'Pastor' && $zona != 'Virtual' && root.child('Perfiles').child(auth.uid).child('rol').val() == 'Facilitador' && root.child('Perfiles').child(auth.uid).child('salon').val() == $zona))"
+      }
+    },
     "AsistenciasPorZona": {
       ".read": "auth != null && (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador' || root.child('Perfiles').child(auth.uid).child('rol').val() == 'Supervisor')",
       ".write": "auth != null && (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador' || root.child('Perfiles').child(auth.uid).child('rol').val() == 'Supervisor')",
