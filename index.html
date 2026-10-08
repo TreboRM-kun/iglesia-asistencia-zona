@@ -777,6 +777,10 @@
   max-width: 1100px;
 }
 
+.ventana-detalle-cumpleanos {
+  max-width: 680px;
+}
+
 .ventana-anuncios {
   max-width: 1100px;
 }
@@ -1009,7 +1013,6 @@
 }
 
 .detalle-dia-cumpleanos {
-  margin-top: 18px;
   padding: 16px;
   border: 1px solid #b89a58;
   border-radius: 8px;
@@ -1076,6 +1079,11 @@
   touch-action: none;
 }
 
+.foto-perfil-recorte:focus-visible {
+  outline: 3px solid #6e1f2a;
+  outline-offset: 4px;
+}
+
 .foto-perfil-recorte:active {
   cursor: grabbing;
 }
@@ -1099,8 +1107,7 @@
 }
 
 .foto-perfil-editor input[type="file"] {
-  max-width: 100%;
-  font-size: 13px;
+  display: none;
 }
 
 .foto-perfil-editor small {
@@ -1588,16 +1595,6 @@
         role="listbox" aria-label="Líderes de las zonas"></div>
       </div>
 
-      <div class="foto-perfil-editor">
-        <label for="fotoPerfilNino">Foto de perfil (opcional)</label>
-        <div id="recorteFotoPerfilNino" class="foto-perfil-recorte"
-          role="img" aria-label="Vista previa de la foto; arrastre para centrarla">
-          <span class="avatar-perfil-placeholder"></span>
-        </div>
-        <input id="fotoPerfilNino" type="file" accept="image/jpeg,image/png,image/webp">
-        <small>Arrastre la imagen para centrarla. Se recortará en círculo y se comprimirá al guardar.</small>
-      </div>
-
       <label for="cumpleanosNino">Cumpleaños:</label>
       <input id="cumpleanosNino" type="text" inputmode="numeric"
         placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
@@ -1847,7 +1844,15 @@
       </div>
 
       <div id="calendarioCumpleanos"></div>
-      <div id="detalleDiaCumpleanos"></div>
+    </div>
+  </div>
+
+  <div id="modalDetalleCumpleanos" class="modal oculto"
+    onclick="if (event.target === this) cerrarModal('modalDetalleCumpleanos')">
+    <div class="ventana-usuarios ventana-detalle-cumpleanos">
+      <button class="cerrar-modal" onclick="cerrarModal('modalDetalleCumpleanos')"
+        aria-label="Cerrar detalle de cumpleaños">×</button>
+      <div id="contenidoDetalleCumpleanos"></div>
     </div>
   </div>
 
@@ -1901,15 +1906,16 @@
     <p id="nombreNinoCambioTexto"></p>
 
     <div class="foto-perfil-editor">
-      <label for="fotoPerfilNinoModal">Foto de perfil</label>
       <div id="recorteFotoPerfilNinoModal" class="foto-perfil-recorte"
-        role="img" aria-label="Vista previa de la foto; arrastre para centrarla">
+        role="button" tabindex="0" aria-label="Elegir o cambiar foto de perfil"
+        title="Haz clic para elegir o cambiar la foto">
         <span class="avatar-perfil-placeholder"></span>
       </div>
-      <input id="fotoPerfilNinoModal" type="file" accept="image/jpeg,image/png,image/webp">
+      <input id="fotoPerfilNinoModal" type="file"
+        accept="image/jpeg,image/png,image/webp" aria-label="Elegir foto de perfil">
       <button id="quitarFotoPerfilNinoModal" type="button"
         onclick="quitarFotoPerfilEditor('Modal')">Quitar foto</button>
-      <small>Arrastre la imagen para centrarla. Se recortará en círculo y se comprimirá al guardar.</small>
+      <small>Haz clic en el círculo para elegir la foto. Arrástrala para centrarla; se recortará en círculo y se comprimirá al guardar.</small>
     </div>
 
     <input id="nombreNinoModal"
@@ -4732,23 +4738,52 @@ async function cargarDatosDesdeAPI() {
 
     function cambiarMesCalendarioCumpleanos() {
       diaCumpleanosSeleccionado = "";
+      cerrarModal("modalDetalleCumpleanos");
       mostrarCalendarioCumpleanos();
     }
 
     function seleccionarDiaCumpleanos(fecha) {
-      diaCumpleanosSeleccionado =
-        diaCumpleanosSeleccionado === fecha ? "" : fecha;
+      const cumpleanosDelDia = obtenerTodosLosCumpleanos().filter(persona =>
+        persona.datos.cumpleanos === fecha.slice(5)
+      );
+      if (!cumpleanosDelDia.length) {
+        diaCumpleanosSeleccionado = "";
+        cerrarModal("modalDetalleCumpleanos");
+        document.getElementById("contenidoDetalleCumpleanos").replaceChildren();
+        mostrarCalendarioCumpleanos();
+        return;
+      }
+
+      diaCumpleanosSeleccionado = fecha;
       mostrarCalendarioCumpleanos();
+      const personaFecha = new Date(`${fecha}T00:00:00`);
+      const fechaTexto = personaFecha.toLocaleDateString("es", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+      });
+      document.getElementById("contenidoDetalleCumpleanos").innerHTML = `
+        <section class="detalle-dia-cumpleanos" aria-live="polite">
+          <h3>Cumpleaños del ${escaparTexto(fechaTexto)}</h3>
+          <div class="lista-detalle-cumpleanos">
+            ${cumpleanosDelDia.map(persona => `
+              <article class="persona-detalle-cumpleanos">
+                ${avatarLiderHtml(persona.datos.fotoPerfil, persona.nombre, "avatar-detalle-cumpleanos")}
+                <span><strong>${escaparTexto(persona.nombre)}</strong><br>${escaparTexto(persona.salon)}</span>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `;
+      document.getElementById("modalDetalleCumpleanos").classList.remove("oculto");
     }
 
     function mostrarCalendarioCumpleanos() {
       const mesTexto = document.getElementById("mesCumpleanos").value;
       const calendario = document.getElementById("calendarioCumpleanos");
-      const detalleDia = document.getElementById("detalleDiaCumpleanos");
 
       if (!mesTexto) {
         calendario.innerHTML = "";
-        detalleDia.innerHTML = "";
         return;
       }
 
@@ -4829,34 +4864,6 @@ async function cargarDatosDesdeAPI() {
 
       html += "</div>";
       calendario.innerHTML = html;
-      const personaFecha = diaCumpleanosSeleccionado
-        ? new Date(`${diaCumpleanosSeleccionado}T00:00:00`)
-        : null;
-      const fechaTexto = personaFecha
-        ? personaFecha.toLocaleDateString("es", {
-            weekday: "long",
-            day: "numeric",
-            month: "long"
-          })
-        : "";
-      const cumpleanosDelDia = diaCumpleanosSeleccionado
-        ? porDia[diaCumpleanosSeleccionado.slice(5)] || []
-        : [];
-      detalleDia.innerHTML = diaCumpleanosSeleccionado ? `
-        <section class="detalle-dia-cumpleanos" aria-live="polite">
-          <h3>Cumpleaños del ${escaparTexto(fechaTexto)}</h3>
-          ${cumpleanosDelDia.length ? `
-            <div class="lista-detalle-cumpleanos">
-              ${cumpleanosDelDia.map(persona => `
-                <article class="persona-detalle-cumpleanos">
-                  ${avatarLiderHtml(persona.datos.fotoPerfil, persona.nombre, "avatar-detalle-cumpleanos")}
-                  <span><strong>${escaparTexto(persona.nombre)}</strong><br>${escaparTexto(persona.salon)}</span>
-                </article>
-              `).join("")}
-            </div>
-          ` : "<p>No hay cumpleaños registrados para este día.</p>"}
-        </section>
-      ` : "";
     }
 
     function abrirCalendarioCumpleanos() {
@@ -4865,6 +4872,7 @@ async function cargarDatosDesdeAPI() {
       campoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
 
       diaCumpleanosSeleccionado = "";
+      cerrarModal("modalDetalleCumpleanos");
       mostrarCalendarioCumpleanos();
       document.getElementById("modalCumpleanos").classList.remove("oculto");
     }
@@ -5095,7 +5103,6 @@ async function cargarDatosDesdeAPI() {
         document.getElementById("bautizadoNino").checked = datos.bautizado;
         document.getElementById("encuentroNino").checked = datos.encuentro;
         document.getElementById("doctrinaNino").value = datos.doctrina;
-        mostrarFotoPerfilEditor("Nino", datos.fotoPerfil);
         mensaje.className = "mensaje";
         mensaje.textContent = reunionPastor
           ? `${nombreOrigen} pertenece a ${salon}. Sus datos se cargaron y se vinculará su asistencia con el resumen del líder.`
@@ -5161,19 +5168,7 @@ async function cargarDatosDesdeAPI() {
         mensaje.textContent = "Escriba el nombre del líder.";
         return;
       }
-      const archivoFotoPerfil = document.getElementById("fotoPerfilNino").files[0];
-      let fotoPerfil = "";
-      if (archivoFotoPerfil) {
-        try {
-          mensaje.textContent = "Comprimiendo la foto de perfil...";
-          fotoPerfil = await obtenerFotoPerfilEditor("Nino");
-        } catch (error) {
-          console.error("No se pudo preparar la foto de perfil.", error);
-          mensaje.className = "mensaje";
-          mensaje.textContent = error.message || "No se pudo preparar la foto.";
-          return;
-        }
-      }
+      const fotoPerfil = "";
       const liderSeleccionado = liderRelacionadoSeleccionado &&
           normalizarNombreLider(liderRelacionadoSeleccionado.nombre) ===
             normalizarNombreLider(nombre)
@@ -5273,7 +5268,6 @@ async function cargarDatosDesdeAPI() {
         document.getElementById("bautizadoNino").checked = false;
         document.getElementById("encuentroNino").checked = false;
         document.getElementById("doctrinaNino").value = "";
-        reiniciarFotoPerfilEditor("Nino");
         mensaje.className = "exito";
         mensaje.textContent = salonOrigen === "Virtual"
           ? `${nombreVirtual} fue agregado a Discipulado Virtual.`
@@ -5373,7 +5367,6 @@ async function cargarDatosDesdeAPI() {
       document.getElementById("bautizadoNino").checked = false;
       document.getElementById("encuentroNino").checked = false;
       document.getElementById("doctrinaNino").value = "";
-      reiniciarFotoPerfilEditor("Nino");
       mensaje.className = "exito";
       mensaje.textContent = liderZonaVinculado
         ? `${nombre} quedó vinculado a su ficha zonal y sus asistencias aparecerán en el resumen del líder.`
@@ -5573,7 +5566,6 @@ async function cargarDatosDesdeAPI() {
     const TAMANO_MAXIMO_FOTO_PERFIL = 120 * 1024;
     const TAMANO_MAXIMO_ORIGINAL_FOTO_PERFIL = 25 * 1024 * 1024;
     const estadoFotoPerfil = {
-      Nino: { imagen: null, url: "", original: "", eliminada: false, x: 0.5, y: 0.5 },
       Modal: { imagen: null, url: "", original: "", eliminada: false, x: 0.5, y: 0.5 }
     };
 
@@ -5683,12 +5675,23 @@ async function cargarDatosDesdeAPI() {
       contenedor.addEventListener("pointerdown", evento => {
         const estado = estadoFotoPerfil[tipo];
         if (!estado.imagen || !estado.url) return;
-        puntero = { id: evento.pointerId, x: evento.clientX, y: evento.clientY };
+        puntero = {
+          id: evento.pointerId,
+          x: evento.clientX,
+          y: evento.clientY,
+          movido: false
+        };
         contenedor.setPointerCapture(evento.pointerId);
         evento.preventDefault();
       });
       contenedor.addEventListener("pointermove", evento => {
         if (!puntero || evento.pointerId !== puntero.id) return;
+        if (Math.hypot(
+          evento.clientX - puntero.x,
+          evento.clientY - puntero.y
+        ) > 3) {
+          puntero.movido = true;
+        }
         const estado = estadoFotoPerfil[tipo];
         const borde = contenedor.getBoundingClientRect();
         const escala = Math.max(
@@ -5714,18 +5717,37 @@ async function cargarDatosDesdeAPI() {
         }
       });
       ["pointerup", "pointercancel"].forEach(tipoEvento =>
-        contenedor.addEventListener(tipoEvento, () => { puntero = null; })
+        contenedor.addEventListener(tipoEvento, () => {
+          if (puntero?.movido) {
+            contenedor.dataset.ignoreClick = "true";
+            setTimeout(() => delete contenedor.dataset.ignoreClick, 0);
+          }
+          puntero = null;
+        })
       );
     }
 
     function inicializarEditoresFotoPerfil() {
-      ["Nino", "Modal"].forEach(tipo => {
-        const idEntrada = `fotoPerfilNino${tipo === "Modal" ? "Modal" : ""}`;
-        document.getElementById(idEntrada).addEventListener("change", evento =>
-          cargarFotoPerfilEditor(tipo, evento.target.files?.[0])
-        );
-        conectarArrastreFotoPerfil(tipo);
+      const tipo = "Modal";
+      const idEntrada = "fotoPerfilNinoModal";
+      const contenedor = document.getElementById("recorteFotoPerfilNinoModal");
+      document.getElementById(idEntrada).addEventListener("change", evento =>
+        cargarFotoPerfilEditor(tipo, evento.target.files?.[0])
+      );
+      contenedor.addEventListener("click", () => {
+        if (contenedor.dataset.ignoreClick === "true") {
+          delete contenedor.dataset.ignoreClick;
+          return;
+        }
+        document.getElementById(idEntrada).click();
       });
+      contenedor.addEventListener("keydown", evento => {
+        if (evento.key === "Enter" || evento.key === " ") {
+          evento.preventDefault();
+          document.getElementById(idEntrada).click();
+        }
+      });
+      conectarArrastreFotoPerfil(tipo);
     }
 
     async function comprimirFotoPerfil(archivo, posicion) {
@@ -7538,6 +7560,9 @@ async function verComprobanteAporte(uid, id) {
 
 function cerrarModal(id) {
   document.getElementById(id).classList.add("oculto");
+  if (id === "modalCumpleanos") {
+    document.getElementById("modalDetalleCumpleanos").classList.add("oculto");
+  }
 }
 
     async function cerrarSesion() {
