@@ -5914,46 +5914,48 @@ async function cargarDatosDesdeAPI() {
         guardarAsistenciasEnCacheLocal();
 
         actualizarEstado("Asistencia guardada en este navegador. Sincronizando con Firebase...");
-        const sincronizada = await sincronizarAsistencias(
-          fecha,
-          salonDatos,
-          tipoReunion,
-          filasAsistencia,
-          asistenciasADN
-        );
-
-        if (sincronizada) {
-          let errorEstadoLideres = null;
-          try {
-            await actualizarEstadosAutomaticosInactividad();
-          } catch (error) {
-            errorEstadoLideres = error;
-            console.error(
-              "La asistencia se guardó, pero no se pudieron actualizar los estados automáticos por faltas.",
-              error
-            );
-          }
-          actualizarEstado(errorEstadoLideres
-            ? "La asistencia se guardó, pero no se pudo guardar el cambio de estado por faltas."
-            : "");
-          mostrarExito(
-            errorEstadoLideres
-              ? "La asistencia se guardó, pero no se pudo actualizar el estado del líder. Revise sus permisos de escritura en Firebase."
-              : archivo
-                ? `La asistencia y el archivo multimedia "${archivo.name}" se guardaron correctamente en Firebase.`
-                : "Asistencia guardada correctamente.",
-            true
+        try {
+          await sincronizarAsistencias(
+            fecha,
+            salonDatos,
+            tipoReunion,
+            filasAsistencia,
+            asistenciasADN
           );
-        } else {
+        } catch (error) {
+          const detalle = [error?.code, error?.message]
+            .filter(Boolean)
+            .join(": ") || "Firebase no proporcionó detalles.";
           actualizarEstado(
-            "La asistencia quedó guardada en este navegador, pero no se pudo sincronizar con Firebase."
+            `La asistencia quedó guardada en este navegador, pero Firebase no pudo sincronizarla: ${detalle}`
           );
           mostrarExito(
-            archivo
-              ? `La asistencia y el archivo multimedia "${archivo.name}" quedaron guardados en este navegador, pero no se pudieron sincronizar con Firebase.`
-              : "Asistencia guardada en este navegador, pero no se pudo sincronizar en línea."
+            `La asistencia quedó guardada localmente, pero no se sincronizó con Firebase. Respuesta: ${detalle}`
+          );
+          return;
+        }
+
+        let errorEstadoLideres = null;
+        try {
+          await actualizarEstadosAutomaticosInactividad();
+        } catch (error) {
+          errorEstadoLideres = error;
+          console.error(
+            "La asistencia se guardó, pero no se pudieron actualizar los estados automáticos por faltas.",
+            error
           );
         }
+        actualizarEstado(errorEstadoLideres
+          ? "La asistencia se guardó, pero no se pudo guardar el cambio de estado por faltas."
+          : "");
+        mostrarExito(
+          errorEstadoLideres
+            ? "La asistencia se guardó, pero no se pudo actualizar el estado del líder. Revise sus permisos de escritura en Firebase."
+            : archivo
+              ? `La asistencia y el archivo multimedia "${archivo.name}" se guardaron correctamente en Firebase.`
+              : "Asistencia guardada correctamente.",
+          true
+        );
       } catch (error) {
         console.error("No se pudo guardar la asistencia.", error);
         actualizarEstado(
@@ -6085,7 +6087,7 @@ async function cargarDatosDesdeAPI() {
         return true;
       } catch (error) {
         console.error(error);
-        return false;
+        throw error;
       }
     }
 
