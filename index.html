@@ -1923,7 +1923,6 @@
             <option value="Zona 4">Zona 4</option>
             <option value="Zona 5">Zona 5</option>
             <option value="Zona 6">Zona 6</option>
-            <option value="">Todas las zonas</option>
           </select>
         </div>
 
@@ -8140,7 +8139,6 @@ function renderizarFilasAportes(filas, mostrarAcciones) {
       <td>${escaparTexto(registro.zona || "")}</td>
       <td>${escaparTexto(registro.referencia || "")}</td>
       <td>${Number(registro.monto).toFixed(2)}${comprobante}</td>
-      <td>${escaparTexto(registro.usuario || "")}</td>
       <td>${escaparTexto(registro.comentario || "—")}</td>
       <td>${escaparTexto(fechaVisible)}</td>
       ${acciones}
@@ -8150,7 +8148,7 @@ function renderizarFilasAportes(filas, mostrarAcciones) {
 
 function cabeceraTablaAportes(mostrarAcciones) {
   return `<thead><tr>
-    <th>Zona</th><th>Referencia</th><th>Monto</th><th>Facilitador</th>
+    <th>Zona</th><th>Referencia</th><th>Monto</th>
     <th>Comentario</th><th>Fecha del aporte</th>
     ${mostrarAcciones ? "<th>Acciones</th>" : ""}
   </tr></thead>`;

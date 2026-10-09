@@ -154,6 +154,18 @@
         ".read": "auth != null && ((root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador' || root.child('Perfiles').child(auth.uid).child('rol').val() == 'Supervisor') || (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Facilitador' && data.child('uid').val() == auth.uid && data.child('zona').val() == root.child('Perfiles').child(auth.uid).child('salon').val()))",
         ".write": "auth != null && ((root.child('Perfiles').child(auth.uid).child('rol').val() == 'Administrador') || (root.child('Perfiles').child(auth.uid).child('rol').val() == 'Facilitador' && root.child('EstadoIndicesAportesLimpieza/listo').val() == true && ((!data.exists() && newData.child('referencia').val() == $referencia && newData.child('referencia').val().matches(/^[0-9]{1,40}$/) && newData.child('uid').val() == auth.uid && newData.child('zona').val() == root.child('Perfiles').child(auth.uid).child('salon').val() && newData.child('fechaCierre').val() > now && newData.child('fechaCierre').val() <= now + 604800000 && (newData.child('zona').val() == 'Zona 1' || newData.child('zona').val() == 'Zona 2' || newData.child('zona').val() == 'Zona 3' || newData.child('zona').val() == 'Zona 4' || newData.child('zona').val() == 'Zona 5' || newData.child('zona').val() == 'Zona 6')) || (!newData.exists() && data.child('uid').val() == auth.uid && data.child('zona').val() == root.child('Perfiles').child(auth.uid).child('salon').val() && data.child('fechaCierre').val() > now))))",
         ".validate": "!newData.exists() || (newData.hasChildren(['id', 'zona', 'referencia', 'fechaCierre']) && newData.child('id').isString() && newData.child('zona').isString() && newData.child('zona').val().length <= 20 && (!newData.child('uid').exists() || newData.child('uid').isString()) && newData.child('fechaCierre').isNumber() && newData.child('fechaCierre').val() > 0 && newData.child('referencia').isString() && newData.child('referencia').val() == $referencia && newData.child('referencia').val().matches(/^[0-9]{1,40}$/))",
+        "id": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,128}$/)"
+        },
+        "zona": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "referencia": {
+          ".validate": "newData.isString() && newData.val() == $referencia && newData.val().matches(/^[0-9]{1,40}$/)"
+        },
+        "fechaCierre": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
         "uid": {
           ".validate": "newData.isString() && newData.val().length <= 128"
         },
