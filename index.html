@@ -323,6 +323,20 @@
       font-weight: bold;
     }
 
+    .campo-cumpleanos-lider {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 1050px) {
+      .formulario-nino {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
     .sugerencias-lideres {
       position: absolute;
       z-index: 30;
@@ -1768,11 +1782,12 @@
         role="listbox" aria-label="Líderes de las zonas"></div>
       </div>
 
-      <label for="cumpleanosNino">Cumpleaños:</label>
-      <input id="cumpleanosNino" type="text" inputmode="numeric"
-        placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
-        aria-label="Cumpleaños del líder, día y mes"
-        onblur="this.value = formatearCumpleanosEntrada(this.value)">
+      <label class="campo-cumpleanos-lider" for="cumpleanosNino">Cumpleaños
+        <input id="cumpleanosNino" type="text" inputmode="numeric"
+          placeholder="DD/MM" pattern="[0-9]{1,2}[/-][0-9]{1,2}"
+          aria-label="Cumpleaños del líder, día y mes"
+          onblur="this.value = formatearCumpleanosEntrada(this.value)">
+      </label>
 
       <input id="sectorNino" type="text" placeholder="Sector al que pertenece">
 
@@ -7827,6 +7842,7 @@ async function cargarAportesLimpieza() {
   const lista = document.getElementById("listaAportesLimpieza");
   document.getElementById("resumenAportesLimpieza").replaceChildren();
   lista.textContent = "Cargando aportes...";
+  mostrarMensajeAportesRegistro("");
   try {
     const firebase = await window.firebaseReady;
     const referencia = firebase.ref(firebase.database, "AportesLimpieza");
@@ -7936,6 +7952,15 @@ async function cargarAportesPropios() {
   lista.textContent = "Cargando sus aportes...";
   try {
     const firebase = await window.firebaseReady;
+    const resultadoIndices = await firebase.get(firebase.ref(
+      firebase.database,
+      "EstadoIndicesAportesLimpieza/listo"
+    ));
+    if (!resultadoIndices.exists() || resultadoIndices.val() !== true) {
+      lista.textContent =
+        "El administrador debe abrir el control de aportes para preparar los registros de esta zona.";
+      return;
+    }
     const resultado = await firebase.get(firebase.ref(
       firebase.database,
       `AportesLimpiezaPorUsuario/${perfilAportesActual.uid}`
