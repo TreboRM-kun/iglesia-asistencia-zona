@@ -866,6 +866,31 @@
   min-width: 760px;
 }
 
+.boton-ver-comprobante {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  margin-left: 6px;
+  padding: 6px;
+  place-items: center;
+  vertical-align: middle;
+}
+
+.boton-ver-comprobante svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.acciones-aporte {
+  display: flex;
+  gap: 6px;
+}
+
 .resumen-aportes {
   margin-top: 16px;
   padding: 12px;
@@ -1161,7 +1186,32 @@
   }
 
   .cumpleanero {
-    font-size: 10px;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 3px 2px;
+    font-size: 9px;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+
+  .cumpleanero .avatar-cumpleanos {
+    display: none;
+  }
+
+  .cumpleanero span {
+    overflow-wrap: anywhere;
+  }
+
+  .cumpleanero br {
+    display: none;
+  }
+
+  .cumpleanero small {
+    display: none;
+  }
+
+  .dia-cumpleanos {
+    overflow: hidden;
   }
 
   .cabecera-cumpleanos {
@@ -1670,6 +1720,17 @@
           <label for="fechaAporte">Fecha del aporte
             <input id="fechaAporte" type="date" required>
           </label>
+          <label id="zonaAporteFormulario" class="oculto" for="zonaAporte">
+            Zona del aporte
+            <select id="zonaAporte">
+              <option value="Zona 1">Zona 1</option>
+              <option value="Zona 2">Zona 2</option>
+              <option value="Zona 3">Zona 3</option>
+              <option value="Zona 4">Zona 4</option>
+              <option value="Zona 5">Zona 5</option>
+              <option value="Zona 6">Zona 6</option>
+            </select>
+          </label>
           <label for="montoAporte">Monto
             <input id="montoAporte" type="number" min="0.01" step="0.01"
               inputmode="decimal" required>
@@ -1685,11 +1746,18 @@
                 accept="image/*">
             </label>
             <button id="botonGuardarAporte" type="submit">Registrar aporte</button>
+            <button id="botonCancelarEdicionAporte" type="button"
+              class="oculto" onclick="cancelarEdicionAporte()">Cancelar edición</button>
           </div>
           <label for="comentarioAporte">Comentario (opcional)
             <textarea id="comentarioAporte" maxlength="500"></textarea>
           </label>
         </form>
+
+        <section id="aportesPropios" class="oculto">
+          <h3>Mis aportes registrados</h3>
+          <div id="listaAportesPropios" class="tabla-aportes"></div>
+        </section>
 
         <section id="consultaAportes" class="oculto">
           <section id="filtrosAportes" class="filtros-aportes">
@@ -4853,7 +4921,7 @@ async function cargarDatosDesdeAPI() {
             ${personas.slice(0, 3).map(persona => `
               <span class="cumpleanero">
                 ${avatarLiderHtml(persona.datos.fotoPerfil, persona.nombre, "avatar-cumpleanos", false)}
-                <span><strong>${escaparTexto(persona.nombre)}</strong><br>${escaparTexto(persona.salon)}</span>
+                <span><strong>${escaparTexto(persona.nombre)}</strong><br><small>${escaparTexto(persona.salon)}</small></span>
               </span>
             `).join("")}
             ${personas.length > 3 ? `<small>+${personas.length - 3} más</small>` : ""}
@@ -6195,7 +6263,7 @@ async function cargarDatosDesdeAPI() {
   configurarRestriccionesResumen(tipoReunion);
 
   if (tipoReunion === "Todas") {
-    const fechaHasta = obtenerFechaReunion("Servicio dominical");
+        const fechaHasta = obtenerUltimaFechaHabilResumen();
     document.getElementById("resumenDesde").value = "2026-09-23";
     document.getElementById("resumenHasta").value = fechaHasta;
     return;
@@ -6204,6 +6272,16 @@ async function cargarDatosDesdeAPI() {
   const fechaHasta = obtenerFechaReunion(tipoReunion);
   document.getElementById("resumenDesde").value = "2026-09-23";
   document.getElementById("resumenHasta").value = fechaHasta;
+}
+
+function obtenerUltimaFechaHabilResumen(fechaBase = new Date()) {
+  const fecha = new Date(fechaBase);
+  fecha.setHours(0, 0, 0, 0);
+  const diasDeReunion = new Set([0, 1, 3, 4]);
+  while (!diasDeReunion.has(fecha.getDay())) {
+    fecha.setDate(fecha.getDate() - 1);
+  }
+  return formatearFechaISO(fecha);
 }
 
 function actualizarResumenPorSalon() {
@@ -6367,9 +6445,37 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
       .map(fila => String(fila.Fecha));
     fechasPeriodo = [...new Set(fechasPeriodo.concat(fechasVirtuales))].sort();
   }
-  const reunionesPeriodo = tipoReunion === "Todas"
+  let reunionesPeriodo = tipoReunion === "Todas"
     ? obtenerFechasDeTodasLasReuniones(desde, hasta)
     : fechasPeriodo.map(fecha => ({ fecha, tipo: tipoReunion }));
+  const salonTieneADN = ZONAS_APORTES.includes(salon);
+  if (tipoReunion === "Todas") {
+    reunionesPeriodo = reunionesPeriodo.filter(reunion => {
+      if (reunion.tipo !== "Discipulado Virtual") return true;
+      const registrosVirtuales = asistencias.filter(fila =>
+        String(fila.TipoReunion) === "Discipulado Virtual" &&
+        String(fila.Fecha) === reunion.fecha &&
+        (
+          String(fila.Salon) === salon ||
+          (String(fila.Salon) === "Virtual" &&
+            (fila.SalonOrigen || obtenerLiderVirtual(fila.Nombre)?.SalonOrigen) === salon)
+        ) &&
+        nombresRelacionados.has(normalizarNombreLider(fila.Nombre))
+      );
+      if (!registrosVirtuales.length) return false;
+      if (!salonTieneADN) return true;
+
+      const fechaADN = obtenerFechaADNDeVirtual(reunion.fecha);
+      return !asistencias.some(fila =>
+        String(fila.Fecha) === fechaADN &&
+        String(fila.Salon) === salon &&
+        String(fila.TipoReunion) === "ADN" &&
+        fila.Asistencia === "Sí" &&
+        fila.OrigenVirtual !== true &&
+        nombresRelacionados.has(normalizarNombreLider(fila.Nombre))
+      );
+    });
+  }
   const reunionesEsperadas = tipoReunion === "Todas"
     ? reunionesPeriodo.length
     : fechasPeriodo.length;
@@ -6377,6 +6483,10 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     nombresRelacionados.has(normalizarNombreLider(fila.Nombre)) &&
     (
       String(fila.Salon) === salon ||
+      (tipoReunion === "Todas" &&
+        String(fila.Salon) === "Virtual" &&
+        String(fila.TipoReunion) === "Discipulado Virtual" &&
+        (fila.SalonOrigen || obtenerLiderVirtual(fila.Nombre)?.SalonOrigen) === salon) ||
       (
         tipoReunion === "Todas" &&
         String(fila.Salon) === "Pastor" &&
@@ -6391,6 +6501,12 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     (tipoReunion === "Todas" ||
       String(fila.TipoReunion || "Servicio dominical") === tipoReunion) &&
     (tipoReunion !== "Todas" || fila.OrigenVirtual !== true) &&
+    (tipoReunion !== "Todas" ||
+      String(fila.TipoReunion) !== "Discipulado Virtual" ||
+      reunionesPeriodo.some(reunion =>
+        reunion.tipo === "Discipulado Virtual" &&
+        reunion.fecha === String(fila.Fecha)
+      )) &&
     fechasPeriodo.includes(String(fila.Fecha))
   );
   const liderVirtual = tipoReunion === "Discipulado Virtual"
@@ -7088,6 +7204,8 @@ const ZONAS_APORTES = Array.from(
 const MAX_COMPROBANTE_APORTE_ORIGINAL_BYTES = 25 * 1024 * 1024;
 let perfilAportesActual = null;
 let registrosAportesCache = [];
+let aportesPropiosCache = [];
+let aporteEnEdicion = null;
 let urlComprobanteActual = null;
 const MAX_COMPROBANTE_APORTE_DATA_URL_CHARS = 2800000;
 
@@ -7223,10 +7341,25 @@ async function cargarPerfilAportes(usuarioFirebase) {
     `${perfilAportesActual.usuario} | ${perfilAportesActual.rol}` +
     (perfilAportesActual.rol === "Facilitador"
       ? ` | ${perfilAportesActual.zona}`
-      : " | Todas las zonas");
+      : perfilAportesActual.rol === "Administrador"
+        ? " | Todas las zonas"
+        : " | Solo consulta");
 
   const esFacilitador = perfilAportesActual.rol === "Facilitador";
-  document.getElementById("formularioAporte").classList.toggle("oculto", !esFacilitador);
+  const puedeRegistrar = esFacilitador ||
+    perfilAportesActual.rol === "Administrador";
+  document.getElementById("formularioAporte").classList.toggle("oculto", !puedeRegistrar);
+  document.getElementById("zonaAporteFormulario").classList.toggle(
+    "oculto",
+    !(
+      perfilAportesActual.rol === "Administrador" &&
+      !aporteEnEdicion
+    )
+  );
+  document.getElementById("aportesPropios").classList.toggle(
+    "oculto",
+    !esFacilitador
+  );
   document.getElementById("consultaAportes").classList.toggle("oculto", esFacilitador);
   document.getElementById("filtroZonaAportes").value = "";
   document.getElementById("filtroSabadoAportes").value =
@@ -7236,14 +7369,25 @@ async function cargarPerfilAportes(usuarioFirebase) {
   establecerSemanaActualAportes();
   if (esFacilitador) {
     registrosAportesCache = [];
-    document.getElementById("listaAportesLimpieza").replaceChildren();
+    await cargarAportesPropios();
     return;
   }
-  await cargarAportesLimpieza();
+  if (perfilAportesActual.rol === "Administrador") {
+    await cargarAportesLimpieza();
+  } else {
+    document.getElementById("formularioAporte").classList.add("oculto");
+    document.getElementById("zonaAporteFormulario").classList.add("oculto");
+    await cargarAportesLimpieza();
+  }
 }
 
 function cerrarModalAportes() {
   perfilAportesActual = null;
+  aporteEnEdicion = null;
+  document.getElementById("formularioAporte").reset();
+  document.getElementById("botonGuardarAporte").textContent = "Registrar aporte";
+  document.getElementById("botonCancelarEdicionAporte").classList.add("oculto");
+  aportesPropiosCache = [];
   document.getElementById("modalAportesLimpieza").classList.add("oculto");
   document.getElementById("contenidoAportes").classList.add("oculto");
 }
@@ -7251,7 +7395,7 @@ function cerrarModalAportes() {
 async function registrarAporteLimpieza(evento) {
   evento.preventDefault();
   if (!perfilAportesActual ||
-      perfilAportesActual.rol !== "Facilitador") return;
+      !["Facilitador", "Administrador"].includes(perfilAportesActual.rol)) return;
 
   const fechaAporte = document.getElementById("fechaAporte").value;
   const fecha = new Date(`${fechaAporte}T00:00:00`);
@@ -7276,8 +7420,35 @@ async function registrarAporteLimpieza(evento) {
     return;
   }
 
+  const esAdministrador = perfilAportesActual.rol === "Administrador";
+  const registroEnEdicion = aporteEnEdicion;
+  const zona = esAdministrador
+    ? registroEnEdicion?.zona ||
+      document.getElementById("zonaAporte").value
+    : perfilAportesActual.zona;
+  const duplicadoLocal = registrosAportesCache
+    .concat(aportesPropiosCache)
+    .some(registro =>
+      String(registro.referencia) === referencia &&
+      registro.id !== registroEnEdicion?.id
+    );
+  if (duplicadoLocal) {
+    mostrarMensajeAportesRegistro(
+      "Ya existe un aporte con esa referencia. Verifique la transacción antes de continuar.",
+      true
+    );
+    return;
+  }
+
   const archivoOriginal =
     document.getElementById("comprobanteAporte").files[0] || null;
+  if (registroEnEdicion && archivoOriginal) {
+    mostrarMensajeAportesRegistro(
+      "Para editar este aporte, quite el archivo seleccionado; el comprobante existente se conservará.",
+      true
+    );
+    return;
+  }
   if (archivoOriginal &&
       (!archivoOriginal.type.startsWith("image/") ||
        archivoOriginal.size > MAX_COMPROBANTE_APORTE_ORIGINAL_BYTES)) {
@@ -7290,7 +7461,9 @@ async function registrarAporteLimpieza(evento) {
 
   const boton = document.getElementById("botonGuardarAporte");
   boton.disabled = true;
-  mostrarMensajeAportesRegistro("Guardando aporte...");
+  mostrarMensajeAportesRegistro(
+    registroEnEdicion ? "Actualizando aporte..." : "Guardando aporte..."
+  );
   let comprobanteGuardado = false;
   let comprobanteEscritoIntentado = false;
   let registroGuardado = false;
@@ -7302,23 +7475,41 @@ async function registrarAporteLimpieza(evento) {
     if (!sesionFirebase || sesionFirebase.uid !== perfilAportesActual.uid) {
       throw new Error("La sesión de Firebase ya no está activa.");
     }
+    if (perfilAportesActual.rol === "Facilitador") {
+      const resultadoIndices = await firebase.get(firebase.ref(
+        firebase.database,
+        "EstadoIndicesAportesLimpieza/listo"
+      ));
+      if (!resultadoIndices.exists() || resultadoIndices.val() !== true) {
+        throw new Error(
+          "El administrador debe abrir primero el control de aportes para preparar los índices de referencias."
+        );
+      }
+    }
 
-    const referenciaColeccion = firebase.ref(
-      firebase.database,
-      "AportesLimpieza"
-    );
-    const id = firebase.push(referenciaColeccion).key;
+    const id = registroEnEdicion?.id || firebase.push(
+      firebase.ref(firebase.database, "AportesLimpieza")
+    ).key;
+    if (!id || !/^[A-Za-z0-9_-]+$/.test(id)) {
+      throw new Error("No se pudo generar un identificador seguro para el aporte.");
+    }
+    const uid = registroEnEdicion?.uid || perfilAportesActual.uid;
+    const usuario = registroEnEdicion?.usuario || perfilAportesActual.usuario;
+    const registroBase = { ...(registroEnEdicion || {}) };
+    delete registroBase.id;
     const registro = {
-      uid: perfilAportesActual.uid,
-      usuario: perfilAportesActual.usuario,
-      zona: perfilAportesActual.zona,
+      ...registroBase,
+      uid,
+      usuario,
+      zona,
       referencia,
       monto,
       fechaAporte,
       semana,
       comentario: document.getElementById("comentarioAporte").value.trim(),
-      fechaRegistro: firebase.serverTimestamp(),
-      rutaComprobante: ""
+      fechaRegistro: registroEnEdicion?.fechaRegistro ||
+        firebase.serverTimestamp(),
+      rutaComprobante: registroEnEdicion?.rutaComprobante || ""
     };
 
     const archivo = archivoOriginal
@@ -7329,7 +7520,7 @@ async function registrarAporteLimpieza(evento) {
       if (datosComprobante.length > MAX_COMPROBANTE_APORTE_DATA_URL_CHARS) {
         throw new Error("La imagen comprimida supera el tamaño permitido.");
       }
-      const ruta = `ComprobantesAportes/${perfilAportesActual.uid}/${id}`;
+      const ruta = `ComprobantesAportes/${uid}/${id}`;
       referenciaComprobante = firebase.ref(firebase.database, ruta);
       comprobanteEscritoIntentado = true;
       await firebase.set(referenciaComprobante, datosComprobante);
@@ -7337,14 +7528,46 @@ async function registrarAporteLimpieza(evento) {
       registro.rutaComprobante = ruta;
     }
 
-    await firebase.set(
-      firebase.ref(firebase.database, `AportesLimpieza/${id}`),
-      registro
-    );
+    const cambios = {
+      [`AportesLimpieza/${id}`]: registro,
+      [`AportesLimpiezaPorUsuario/${uid}/${id}`]: registro
+    };
+    if (!registroEnEdicion ||
+        registroEnEdicion.referencia !== referencia) {
+      cambios[`ReferenciasAportesLimpieza/${referencia}`] = {
+        id,
+        uid,
+        zona,
+        referencia
+      };
+    }
+    if (registroEnEdicion &&
+        registroEnEdicion.referencia !== referencia) {
+      const referenciaAnterior = registroEnEdicion.referencia;
+      const resultadoIndiceAnterior = await firebase.get(firebase.ref(
+        firebase.database,
+        `ReferenciasAportesLimpieza/${referenciaAnterior}`
+      ));
+      if (resultadoIndiceAnterior.exists() &&
+          resultadoIndiceAnterior.val().id === id) {
+        cambios[`ReferenciasAportesLimpieza/${referenciaAnterior}`] = null;
+      }
+    }
+    await firebase.update(firebase.ref(firebase.database), cambios);
     registroGuardado = true;
     document.getElementById("formularioAporte").reset();
     establecerSemanaActualAportes();
-    mostrarMensajeAportesRegistro("Aporte registrado correctamente.");
+    cancelarEdicionAporte(false);
+    mostrarMensajeAportesRegistro(
+      registroEnEdicion
+        ? "Aporte actualizado correctamente."
+        : "Aporte registrado correctamente."
+    );
+    if (perfilAportesActual.rol === "Facilitador") {
+      await cargarAportesPropios();
+    } else {
+      await cargarAportesLimpieza();
+    }
   } catch (error) {
     console.error("No se pudo registrar el aporte de limpieza.", error);
     let errorLimpiezaComprobante = null;
@@ -7369,7 +7592,9 @@ async function registrarAporteLimpieza(evento) {
             ? "No se pudo registrar el aporte y se limpió el comprobante temporal. Puede volver a intentarlo."
             : archivoOriginal
               ? "No se pudo comprimir el comprobante ni completar el registro. Verifique la imagen y la conexión, e inténtelo de nuevo."
-              : "No se pudo registrar el aporte. Revise la conexión y la configuración de Firebase.",
+              : error?.code === "PERMISSION_DENIED"
+                ? "No se guardó el aporte: la referencia ya pudo haberse utilizado o falta publicar las reglas actualizadas de Firebase."
+                : `No se pudo ${registroEnEdicion ? "actualizar" : "registrar"} el aporte: ${error?.message || "revise la conexión con Firebase."}`,
       true
     );
   } finally {
@@ -7401,6 +7626,20 @@ async function cargarAportesLimpieza() {
           ...registro
         }))
       : [];
+    if (perfilAportesActual.rol === "Administrador") {
+      try {
+        await completarIndicesAportes(firebase);
+      } catch (error) {
+        console.error(
+          "No se pudieron preparar los índices para validar referencias y habilitar la edición de aportes.",
+          error
+        );
+        mostrarMensajeAportesRegistro(
+          "Los aportes se cargaron, pero no se pudieron actualizar sus índices de referencias y facilitadores. Publique las reglas nuevas de Firebase para activar el control de duplicados y la edición.",
+          true
+        );
+      }
+    }
     actualizarSugerenciasReferenciaAportes();
     mostrarAportesLimpieza();
   } catch (error) {
@@ -7409,6 +7648,249 @@ async function cargarAportesLimpieza() {
     document.getElementById("sugerenciasReferenciaAportes").replaceChildren();
     lista.textContent =
       "No se pudieron cargar los aportes. Verifique los permisos y la conexión a Firebase.";
+  }
+}
+
+async function completarIndicesAportes(firebase) {
+  const [resultadoReferencias, resultadoUsuarios] = await Promise.all([
+    firebase.get(firebase.ref(firebase.database, "ReferenciasAportesLimpieza")),
+    firebase.get(firebase.ref(firebase.database, "AportesLimpiezaPorUsuario"))
+  ]);
+  const referencias = resultadoReferencias.exists()
+    ? resultadoReferencias.val()
+    : {};
+  const usuarios = resultadoUsuarios.exists()
+    ? resultadoUsuarios.val()
+    : {};
+  const cambios = {};
+
+  registrosAportesCache.forEach(registro => {
+    const referencia = String(registro.referencia || "");
+    if (/^\d{1,40}$/.test(referencia) && !referencias[referencia]) {
+      referencias[referencia] = {
+        id: registro.id,
+        uid: registro.uid,
+        zona: registro.zona,
+        referencia
+      };
+      cambios[`ReferenciasAportesLimpieza/${referencia}`] =
+        referencias[referencia];
+    }
+    if (registro.uid && registro.id &&
+        !usuarios[registro.uid]?.[registro.id]) {
+      const registroSinId = { ...registro };
+      delete registroSinId.id;
+      cambios[`AportesLimpiezaPorUsuario/${registro.uid}/${registro.id}`] =
+        registroSinId;
+    }
+  });
+
+  cambios["EstadoIndicesAportesLimpieza/listo"] = true;
+  if (Object.keys(cambios).length) {
+    await firebase.update(firebase.ref(firebase.database), cambios);
+  }
+}
+
+async function cargarAportesPropios() {
+  if (perfilAportesActual?.rol !== "Facilitador") return;
+  const lista = document.getElementById("listaAportesPropios");
+  lista.textContent = "Cargando sus aportes...";
+  try {
+    const firebase = await window.firebaseReady;
+    const resultado = await firebase.get(firebase.ref(
+      firebase.database,
+      `AportesLimpiezaPorUsuario/${perfilAportesActual.uid}`
+    ));
+    aportesPropiosCache = resultado.exists()
+      ? Object.entries(resultado.val()).map(([id, registro]) => ({
+          id,
+          ...registro
+        }))
+      : [];
+    mostrarAportesPropios();
+  } catch (error) {
+    console.error("No se pudieron cargar los aportes del facilitador.", error);
+    lista.textContent =
+      "No se pudieron cargar sus aportes. Pida al administrador que actualice los índices y las reglas de Firebase.";
+  }
+}
+
+function formatearFechaAporte(fechaISO, fechaRegistro) {
+  const fechaTexto = /^\d{4}-\d{2}-\d{2}$/.test(String(fechaISO || ""))
+    ? String(fechaISO)
+    : Number(fechaRegistro)
+      ? formatearFechaISO(new Date(Number(fechaRegistro)))
+      : "";
+  if (!fechaTexto) return "—";
+  const [ano, mes, dia] = fechaTexto.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
+function renderizarFilasAportes(filas, mostrarAcciones) {
+  return filas.map(registro => {
+    const fechaVisible = formatearFechaAporte(
+      registro.fechaAporte,
+      registro.fechaRegistro
+    );
+    const comprobante = registro.rutaComprobante
+      ? `<button class="boton-ver-comprobante" type="button"
+          title="Ver comprobante" aria-label="Ver comprobante"
+          onclick="verComprobanteAporte('${escaparTexto(registro.uid)}','${escaparTexto(registro.id)}')">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>`
+      : "";
+    const acciones = mostrarAcciones
+      ? `<td><div class="acciones-aporte">
+          <button type="button" onclick="editarAporteLimpieza('${escaparTexto(registro.id)}')">Editar</button>
+          <button type="button" onclick="eliminarAporteLimpieza('${escaparTexto(registro.id)}')">Eliminar</button>
+        </div></td>`
+      : "";
+    return `<tr>
+      <td>${escaparTexto(registro.zona || "")}</td>
+      <td>${escaparTexto(registro.referencia || "")}</td>
+      <td>${Number(registro.monto).toFixed(2)}${comprobante}</td>
+      <td>${escaparTexto(registro.usuario || "")}</td>
+      <td>${escaparTexto(registro.comentario || "—")}</td>
+      <td>${escaparTexto(fechaVisible)}</td>
+      ${acciones}
+    </tr>`;
+  }).join("");
+}
+
+function cabeceraTablaAportes(mostrarAcciones) {
+  return `<thead><tr>
+    <th>Zona</th><th>Referencia</th><th>Monto</th><th>Facilitador</th>
+    <th>Comentario</th><th>Fecha del aporte</th>
+    ${mostrarAcciones ? "<th>Acciones</th>" : ""}
+  </tr></thead>`;
+}
+
+function mostrarAportesPropios() {
+  const lista = document.getElementById("listaAportesPropios");
+  const filas = [...aportesPropiosCache].sort((a, b) =>
+    Number(b.fechaRegistro || 0) - Number(a.fechaRegistro || 0)
+  );
+  if (!filas.length) {
+    lista.textContent = "Todavía no hay aportes registrados con esta cuenta.";
+    return;
+  }
+  lista.innerHTML = `<table>${cabeceraTablaAportes(true)}
+    <tbody>${renderizarFilasAportes(filas, true)}</tbody>
+  </table>`;
+}
+
+function editarAporteLimpieza(id) {
+  if (!perfilAportesActual ||
+      !["Facilitador", "Administrador"].includes(perfilAportesActual.rol) ||
+      !/^[A-Za-z0-9_-]+$/.test(id)) return;
+  const registros = perfilAportesActual.rol === "Administrador"
+    ? registrosAportesCache
+    : aportesPropiosCache;
+  const registro = registros.find(item => item.id === id);
+  if (!registro ||
+      (perfilAportesActual.rol === "Facilitador" &&
+       (registro.uid !== perfilAportesActual.uid ||
+        registro.zona !== perfilAportesActual.zona))) return;
+
+  aporteEnEdicion = { ...registro };
+  document.getElementById("fechaAporte").value = registro.fechaAporte || "";
+  document.getElementById("zonaAporte").value =
+    ZONAS_APORTES.includes(registro.zona) ? registro.zona : "Zona 1";
+  document.getElementById("zonaAporteFormulario").classList.add("oculto");
+  document.getElementById("montoAporte").value = registro.monto;
+  document.getElementById("referenciaAporte").value = registro.referencia || "";
+  document.getElementById("comprobanteAporte").value = "";
+  document.getElementById("comentarioAporte").value = registro.comentario || "";
+  document.getElementById("botonGuardarAporte").textContent = "Guardar cambios";
+  document.getElementById("botonCancelarEdicionAporte").classList.remove("oculto");
+  document.getElementById("formularioAporte").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+  mostrarMensajeAportesRegistro(
+    `Editando el aporte ${registro.referencia}. El comprobante actual se conservará.`
+  );
+}
+
+function cancelarEdicionAporte(limpiarFormulario = true) {
+  aporteEnEdicion = null;
+  document.getElementById("botonGuardarAporte").textContent = "Registrar aporte";
+  document.getElementById("botonCancelarEdicionAporte").classList.add("oculto");
+  document.getElementById("zonaAporteFormulario").classList.toggle(
+    "oculto",
+    perfilAportesActual?.rol !== "Administrador"
+  );
+  if (limpiarFormulario) {
+    document.getElementById("formularioAporte").reset();
+    establecerSemanaActualAportes();
+    mostrarMensajeAportesRegistro("");
+  }
+}
+
+async function eliminarAporteLimpieza(id) {
+  if (!perfilAportesActual ||
+      !["Facilitador", "Administrador"].includes(perfilAportesActual.rol) ||
+      !/^[A-Za-z0-9_-]+$/.test(id)) return;
+  const esAdministrador = perfilAportesActual.rol === "Administrador";
+  const registros = esAdministrador ? registrosAportesCache : aportesPropiosCache;
+  const registro = registros.find(item => item.id === id);
+  if (!registro ||
+      (!esAdministrador &&
+       (registro.uid !== perfilAportesActual.uid ||
+        registro.zona !== perfilAportesActual.zona))) return;
+  if (!confirm(
+    `¿Eliminar el aporte de ${registro.monto} con referencia ${registro.referencia}? Esta acción no se puede deshacer.`
+  )) return;
+
+  try {
+    const firebase = await window.firebaseReady;
+    const cambios = {
+      [`AportesLimpieza/${id}`]: null,
+      [`AportesLimpiezaPorUsuario/${registro.uid}/${id}`]: null
+    };
+      const resultadoIndice = await firebase.get(firebase.ref(
+        firebase.database,
+        `ReferenciasAportesLimpieza/${registro.referencia}`
+      ));
+      if (resultadoIndice.exists() &&
+          resultadoIndice.val().id === id) {
+        cambios[`ReferenciasAportesLimpieza/${registro.referencia}`] = null;
+      }
+    await firebase.update(firebase.ref(firebase.database), cambios);
+
+    let comprobantePendiente = false;
+    if (registro.rutaComprobante) {
+      try {
+        await firebase.remove(firebase.ref(
+          firebase.database,
+          registro.rutaComprobante
+        ));
+      } catch (error) {
+        comprobantePendiente = true;
+        console.error(
+          "El aporte se eliminó, pero no se pudo limpiar su comprobante.",
+          error
+        );
+      }
+    }
+    if (aporteEnEdicion?.id === id) cancelarEdicionAporte();
+    mostrarMensajeAportesRegistro(
+      comprobantePendiente
+        ? "El aporte se eliminó, pero el comprobante quedó pendiente de limpieza. Avise al administrador."
+        : "El aporte se eliminó correctamente.",
+      comprobantePendiente
+    );
+    if (esAdministrador) await cargarAportesLimpieza();
+    else await cargarAportesPropios();
+  } catch (error) {
+    console.error("No se pudo eliminar el aporte de limpieza.", error);
+    mostrarMensajeAportesRegistro(
+      `No se pudo eliminar el aporte: ${error?.message || "revise los permisos de Firebase."}`,
+      true
+    );
   }
 }
 
@@ -7493,31 +7975,9 @@ function mostrarAportesLimpieza() {
     return;
   }
 
-  const cuerpo = filas.map(registro => {
-    const fechaVisible = registro.fechaAporte
-      ? new Date(`${escaparTexto(registro.fechaAporte)}T00:00:00`)
-          .toLocaleDateString("es")
-      : Number(registro.fechaRegistro)
-        ? new Date(Number(registro.fechaRegistro)).toLocaleDateString("es")
-        : "—";
-    const comprobante = registro.rutaComprobante
-      ? `<button type="button" onclick="verComprobanteAporte('${escaparTexto(registro.uid)}','${escaparTexto(registro.id)}')">Ver comprobante</button>`
-      : "";
-    return `<tr>
-      <td>${escaparTexto(registro.zona || "")}</td>
-      <td>${escaparTexto(registro.referencia || "")}</td>
-      <td>${Number(registro.monto).toFixed(2)} ${comprobante}</td>
-      <td>${escaparTexto(registro.usuario || "")}</td>
-      <td>${escaparTexto(registro.comentario || "—")}</td>
-      <td>${escaparTexto(fechaVisible)}</td>
-    </tr>`;
-  }).join("");
-  lista.innerHTML = `<table>
-    <thead><tr>
-      <th>Zona</th><th>Referencia</th><th>Monto</th><th>Facilitador</th>
-      <th>Comentario</th><th>Fecha del aporte</th>
-    </tr></thead>
-    <tbody>${cuerpo}</tbody>
+  const puedeEditar = perfilAportesActual.rol === "Administrador";
+  lista.innerHTML = `<table>${cabeceraTablaAportes(puedeEditar)}
+    <tbody>${renderizarFilasAportes(filas, puedeEditar)}</tbody>
   </table>`;
 }
 
@@ -7579,6 +8039,7 @@ function cerrarModal(id) {
     return;
   }
   perfilAportesActual = null;
+  aportesPropiosCache = [];
   usuarioActual = null;
   cumpleanosCompartidos = [];
   cumpleanosCompartidosCargados = false;
