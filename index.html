@@ -5865,12 +5865,15 @@ async function cargarDatosDesdeAPI() {
             : tipoReunion === "Discipulado Virtual"
               ? obtenerLiderVirtual(nombre)
               : null;
+          const salonOrigen = tipoReunion === "Discipulado Virtual"
+            ? liderRelacionado?.SalonOrigen
+            : liderRelacionado?.salon;
 
           return {
             Fecha: fecha,
             Salon: salonDatos,
             Nombre: nombre,
-            ...(liderRelacionado ? { SalonOrigen: liderRelacionado.salon } : {}),
+            ...(salonOrigen ? { SalonOrigen: salonOrigen } : {}),
             TipoReunion: tipoReunion,
             Asistencia: presente ? "Sí" : "No",
             Participacion: presente
