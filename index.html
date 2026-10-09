@@ -273,6 +273,16 @@
     }
 
     .formulario-nino {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1.8fr)
+        minmax(95px, 0.7fr)
+        minmax(130px, 1.1fr)
+        minmax(130px, 1.1fr)
+        minmax(130px, 1fr)
+        minmax(120px, 0.9fr);
+      align-items: center;
+      gap: 8px 12px;
       background: #f5f3ef;
       border-left: 6px solid #6e1f2a;
       padding: 15px;
@@ -280,13 +290,37 @@
       margin: 20px 0;
     }
 
+    .formulario-nino > h3,
+    .formulario-nino > .seguimiento-lider,
+    .formulario-nino > #mensajeNino {
+      grid-column: 1 / -1;
+    }
+
     .sugerencias-lideres-contenedor {
       position: relative;
-      width: 100%;
+      width: auto;
+      min-width: 0;
     }
 
     .sugerencias-lideres-contenedor > input {
       width: 100%;
+      min-width: 0;
+    }
+
+    .formulario-nino > input,
+    .formulario-nino > select,
+    .formulario-nino > label {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+    }
+
+    .campo-estado-lider {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: bold;
     }
 
     .sugerencias-lideres {
@@ -400,6 +434,10 @@
     @media (max-width: 850px) {
       .controles-asistencia {
         align-items: stretch;
+      }
+
+      .formulario-nino {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .control-asistencia,
@@ -790,6 +828,23 @@
   text-align: left;
 }
 
+.perfil-aportes-linea {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.perfil-aportes-linea p {
+  margin: 0;
+}
+
+#zonaAporteFormulario {
+  width: auto;
+  min-width: 110px;
+  margin: 0;
+}
+
 .formulario-aporte {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
@@ -866,6 +921,12 @@
   min-width: 760px;
 }
 
+.tabla-aportes th:first-child,
+.tabla-aportes td:first-child {
+  min-width: 76px;
+  white-space: nowrap;
+}
+
 .boton-ver-comprobante {
   display: inline-grid;
   width: 32px;
@@ -888,7 +949,57 @@
 
 .acciones-aporte {
   display: flex;
-  gap: 6px;
+  justify-content: center;
+  gap: 4px;
+}
+
+.boton-icono-aporte {
+  position: relative;
+  display: inline-grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 6px;
+  place-items: center;
+}
+
+.boton-icono-aporte svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.boton-icono-aporte::after {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  right: 0;
+  width: max-content;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #171717;
+  color: white;
+  content: attr(data-tooltip);
+  font-size: 12px;
+  font-weight: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.boton-icono-aporte:hover::after,
+.boton-icono-aporte:focus-visible::after {
+  opacity: 1;
+}
+
+.boton-icono-aporte:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .resumen-aportes {
@@ -906,6 +1017,18 @@
 @media (max-width: 600px) {
   .formulario-aporte {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .formulario-nino {
+    display: block;
+  }
+
+  .formulario-nino > * {
+    margin-top: 8px;
+  }
+
+  .formulario-nino > h3 {
+    margin-top: 0;
   }
 
   .aporte-comprobante-acciones {
@@ -1655,12 +1778,13 @@
 
       <input id="comiteRedNino" type="text" placeholder="Comité o red">
 
-      <label for="estadoNino">Estado:</label>
-      <select id="estadoNino">
-        <option value="Activo">Activo</option>
-        <option value="Protocolo del Servidor">Protocolo del Servidor</option>
-        <option value="Inactivo">Inactivo</option>
-      </select>
+      <label class="campo-estado-lider" for="estadoNino">Estado
+        <select id="estadoNino">
+          <option value="Activo">Activo</option>
+          <option value="Protocolo del Servidor">Protocolo del Servidor</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
+      </label>
 
       <select id="salonNuevoNino">
         <option value="Zona 1">Zona 1</option>
@@ -1713,23 +1837,24 @@
       <h2>Control de aportes de limpieza</h2>
 
       <section id="contenidoAportes" class="oculto">
-        <p id="informacionPerfilAportes"></p>
+        <div class="perfil-aportes-linea">
+          <p id="informacionPerfilAportes"></p>
+          <select id="zonaAporteFormulario" class="oculto"
+            aria-label="Zona del aporte">
+            <option value="Zona 1">Zona 1</option>
+            <option value="Zona 2">Zona 2</option>
+            <option value="Zona 3">Zona 3</option>
+            <option value="Zona 4">Zona 4</option>
+            <option value="Zona 5">Zona 5</option>
+            <option value="Zona 6">Zona 6</option>
+            <option value="">Todas las zonas</option>
+          </select>
+        </div>
 
         <form id="formularioAporte" class="formulario-aporte"
           onsubmit="registrarAporteLimpieza(event)">
           <label for="fechaAporte">Fecha del aporte
             <input id="fechaAporte" type="date" required>
-          </label>
-          <label id="zonaAporteFormulario" class="oculto" for="zonaAporte">
-            Zona del aporte
-            <select id="zonaAporte">
-              <option value="Zona 1">Zona 1</option>
-              <option value="Zona 2">Zona 2</option>
-              <option value="Zona 3">Zona 3</option>
-              <option value="Zona 4">Zona 4</option>
-              <option value="Zona 5">Zona 5</option>
-              <option value="Zona 6">Zona 6</option>
-            </select>
           </label>
           <label for="montoAporte">Monto
             <input id="montoAporte" type="number" min="0.01" step="0.01"
@@ -1747,7 +1872,13 @@
             </label>
             <button id="botonGuardarAporte" type="submit">Registrar aporte</button>
             <button id="botonCancelarEdicionAporte" type="button"
-              class="oculto" onclick="cancelarEdicionAporte()">Cancelar edición</button>
+              class="boton-icono-aporte oculto" data-tooltip="Cancelar edición"
+              title="Cancelar edición" aria-label="Cancelar edición"
+              onclick="cancelarEdicionAporte()">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m6 6 12 12M18 6 6 18"></path>
+              </svg>
+            </button>
           </div>
           <label for="comentarioAporte">Comentario (opcional)
             <textarea id="comentarioAporte" maxlength="500"></textarea>
@@ -7207,6 +7338,7 @@ let registrosAportesCache = [];
 let aportesPropiosCache = [];
 let aporteEnEdicion = null;
 let urlComprobanteActual = null;
+let temporizadorCierreAportes = null;
 const MAX_COMPROBANTE_APORTE_DATA_URL_CHARS = 2800000;
 
 function normalizarUsuarioAportes(usuario) {
@@ -7273,6 +7405,55 @@ function lunesDeSabadoAportes(sabadoISO) {
     String(sabado.getMonth() + 1).padStart(2, "0"),
     String(sabado.getDate()).padStart(2, "0")
   ].join("-");
+}
+
+function calcularCierreSemanaAportes(semanaISO) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(semanaISO || ""))) return 0;
+  const lunes = new Date(`${semanaISO}T00:00:00-04:00`);
+  if (Number.isNaN(lunes.getTime()) || lunes.getUTCDay() !== 1) return 0;
+  lunes.setUTCDate(lunes.getUTCDate() + 6);
+  return lunes.getTime();
+}
+
+function obtenerCierreAporte(registro) {
+  const fechaGuardada = Number(registro?.fechaCierre);
+  if (Number.isFinite(fechaGuardada) && fechaGuardada > 0) {
+    return fechaGuardada;
+  }
+  const fechaBase = /^\d{4}-\d{2}-\d{2}$/.test(registro?.fechaAporte || "")
+    ? registro.fechaAporte
+    : Number(registro?.fechaRegistro)
+      ? formatearFechaISO(new Date(Number(registro.fechaRegistro)))
+      : "";
+  const semana = /^\d{4}-\d{2}-\d{2}$/.test(registro?.semana || "")
+    ? registro.semana
+    : fechaBase
+      ? obtenerLunesISOAportes(new Date(`${fechaBase}T00:00:00`))
+      : "";
+  return calcularCierreSemanaAportes(semana);
+}
+
+function estaAporteCerrado(registro, ahora = Date.now()) {
+  const fechaCierre = obtenerCierreAporte(registro);
+  return !fechaCierre || ahora >= fechaCierre;
+}
+
+function programarActualizacionCierreAportes(registros) {
+  clearTimeout(temporizadorCierreAportes);
+  const ahora = Date.now();
+  const siguienteCierre = registros
+    .map(obtenerCierreAporte)
+    .filter(fecha => fecha > ahora)
+    .sort((a, b) => a - b)[0];
+  if (!siguienteCierre) return;
+
+  temporizadorCierreAportes = setTimeout(() => {
+    if (perfilAportesActual?.rol === "Facilitador") {
+      mostrarAportesPropios();
+    } else if (perfilAportesActual?.rol === "Administrador") {
+      mostrarAportesLimpieza();
+    }
+  }, Math.min(siguienteCierre - ahora + 50, 2147483647));
 }
 
 function ajustarFiltroSabadoAportes() {
@@ -7344,6 +7525,7 @@ async function cargarPerfilAportes(usuarioFirebase) {
       : perfilAportesActual.rol === "Administrador"
         ? " | Todas las zonas"
         : " | Solo consulta");
+  document.getElementById("zonaAporteFormulario").value = "Zona 1";
 
   const esFacilitador = perfilAportesActual.rol === "Facilitador";
   const puedeRegistrar = esFacilitador ||
@@ -7382,6 +7564,8 @@ async function cargarPerfilAportes(usuarioFirebase) {
 }
 
 function cerrarModalAportes() {
+  clearTimeout(temporizadorCierreAportes);
+  temporizadorCierreAportes = null;
   perfilAportesActual = null;
   aporteEnEdicion = null;
   document.getElementById("formularioAporte").reset();
@@ -7424,8 +7608,33 @@ async function registrarAporteLimpieza(evento) {
   const registroEnEdicion = aporteEnEdicion;
   const zona = esAdministrador
     ? registroEnEdicion?.zona ||
-      document.getElementById("zonaAporte").value
+      document.getElementById("zonaAporteFormulario").value
     : perfilAportesActual.zona;
+  if (esAdministrador && !ZONAS_APORTES.includes(zona)) {
+    mostrarMensajeAportesRegistro(
+      "Seleccione una zona específica para registrar este aporte.",
+      true
+    );
+    return;
+  }
+  if (registroEnEdicion && estaAporteCerrado(registroEnEdicion)) {
+    mostrarMensajeAportesRegistro(
+      "El plazo de edición de este aporte ya terminó.",
+      true
+    );
+    cancelarEdicionAporte();
+    return;
+  }
+  const fechaCierre = registroEnEdicion
+    ? obtenerCierreAporte(registroEnEdicion)
+    : calcularCierreSemanaAportes(semana);
+  if (!registroEnEdicion && (!fechaCierre || Date.now() >= fechaCierre)) {
+    mostrarMensajeAportesRegistro(
+      "El plazo de cierre de esa semana ya terminó. No se pueden registrar aportes atrasados.",
+      true
+    );
+    return;
+  }
   const duplicadoLocal = registrosAportesCache
     .concat(aportesPropiosCache)
     .some(registro =>
@@ -7506,6 +7715,7 @@ async function registrarAporteLimpieza(evento) {
       monto,
       fechaAporte,
       semana,
+      fechaCierre,
       comentario: document.getElementById("comentarioAporte").value.trim(),
       fechaRegistro: registroEnEdicion?.fechaRegistro ||
         firebase.serverTimestamp(),
@@ -7538,7 +7748,8 @@ async function registrarAporteLimpieza(evento) {
         id,
         uid,
         zona,
-        referencia
+        referencia,
+        fechaCierre
       };
     }
     if (registroEnEdicion &&
@@ -7635,7 +7846,7 @@ async function cargarAportesLimpieza() {
           error
         );
         mostrarMensajeAportesRegistro(
-          "Los aportes se cargaron, pero no se pudieron actualizar sus índices de referencias y facilitadores. Publique las reglas nuevas de Firebase para activar el control de duplicados y la edición.",
+          `Los aportes se cargaron, pero Firebase rechazó la preparación de los índices (${error?.code || error?.message || "error desconocido"}). No se habilitará el registro de la zona hasta completar la migración.`,
           true
         );
       }
@@ -7666,22 +7877,50 @@ async function completarIndicesAportes(firebase) {
 
   registrosAportesCache.forEach(registro => {
     const referencia = String(registro.referencia || "");
-    if (/^\d{1,40}$/.test(referencia) && !referencias[referencia]) {
-      referencias[referencia] = {
+    const zona = String(registro.zona || "Sin zona");
+    const indiceExistente = referencias[referencia];
+    const fechaCierre = obtenerCierreAporte(registro);
+    if (!fechaCierre) {
+      throw new Error(
+        `No se pudo determinar la fecha de cierre del aporte ${registro.id}.`
+      );
+    }
+    if (/^\d{1,40}$/.test(referencia) &&
+        (!indiceExistente ||
+         (indiceExistente.id === registro.id &&
+          (indiceExistente.referencia !== referencia ||
+           Number(indiceExistente.fechaCierre) !== fechaCierre ||
+           indiceExistente.zona !== zona ||
+           (registro.uid && indiceExistente.uid !== registro.uid))))) {
+      const indiceReferencia = {
         id: registro.id,
-        uid: registro.uid,
-        zona: registro.zona,
-        referencia
+        zona,
+        referencia,
+        fechaCierre
       };
+      if (registro.uid) indiceReferencia.uid = registro.uid;
+      referencias[referencia] = indiceReferencia;
       cambios[`ReferenciasAportesLimpieza/${referencia}`] =
-        referencias[referencia];
+        indiceReferencia;
+    }
+    if (fechaCierre &&
+        Number(registro.fechaCierre) !== fechaCierre) {
+      cambios[`AportesLimpieza/${registro.id}/fechaCierre`] = fechaCierre;
     }
     if (registro.uid && registro.id &&
         !usuarios[registro.uid]?.[registro.id]) {
       const registroSinId = { ...registro };
+      registroSinId.zona = zona;
+      if (fechaCierre) registroSinId.fechaCierre = fechaCierre;
       delete registroSinId.id;
       cambios[`AportesLimpiezaPorUsuario/${registro.uid}/${registro.id}`] =
         registroSinId;
+    } else if (registro.uid && registro.id && fechaCierre &&
+        Number(usuarios[registro.uid][registro.id].fechaCierre) !==
+          fechaCierre) {
+      cambios[
+        `AportesLimpiezaPorUsuario/${registro.uid}/${registro.id}/fechaCierre`
+      ] = fechaCierre;
     }
   });
 
@@ -7744,8 +7983,23 @@ function renderizarFilasAportes(filas, mostrarAcciones) {
       : "";
     const acciones = mostrarAcciones
       ? `<td><div class="acciones-aporte">
-          <button type="button" onclick="editarAporteLimpieza('${escaparTexto(registro.id)}')">Editar</button>
-          <button type="button" onclick="eliminarAporteLimpieza('${escaparTexto(registro.id)}')">Eliminar</button>
+          ${!estaAporteCerrado(registro)
+            ? `<button class="boton-icono-aporte" type="button"
+                data-tooltip="Editar" title="Editar" aria-label="Editar aporte"
+                onclick="editarAporteLimpieza('${escaparTexto(registro.id)}')">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="m15 5 4 4M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"></path>
+                </svg>
+              </button>
+              <button class="boton-icono-aporte" type="button"
+                data-tooltip="Eliminar" title="Eliminar"
+                aria-label="Eliminar aporte"
+                onclick="eliminarAporteLimpieza('${escaparTexto(registro.id)}')">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"></path>
+                </svg>
+              </button>`
+            : ""}
         </div></td>`
       : "";
     return `<tr>
@@ -7770,11 +8024,15 @@ function cabeceraTablaAportes(mostrarAcciones) {
 
 function mostrarAportesPropios() {
   const lista = document.getElementById("listaAportesPropios");
-  const filas = [...aportesPropiosCache].sort((a, b) =>
+  programarActualizacionCierreAportes(aportesPropiosCache);
+  const filas = aportesPropiosCache.filter(registro =>
+    !estaAporteCerrado(registro)
+  ).sort((a, b) =>
     Number(b.fechaRegistro || 0) - Number(a.fechaRegistro || 0)
   );
   if (!filas.length) {
-    lista.textContent = "Todavía no hay aportes registrados con esta cuenta.";
+    lista.textContent =
+      "No hay aportes abiertos para mostrar. Los registros cerrados quedan guardados y ya no aparecen en esta zona.";
     return;
   }
   lista.innerHTML = `<table>${cabeceraTablaAportes(true)}
@@ -7793,11 +8051,12 @@ function editarAporteLimpieza(id) {
   if (!registro ||
       (perfilAportesActual.rol === "Facilitador" &&
        (registro.uid !== perfilAportesActual.uid ||
-        registro.zona !== perfilAportesActual.zona))) return;
+        registro.zona !== perfilAportesActual.zona)) ||
+      estaAporteCerrado(registro)) return;
 
   aporteEnEdicion = { ...registro };
   document.getElementById("fechaAporte").value = registro.fechaAporte || "";
-  document.getElementById("zonaAporte").value =
+  document.getElementById("zonaAporteFormulario").value =
     ZONAS_APORTES.includes(registro.zona) ? registro.zona : "Zona 1";
   document.getElementById("zonaAporteFormulario").classList.add("oculto");
   document.getElementById("montoAporte").value = registro.monto;
@@ -7840,7 +8099,14 @@ async function eliminarAporteLimpieza(id) {
   if (!registro ||
       (!esAdministrador &&
        (registro.uid !== perfilAportesActual.uid ||
-        registro.zona !== perfilAportesActual.zona))) return;
+        registro.zona !== perfilAportesActual.zona)) ||
+      estaAporteCerrado(registro)) {
+    mostrarMensajeAportesRegistro(
+      "El plazo de modificación o eliminación de este aporte ya terminó.",
+      true
+    );
+    return;
+  }
   if (!confirm(
     `¿Eliminar el aporte de ${registro.monto} con referencia ${registro.referencia}? Esta acción no se puede deshacer.`
   )) return;
@@ -7918,6 +8184,9 @@ function mostrarAportesLimpieza() {
   if (!perfilAportesActual ||
       !["Administrador", "Supervisor"].includes(perfilAportesActual.rol)) {
     return;
+  }
+  if (perfilAportesActual.rol === "Administrador") {
+    programarActualizacionCierreAportes(registrosAportesCache);
   }
   const zona = document.getElementById("filtroZonaAportes").value;
   const sabado = document.getElementById("filtroSabadoAportes").value;
