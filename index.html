@@ -6729,7 +6729,9 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
     ) &&
     (tipoReunion === "Todas" ||
       String(fila.TipoReunion || "Servicio dominical") === tipoReunion) &&
-    (tipoReunion !== "Todas" || fila.OrigenVirtual !== true) &&
+    (tipoReunion !== "Todas" ||
+      fila.OrigenVirtual !== true ||
+      String(fila.TipoReunion) === "ADN") &&
     (tipoReunion !== "Todas" ||
       String(fila.TipoReunion) !== "Discipulado Virtual" ||
       reunionesPeriodo.some(reunion =>
