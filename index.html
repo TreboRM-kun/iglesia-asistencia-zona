@@ -7490,11 +7490,7 @@ function calcularCierreSemanaAportes(semanaISO) {
   return lunes.getTime();
 }
 
-function obtenerCierreAporte(registro) {
-  const fechaGuardada = Number(registro?.fechaCierre);
-  if (Number.isFinite(fechaGuardada) && fechaGuardada > 0) {
-    return fechaGuardada;
-  }
+function calcularCierreRegistroAporte(registro) {
   const fechaBase = /^\d{4}-\d{2}-\d{2}$/.test(registro?.fechaAporte || "")
     ? registro.fechaAporte
     : Number(registro?.fechaRegistro)
@@ -7506,6 +7502,14 @@ function obtenerCierreAporte(registro) {
       ? obtenerLunesISOAportes(new Date(`${fechaBase}T00:00:00`))
       : "";
   return calcularCierreSemanaAportes(semana);
+}
+
+function obtenerCierreAporte(registro) {
+  const fechaGuardada = Number(registro?.fechaCierre);
+  if (Number.isFinite(fechaGuardada) && fechaGuardada > 0) {
+    return fechaGuardada;
+  }
+  return calcularCierreRegistroAporte(registro);
 }
 
 function estaAporteCerrado(registro, ahora = Date.now()) {
@@ -7952,13 +7956,19 @@ async function completarIndicesAportes(firebase) {
   const cambiosReferencias = {};
   const cambiosAportes = {};
   const cambiosUsuarios = {};
+  const ahora = Date.now();
 
   registrosAportesCache.forEach(registro => {
     const referencia = String(registro.referencia || "");
     const zona = String(registro.zona || "Sin zona");
     const indiceExistente = referencias[referencia];
-    const fechaCierre = obtenerCierreAporte(registro);
-    if (!fechaCierre) {
+    const fechaCierreCalculada = calcularCierreRegistroAporte(registro);
+    const fechaCierreExistente = Number(registro.fechaCierre);
+    const fechaCierre = Number.isFinite(fechaCierreExistente) &&
+        fechaCierreExistente > 0
+      ? Math.min(fechaCierreExistente, fechaCierreCalculada)
+      : fechaCierreCalculada;
+    if (!fechaCierreCalculada || !fechaCierre) {
       throw new Error(
         `No se pudo determinar la fecha de cierre del aporte ${registro.id}.`
       );
@@ -7982,7 +7992,10 @@ async function completarIndicesAportes(firebase) {
         indiceReferencia;
     }
     if (fechaCierre &&
-        Number(registro.fechaCierre) !== fechaCierre) {
+        (!Number.isFinite(fechaCierreExistente) ||
+         fechaCierreExistente <= 0 ||
+         (fechaCierreExistente > ahora &&
+          fechaCierre < fechaCierreExistente))) {
       cambiosAportes[`AportesLimpieza/${registro.id}/fechaCierre`] =
         fechaCierre;
     }
