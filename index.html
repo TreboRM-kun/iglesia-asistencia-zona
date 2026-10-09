@@ -2562,6 +2562,24 @@ function obtenerLiderRelacionadoPastor(nombre) {
   return coincidencias.length === 1 ? coincidencias[0] : null;
 }
 
+function perteneceReunionPastor(salon, nombre) {
+  if (salon === "Pastor") {
+    return lideresPastor.some(nombrePastor =>
+      nombresLiderRelacionadosCoinciden("Pastor", nombre, nombrePastor)
+    );
+  }
+
+  return lideresPastor.some(nombrePastor => {
+    const liderRelacionado = obtenerLiderRelacionadoPastor(nombrePastor);
+    return liderRelacionado?.salon === salon &&
+      nombresLiderRelacionadosCoinciden(
+        salon,
+        nombre,
+        liderRelacionado.nombre
+      );
+  });
+}
+
 function separarRegistroLider(registro) {
   const separador = String(registro || "").indexOf("|");
   if (separador < 0) return null;
@@ -6657,6 +6675,11 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const salonTieneADN = ZONAS_APORTES.includes(salon);
   if (tipoReunion === "Todas") {
     reunionesPeriodo = reunionesPeriodo.filter(reunion => {
+      if (reunion.tipo === "Reunión con el pastor" &&
+          salon !== "Pastor" &&
+          !perteneceReunionPastor(salon, nino)) {
+        return false;
+      }
       if (reunion.tipo !== "Discipulado Virtual") return true;
       const registrosVirtuales = asistencias.filter(fila =>
         String(fila.TipoReunion) === "Discipulado Virtual" &&
