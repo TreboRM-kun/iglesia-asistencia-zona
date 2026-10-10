@@ -2393,6 +2393,11 @@ function puedeVerTodasLasZonas() {
   return ["Administrador", "Supervisor"].includes(usuarioActual?.rol);
 }
 
+function esCuentaSabana() {
+  return normalizarNombreLider(usuarioActual?.usuario) ===
+    normalizarNombreLider("Sabana");
+}
+
 function normalizarSalonDatos(salon) {
   return salon === "Zona 7" ? "Virtual" : String(salon || "").trim();
 }
@@ -4121,8 +4126,12 @@ async function cargarDatosDesdeAPI() {
     }
 
     function actualizarReunionPorSalon() {
-      const salon = document.getElementById("salon").value;
+      let salon = document.getElementById("salon").value;
       const selectorReunion = document.getElementById("tipoReunion");
+      if (esCuentaSabana()) {
+        document.getElementById("salon").value = "Sabana de Parra";
+        salon = "Sabana de Parra";
+      }
       if (salon === "Virtual") {
         selectorReunion.value = "Discipulado Virtual";
       } else if (selectorReunion.value === "Discipulado Virtual") {
@@ -4152,22 +4161,71 @@ async function cargarDatosDesdeAPI() {
         .filter(Boolean);
       const esFacilitador = usuarioActual?.rol === "Facilitador";
       const puedeVerVirtual = ["Administrador", "Supervisor"].includes(usuarioActual?.rol);
+      const esSabana = esCuentaSabana();
+      const selectorSalon = document.getElementById("salon");
+      const selectorSalonNuevo = document.getElementById("salonNuevoNino");
+      const selectorResumenSalon = document.getElementById("resumenSalon");
+      const selectorResumenReunionSalon =
+        document.getElementById("resumenReunionSalon");
+      const reunionAnterior = selectorReunion.value;
+      const tiposReunionRestringidos = [
+        document.getElementById("tipoReunion"),
+        document.getElementById("resumenTipoReunion"),
+        document.getElementById("resumenReunionTipo")
+      ];
 
-      opcionPastor.classList.toggle("oculto", esFacilitador);
+      opcionPastor.classList.toggle("oculto", esFacilitador || esSabana);
       opcionVirtual.classList.toggle("oculto", !puedeVerVirtual);
+      opcionPastor.hidden = esSabana;
+      opcionVirtual.hidden = esSabana;
       if (opcionSalonVirtual) {
-        opcionSalonVirtual.hidden = !puedeVerVirtual;
+        opcionSalonVirtual.hidden = !puedeVerVirtual || esSabana;
       }
       opcionesVirtuales.forEach(opcion => {
-        opcion.hidden = !puedeVerVirtual;
+        opcion.hidden = !puedeVerVirtual || esSabana;
       });
+
+      [selectorSalon, selectorSalonNuevo, selectorResumenSalon,
+        selectorResumenReunionSalon].forEach(selector => {
+        [...selector.options].forEach(opcion => {
+          opcion.hidden = esSabana &&
+            opcion.value !== "Sabana de Parra";
+        });
+      });
+      selectorSalon.disabled = esSabana || usuarioActual?.salon !== "todos";
+      selectorSalonNuevo.disabled = esSabana || usuarioActual?.salon !== "todos";
+      selectorResumenSalon.disabled = esSabana;
+      selectorResumenReunionSalon.disabled = esSabana;
+      if (esSabana) {
+        selectorSalon.value = "Sabana de Parra";
+        selectorSalonNuevo.value = "Sabana de Parra";
+        selectorResumenSalon.value = "Sabana de Parra";
+        selectorResumenReunionSalon.value = "Sabana de Parra";
+        tiposReunionRestringidos.forEach(selector => {
+          [...selector.options].forEach(opcion => {
+            opcion.hidden = !["ADN", "Servicio dominical", "Todas"]
+              .includes(opcion.value);
+          });
+          if (!["ADN", "Servicio dominical", "Todas"]
+            .includes(selector.value)) {
+            selector.value = "ADN";
+          }
+        });
+      } else {
+        tiposReunionRestringidos.forEach(selector => {
+          [...selector.options].forEach(opcion => {
+            opcion.hidden = false;
+          });
+        });
+      }
 
       if (esFacilitador && selectorReunion.value === "Reunión con el pastor") {
         selectorReunion.value = "ADN";
-        actualizarFechaReunion();
       }
       if (!puedeVerVirtual && selectorReunion.value === "Discipulado Virtual") {
         selectorReunion.value = "ADN";
+      }
+      if (selectorReunion.value !== reunionAnterior) {
         actualizarFechaReunion();
       }
     }
@@ -6434,7 +6492,8 @@ async function cargarDatosDesdeAPI() {
   botonResumenReunion.classList.toggle(
     "oculto",
     !usuarioActual ||
-      !["Administrador", "Supervisor"].includes(usuarioActual.rol)
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol) ||
+      esCuentaSabana()
   );
 }
 
@@ -6674,6 +6733,12 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
   const salonTieneADN = ZONAS_APORTES.includes(salon);
   if (tipoReunion === "Todas") {
     reunionesPeriodo = reunionesPeriodo.filter(reunion => {
+      if (esCuentaSabana() &&
+          !["ADN", "Servicio dominical"].includes(reunion.tipo) &&
+          !(reunion.tipo === "Reunión con el pastor" &&
+            perteneceReunionPastor(salon, nino))) {
+        return false;
+      }
       if (reunion.tipo === "Reunión con el pastor" &&
           salon !== "Pastor" &&
           !perteneceReunionPastor(salon, nino)) {
@@ -6881,7 +6946,8 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 
     function mostrarResumenReunion() {
   if (!usuarioActual ||
-      !["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol) ||
+      esCuentaSabana()) {
     return;
   }
 
