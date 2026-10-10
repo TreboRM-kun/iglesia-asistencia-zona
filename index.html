@@ -6535,8 +6535,7 @@ function actualizarResumenPorSalon() {
     }
   } else if (tipoReunion === "ADN" && (
     selectorSalon.value === "Pastor" ||
-    selectorSalon.value === "Virtual" ||
-    selectorSalon.value === "Sabana de Parra"
+    selectorSalon.value === "Virtual"
   )) {
     selectorSalon.value = "Zona 1";
   }
@@ -6548,7 +6547,7 @@ function actualizarResumenPorSalon() {
     function obtenerDomingosEntre(desdeTexto, hastaTexto) {
   const domingos = [];
   const fecha = new Date(`${desdeTexto}T00:00:00`);
-  const hasta = new Date(`${hastaTexto}T00:00:00`);
+  const hasta = new Date(`${hastaTexto}T00:00:00`); fecha.setDate(fecha.getDate() + (7 - fecha.getDay()) % 7);
 
   while (fecha <= hasta) {
     domingos.push([
