@@ -6480,7 +6480,9 @@ async function cargarDatosDesdeAPI() {
   }
 
   let salon = usuarioActual.salon === "todos"
-    ? document.getElementById("salon").value
+    ? esCuentaSabana()
+      ? "Sabana de Parra"
+      : document.getElementById("salon").value
     : usuarioActual.salon;
   if (salon === "Zona 7") salon = "Virtual";
 
