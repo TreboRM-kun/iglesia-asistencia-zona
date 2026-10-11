@@ -4126,12 +4126,8 @@ async function cargarDatosDesdeAPI() {
     }
 
     function actualizarReunionPorSalon() {
-      let salon = document.getElementById("salon").value;
+      const salon = document.getElementById("salon").value;
       const selectorReunion = document.getElementById("tipoReunion");
-      if (esCuentaSabana()) {
-        document.getElementById("salon").value = "Sabana de Parra";
-        salon = "Sabana de Parra";
-      }
       if (salon === "Virtual") {
         selectorReunion.value = "Discipulado Virtual";
       } else if (selectorReunion.value === "Discipulado Virtual") {
@@ -4161,63 +4157,19 @@ async function cargarDatosDesdeAPI() {
         .filter(Boolean);
       const esFacilitador = usuarioActual?.rol === "Facilitador";
       const puedeVerVirtual = ["Administrador", "Supervisor"].includes(usuarioActual?.rol);
-      const esSabana = esCuentaSabana();
       const selectorSalon = document.getElementById("salon");
-      const selectorSalonNuevo = document.getElementById("salonNuevoNino");
-      const selectorResumenSalon = document.getElementById("resumenSalon");
-      const selectorResumenReunionSalon =
-        document.getElementById("resumenReunionSalon");
       const reunionAnterior = selectorReunion.value;
-      const tiposReunionRestringidos = [
-        document.getElementById("tipoReunion"),
-        document.getElementById("resumenTipoReunion"),
-        document.getElementById("resumenReunionTipo")
-      ];
 
-      opcionPastor.classList.toggle("oculto", esFacilitador || esSabana);
+      opcionPastor.classList.toggle("oculto", esFacilitador);
       opcionVirtual.classList.toggle("oculto", !puedeVerVirtual);
-      opcionPastor.hidden = esSabana;
-      opcionVirtual.hidden = esSabana;
       if (opcionSalonVirtual) {
-        opcionSalonVirtual.hidden = !puedeVerVirtual || esSabana;
+        opcionSalonVirtual.hidden = !puedeVerVirtual;
       }
       opcionesVirtuales.forEach(opcion => {
-        opcion.hidden = !puedeVerVirtual || esSabana;
+        opcion.hidden = !puedeVerVirtual;
       });
 
-      [selectorSalon, selectorSalonNuevo, selectorResumenSalon,
-        selectorResumenReunionSalon].forEach(selector => {
-        [...selector.options].forEach(opcion => {
-          opcion.hidden = esSabana &&
-            opcion.value !== "Sabana de Parra";
-        });
-      });
-      selectorSalon.disabled = esSabana || usuarioActual?.salon !== "todos";
-      selectorSalonNuevo.disabled = esSabana || usuarioActual?.salon !== "todos";
-      selectorResumenSalon.disabled = esSabana;
-      selectorResumenReunionSalon.disabled = esSabana;
-      if (esSabana) {
-        selectorSalon.value = "Sabana de Parra";
-        selectorSalonNuevo.value = "Sabana de Parra";
-        selectorResumenSalon.value = "Sabana de Parra";
-        selectorResumenReunionSalon.value = "Sabana de Parra";
-        tiposReunionRestringidos.forEach(selector => {
-          [...selector.options].forEach(opcion => {
-            opcion.hidden = !["ADN", "Servicio dominical", "Todas"]
-              .includes(opcion.value);
-          });
-          if (!["ADN", "Servicio dominical", "Todas"]
-            .includes(selector.value)) {
-            selector.value = "ADN";
-          }
-        });
-      } else {
-        tiposReunionRestringidos.forEach(selector => {
-          [...selector.options].forEach(opcion => {
-            opcion.hidden = false;
-          });
-        });
-      }
+      selectorSalon.disabled = usuarioActual?.salon !== "todos";
 
       if (esFacilitador && selectorReunion.value === "Reunión con el pastor") {
         selectorReunion.value = "ADN";
@@ -4626,6 +4578,10 @@ async function cargarDatosDesdeAPI() {
           document.getElementById("salonNuevoNino").value = usuarioActual.salon;
           document.getElementById("salonNuevoNino").disabled = true;
         } else {
+          if (esCuentaSabana()) {
+            selectorSalon.value = "Sabana de Parra";
+            document.getElementById("salonNuevoNino").value = "Sabana de Parra";
+          }
           selectorSalon.disabled = false;
           document.getElementById("salonNuevoNino").disabled = false;
         }
@@ -6492,8 +6448,7 @@ async function cargarDatosDesdeAPI() {
   botonResumenReunion.classList.toggle(
     "oculto",
     !usuarioActual ||
-      !["Administrador", "Supervisor"].includes(usuarioActual.rol) ||
-      esCuentaSabana()
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)
   );
 }
 
@@ -6603,24 +6558,7 @@ function actualizarResumenPorSalon() {
   cargarNinosResumen();
 }
 
-    function obtenerDomingosEntre(desdeTexto, hastaTexto) {
-  const domingos = [];
-  const fecha = new Date(`${desdeTexto}T00:00:00`);
-  const hasta = new Date(`${hastaTexto}T00:00:00`); fecha.setDate(fecha.getDate() + (7 - fecha.getDay()) % 7);
-
-  while (fecha <= hasta) {
-    domingos.push([
-      fecha.getFullYear(),
-      String(fecha.getMonth() + 1).padStart(2, "0"),
-      String(fecha.getDate()).padStart(2, "0")
-    ].join("-"));
-    fecha.setDate(fecha.getDate() + 7);
-  }
-
-  return domingos;
-}
-
-function obtenerFechasEntre(desdeTexto, hastaTexto) {
+    function obtenerFechasEntre(desdeTexto, hastaTexto) {
   const fechas = [];
   const fecha = new Date(`${desdeTexto}T00:00:00`);
   const hasta = new Date(`${hastaTexto}T00:00:00`);
@@ -6635,6 +6573,12 @@ function obtenerFechasEntre(desdeTexto, hastaTexto) {
   }
 
   return fechas;
+}
+
+function obtenerFechasDeReunionEntre(desdeTexto, hastaTexto, tipoReunion) {
+  return obtenerFechasEntre(desdeTexto, hastaTexto).filter(fecha =>
+    esFechaDeReunion(fecha, tipoReunion)
+  );
 }
 
 function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
@@ -6709,36 +6653,13 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 
   let fechasPeriodo = tipoReunion === "Todas"
     ? obtenerFechasEntre(desde, hasta)
-  : tipoReunion === "Discipulado Virtual"
-    ? obtenerFechasEntre(desde, hasta).filter(fecha =>
-        esFechaDeReunion(fecha, "Discipulado Virtual")
-      )
-    : obtenerDomingosEntre(desde, hasta);
-  if (tipoReunion === "ADN") {
-    const fechasVirtuales = asistencias
-      .filter(fila =>
-        fila.OrigenVirtual === true &&
-        String(fila.Salon) === salon &&
-        String(fila.Nombre) === nino &&
-        String(fila.TipoReunion) === "ADN" &&
-        String(fila.Fecha) >= desde &&
-        String(fila.Fecha) <= hastaIncluido
-      )
-      .map(fila => String(fila.Fecha));
-    fechasPeriodo = [...new Set(fechasPeriodo.concat(fechasVirtuales))].sort();
-  }
+    : obtenerFechasDeReunionEntre(desde, hasta, tipoReunion);
   let reunionesPeriodo = tipoReunion === "Todas"
     ? obtenerFechasDeTodasLasReuniones(desde, hasta)
     : fechasPeriodo.map(fecha => ({ fecha, tipo: tipoReunion }));
   const salonTieneADN = ZONAS_APORTES.includes(salon);
   if (tipoReunion === "Todas") {
     reunionesPeriodo = reunionesPeriodo.filter(reunion => {
-      if (esCuentaSabana() &&
-          !["ADN", "Servicio dominical"].includes(reunion.tipo) &&
-          !(reunion.tipo === "Reunión con el pastor" &&
-            perteneceReunionPastor(salon, nino))) {
-        return false;
-      }
       if (reunion.tipo === "Reunión con el pastor" &&
           salon !== "Pastor" &&
           !perteneceReunionPastor(salon, nino)) {
@@ -6946,8 +6867,7 @@ function obtenerFechasDeTodasLasReuniones(desdeTexto, hastaTexto) {
 
     function mostrarResumenReunion() {
   if (!usuarioActual ||
-      !["Administrador", "Supervisor"].includes(usuarioActual.rol) ||
-      esCuentaSabana()) {
+      !["Administrador", "Supervisor"].includes(usuarioActual.rol)) {
     return;
   }
 
